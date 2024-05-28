@@ -1,0 +1,25 @@
+{
+  "name": "labirynt-4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "webpack": "webpack",
+    "http-server": "http-server",
+    "dev": "concurrently \"npm run http-server\" \"npm run webpack -- --watch\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/three": "^0.164.1",
+    "http-server": "^14.1.1",
+    "ts-loader": "^9.5.1",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2",
+    "three": "^0.164.1",
+    "typescript": "^5.4.5"
+  }
+}
