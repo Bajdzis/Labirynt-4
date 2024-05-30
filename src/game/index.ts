@@ -1,3 +1,5 @@
-import * as THREE from 'three';
+import { MyGame } from "./engine/MyGame";
 
-console.log('hello world', THREE, document.getElementById('main'));
+const game = new MyGame();
+
+game.run();

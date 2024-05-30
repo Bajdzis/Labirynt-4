@@ -1,5 +1,5 @@
-//webpack.config.js
-const path = require('path');
+/* eslint-disable */
+const path = require("path");
 
 module.exports = {
   mode: "development",
@@ -8,8 +8,8 @@ module.exports = {
     main: "./src/game/index.ts",
   },
   output: {
-    path: path.resolve(__dirname, './public/build'),
-    filename: "[name]-bundle.js" // <--- Will be compiled to this single file
+    path: path.resolve(__dirname, "./public/build"),
+    filename: "[name]-bundle.js", // <--- Will be compiled to this single file
   },
   resolve: {
     extensions: [".ts", ".js"],
@@ -18,8 +18,8 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        loader: "ts-loader"
-      }
-    ]
-  }
+        loader: "ts-loader",
+      },
+    ],
+  },
 };
