@@ -3,7 +3,7 @@ import { ResourcesLoader } from "./ResourcesLoader";
 import { ThreeJsTextureLoader } from "./ThreeJsTextureLoader";
 import { PlayerImageLoader } from "./PlayerImageLoader";
 
-type MaterialName = "wall" | "floor" | "player1" | "player2";
+type MaterialName = "wall" | "floor" | "floorShadow" | "player1" | "player2";
 
 interface MaterialLoaderProps {
   textureLoader: ThreeJsTextureLoader;
@@ -27,16 +27,38 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
         roughness: 1,
         metalness: 0,
         map: texture,
+        bumpMap: texture,
+        bumpScale: 0.75,
       });
     });
   }
 
-  floor({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+  private getFloorTexture({
+    textureLoader,
+  }: MaterialLoaderProps): Promise<THREE.Texture> {
     return textureLoader.load("/resources/floor.png").then((texture) => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       texture.repeat.set(3.2 * 10, 3.2 * 10);
+
+      return texture;
+    });
+  }
+
+  floor(props: MaterialLoaderProps): Promise<THREE.Material> {
+    return this.getFloorTexture(props).then((texture) => {
       return new THREE.MeshStandardMaterial({
+        map: texture,
+      });
+    });
+  }
+
+  floorShadow(props: MaterialLoaderProps): Promise<THREE.Material> {
+    return this.getFloorTexture(props).then((texture) => {
+      return new THREE.MeshPhysicalMaterial({
+        transparent: true,
+        opacity: 0.25,
+        transmission: 0,
         map: texture,
       });
     });

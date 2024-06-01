@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { Player } from "../Board/Player";
+import { random } from "../Utils/math/random";
+import { Timer } from "../Board/Timer";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
-
 export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
   private group: THREE.Group;
 
+  private lightTimer: Timer;
   constructor(material: THREE.Material) {
     super();
 
@@ -15,14 +17,20 @@ export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
 
     this.group.add(body);
     this.group.add(light);
+
+    this.lightTimer = new Timer(150, () => {
+      light.position.x = random(-0.01, 0.01);
+      light.position.y = random(-0.01, 0.01);
+      light.intensity = random(0.45, 0.55);
+    });
   }
 
   getObject() {
     return this.group;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(delta: number) {
+    this.lightTimer.update(delta);
     this.group.setRotationFromAxisAngle(new THREE.Vector3(0, 0, 1), this.angle);
     this.group.position.x = this.x;
     this.group.position.y = this.y;

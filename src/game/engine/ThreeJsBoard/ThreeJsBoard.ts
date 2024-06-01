@@ -8,12 +8,15 @@ import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 export class ThreeJsBoard {
   private scene: THREE.Scene;
   protected player: ThreeJsPlayer;
+  protected player2: ThreeJsPlayer;
   private objects: ThreeJsBoardObject[] = [];
 
   constructor(private resources: Resources) {
     this.player = new ThreeJsPlayer(this.resources.material.player1);
+    this.player2 = new ThreeJsPlayer(this.resources.material.player2);
 
     this.objects.push(this.player);
+    this.objects.push(this.player2);
     this.objects.push(new Floor(this.resources));
 
     this.addWall(3, 2);
@@ -36,6 +39,7 @@ export class ThreeJsBoard {
 
   update(delta: number) {
     this.player.update(delta);
+    this.player2.update(delta);
   }
 
   changePlayerPosition(x: number, y: number) {

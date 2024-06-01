@@ -19,17 +19,18 @@ export class MyGame extends BrowserGame {
   protected update(delta: number) {
     this.renderer.update(delta);
     this.board.update(delta);
-    const step = 0.001875 * delta;
-    if (this.keyboard.isDown("KeyD")) {
-      this.board.changePlayerPosition(step, 0);
-    } else if (this.keyboard.isDown("KeyA")) {
-      this.board.changePlayerPosition(-step, 0);
-    }
+    const keyWIsDown = this.keyboard.isDown("KeyW");
+    const keyAIsDown = this.keyboard.isDown("KeyA");
+    const keySIsDown = this.keyboard.isDown("KeyS");
+    const keyDIsDown = this.keyboard.isDown("KeyD");
 
-    if (this.keyboard.isDown("KeyW")) {
-      this.board.changePlayerPosition(0, step);
-    } else if (this.keyboard.isDown("KeyS")) {
-      this.board.changePlayerPosition(0, -step);
+    if (keyWIsDown || keyAIsDown || keySIsDown || keyDIsDown) {
+      const step = 0.001875 * delta;
+
+      this.board.changePlayerPosition(
+        keyDIsDown ? step : keyAIsDown ? -step : 0,
+        keyWIsDown ? step : keySIsDown ? -step : 0,
+      );
     }
   }
 

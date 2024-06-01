@@ -3,7 +3,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 export class ThreeJsRenderer {
   private renderer: THREE.WebGLRenderer;
-  private camera: THREE.PerspectiveCamera;
+  private perspectiveCamera: THREE.PerspectiveCamera;
+  private orthographicCamera: THREE.OrthographicCamera;
   private orbitControls: OrbitControls;
 
   constructor() {
@@ -11,11 +12,20 @@ export class ThreeJsRenderer {
     if (!main)
       throw new Error(`No element with id 'main' found in the document`);
 
-    this.camera = new THREE.PerspectiveCamera(
+    this.perspectiveCamera = new THREE.PerspectiveCamera(
       45,
       window.innerWidth / window.innerHeight,
       0.1,
       1000,
+    );
+
+    this.orthographicCamera = new THREE.OrthographicCamera(
+      -window.innerWidth / 400,
+      window.innerWidth / 400,
+      window.innerHeight / 400,
+      -window.innerHeight / 400,
+      -1,
+      1,
     );
 
     this.renderer = new THREE.WebGLRenderer();
@@ -25,17 +35,24 @@ export class ThreeJsRenderer {
     this.renderer.shadowMap.autoUpdate = true;
 
     window.addEventListener("resize", () => {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
+      this.perspectiveCamera.aspect = window.innerWidth / window.innerHeight;
+
+      this.orthographicCamera.left = -window.innerWidth / 400;
+      this.orthographicCamera.right = window.innerWidth / 400;
+      this.orthographicCamera.top = window.innerHeight / 400;
+      this.orthographicCamera.bottom = -window.innerHeight / 400;
+      this.orthographicCamera.updateProjectionMatrix();
+
+      this.perspectiveCamera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     main.appendChild(this.renderer.domElement);
-    this.camera.position.z += 6;
+    this.perspectiveCamera.position.z += 6;
 
     this.orbitControls = new OrbitControls(
-      this.camera,
+      this.perspectiveCamera,
       this.renderer.domElement,
     );
   }
@@ -45,6 +62,6 @@ export class ThreeJsRenderer {
   }
 
   render(scene: THREE.Scene) {
-    this.renderer.render(scene, this.camera);
+    this.renderer.render(scene, this.orthographicCamera);
   }
 }
