@@ -7,6 +7,7 @@
     "webpack": "webpack",
     "http-server": "http-server",
     "dev": "concurrently \"npm run http-server\" \"npm run webpack -- --watch\"",
+    "prod": "webpack --mode production && http-server",
     "lint": "eslint src"
   },
   "author": "",
