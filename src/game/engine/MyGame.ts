@@ -1,21 +1,24 @@
-import { ThreeJsBoard } from "./ThreeJsBoard";
+import { ThreeJsBoard } from "./ThreeJsBoard/ThreeJsBoard";
 import { BrowserGame } from "./BrowserGame";
 import { Keyboard } from "./Keyboard";
 import { ThreeJsRenderer } from "./ThreeJsRenderer";
+import { Resources } from "./Resources/Resources";
 
 export class MyGame extends BrowserGame {
   private keyboard: Keyboard;
   private renderer: ThreeJsRenderer;
   private board: ThreeJsBoard;
 
-  constructor() {
+  constructor(private resources: Resources) {
     super();
     this.keyboard = new Keyboard();
     this.renderer = new ThreeJsRenderer();
-    this.board = new ThreeJsBoard();
+    this.board = new ThreeJsBoard(this.resources);
   }
 
   protected update(delta: number) {
+    this.renderer.update(delta);
+    this.board.update(delta);
     const step = 0.001875 * delta;
     if (this.keyboard.isDown("KeyD")) {
       this.board.changePlayerPosition(step, 0);
