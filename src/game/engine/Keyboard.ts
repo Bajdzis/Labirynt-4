@@ -1,4 +1,4 @@
-type KeyboardCode =
+export type KeyboardCode =
   | "Unidentified"
   | "Escape"
   | "Digit1"
@@ -160,7 +160,7 @@ type KeyboardCode =
   | "LaunchApp1"
   | "MediaSelect";
 
-export class Keyboard {
+class Keyboard {
   private keyState: {
     [key in string | KeyboardCode]?: boolean;
   } = {};
@@ -187,3 +187,5 @@ export class Keyboard {
     return !!this.keyState[keyCode];
   }
 }
+
+export const keyboard = new Keyboard();

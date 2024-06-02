@@ -41,4 +41,7 @@ export class ThreeJsWall extends Wall implements ThreeJsBoardObject {
     this.mesh.position.x = this.x;
     this.mesh.position.y = this.y;
   }
+  setBoard(): void {
+    // do nothing
+  }
 }

@@ -37,4 +37,5 @@ export class Floor implements ThreeJsBoardObject {
   }
 
   update(): void {}
+  setBoard(): void {}
 }

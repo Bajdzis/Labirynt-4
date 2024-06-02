@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Player } from "../Board/Player";
+import { Player, PlayerKeys } from "../Board/Player";
 import { random } from "../Utils/math/random";
 import { Timer } from "../Board/Timer";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
@@ -7,8 +7,8 @@ export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
   private group: THREE.Group;
 
   private lightTimer: Timer;
-  constructor(material: THREE.Material) {
-    super();
+  constructor(material: THREE.Material, keyCodes: PlayerKeys) {
+    super(keyCodes);
 
     this.group = new THREE.Group();
 
@@ -30,10 +30,11 @@ export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
   }
 
   update(delta: number) {
+    super.update(delta);
     this.lightTimer.update(delta);
     this.group.setRotationFromAxisAngle(new THREE.Vector3(0, 0, 1), this.angle);
-    this.group.position.x = this.x;
-    this.group.position.y = this.y;
+    this.group.position.x = this.x - 0.05;
+    this.group.position.y = this.y - 0.05;
   }
 
   createPlayerBody(material: THREE.Material) {
