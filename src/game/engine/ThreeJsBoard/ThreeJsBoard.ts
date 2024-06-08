@@ -6,6 +6,8 @@ import { ThreeJsWall } from "./ThreeJsWall";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Player } from "../Board/Player";
 import { objectContainsOther } from "../Utils/math/objectContainsOther";
+import { Torch } from "./Torch";
+import { lightsHelper } from "./LightsHelper";
 
 export class ThreeJsBoard {
   private scene: THREE.Scene;
@@ -14,7 +16,7 @@ export class ThreeJsBoard {
   constructor(private resources: Resources) {
     this.scene = new THREE.Scene();
     // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
+    this.scene.add(lightsHelper.getObject());
     this.addObject(
       new ThreeJsPlayer(this.resources.material.player1, {
         top: "KeyW",
@@ -87,7 +89,7 @@ export class ThreeJsBoard {
         event.player.changePosition(event.x, event.y);
       }
     } else if (event.name === "throwTorch") {
-      console.log("throwTorch");
+      this.addObject(new Torch(event.player.x, event.player.y));
     }
   }
 
@@ -98,6 +100,7 @@ export class ThreeJsBoard {
   private addObject(object: ThreeJsBoardObject) {
     this.objects.push(object);
     this.scene.add(object.getObject());
+    console.log(this);
     object.setBoard(this);
   }
 

@@ -164,6 +164,9 @@ class Keyboard {
   private keyState: {
     [key in string | KeyboardCode]?: boolean;
   } = {};
+  private lastKeyState: {
+    [key in string | KeyboardCode]?: boolean;
+  } = {};
 
   constructor() {
     window.addEventListener(
@@ -185,6 +188,12 @@ class Keyboard {
 
   isDown(keyCode: KeyboardCode): boolean {
     return !!this.keyState[keyCode];
+  }
+
+  isChanged(keyCode: KeyboardCode): boolean {
+    const change = this.keyState[keyCode] !== this.lastKeyState[keyCode];
+    this.lastKeyState[keyCode] = this.keyState[keyCode];
+    return change;
   }
 }
 

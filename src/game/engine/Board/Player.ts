@@ -18,6 +18,7 @@ export class Player implements BoardObject {
   public angle = 0.0;
   private keyCodes: PlayerKeys;
   protected board: ThreeJsBoard | null = null;
+  protected numberOfTorches: number = 2;
 
   constructor(keyCodes: PlayerKeys) {
     this.keyCodes = keyCodes;
@@ -35,6 +36,17 @@ export class Player implements BoardObject {
   }
 
   update(delta: number): void {
+    const keyActionIsDown =
+      keyboard.isChanged(this.keyCodes.action) &&
+      keyboard.isDown(this.keyCodes.action);
+
+    if (keyActionIsDown && this.numberOfTorches > 0) {
+      this.numberOfTorches -= 1;
+      this.board?.sendEvent({
+        name: "throwTorch",
+        player: this,
+      });
+    }
     const keyTopIsDown = keyboard.isDown(this.keyCodes.top);
     const keyLeftIsDown = keyboard.isDown(this.keyCodes.left);
     const keyBottomIsDown = keyboard.isDown(this.keyCodes.bottom);
