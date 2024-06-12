@@ -26,7 +26,10 @@ export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
     // this.group.add(elementCss2D);
 
     this.light = new Light(this.numberOfTorches * 2 + 1.5);
-    this.group.add(this.light.getObject());
+    const obj = this.light.getObject();
+    obj.position.x = 0.1;
+    obj.position.y = 0.1;
+    this.group.add(obj);
   }
 
   getObject() {
