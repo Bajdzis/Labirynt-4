@@ -1,4 +1,5 @@
-import { keyboard, KeyboardCode } from "../Keyboard";
+import { keyboard, KeyboardCode } from "../IO/Keyboard";
+import { mobileGamepad } from "../IO/MobileGamepad";
 import { ThreeJsBoard } from "../ThreeJsBoard/ThreeJsBoard";
 import { BoardObject } from "./BoardObject";
 
@@ -17,13 +18,15 @@ export class Player implements BoardObject {
   public readonly height = 0.2;
   public angle = 0.0;
   private keyCodes: PlayerKeys;
+  private useTouchScreen: boolean;
   protected board: ThreeJsBoard | null = null;
   protected numberOfTorches: number = 2;
 
-  constructor(keyCodes: PlayerKeys) {
+  constructor(keyCodes: PlayerKeys, useTouchScreen: boolean = false) {
     this.keyCodes = keyCodes;
     this.x = 0.06;
     this.y = 0.06;
+    this.useTouchScreen = useTouchScreen;
   }
 
   setBoard(board: ThreeJsBoard): void {
@@ -37,8 +40,11 @@ export class Player implements BoardObject {
 
   update(delta: number): void {
     const keyActionIsDown =
-      keyboard.isChanged(this.keyCodes.action) &&
-      keyboard.isDown(this.keyCodes.action);
+      (keyboard.isChanged(this.keyCodes.action) &&
+        keyboard.isDown(this.keyCodes.action)) ||
+      (this.useTouchScreen &&
+        mobileGamepad.isChanged() &&
+        mobileGamepad.isDown());
 
     if (keyActionIsDown && this.numberOfTorches > 0) {
       this.numberOfTorches -= 1;
@@ -47,13 +53,39 @@ export class Player implements BoardObject {
         player: this,
       });
     }
+
+    const step = 0.001875 * delta;
+    if (this.useTouchScreen && mobileGamepad.isActive()) {
+      const x = mobileGamepad.getAxisX() * step;
+      const y = mobileGamepad.getAxisY() * step;
+      if (x !== 0 || y !== 0) {
+        this.angle = Math.atan2(y, x);
+      }
+      if (y !== 0) {
+        this.board?.sendEvent({
+          name: "changePlayerPosition",
+          player: this,
+          x: 0,
+          y: y,
+        });
+      }
+
+      if (x !== 0) {
+        this.board?.sendEvent({
+          name: "changePlayerPosition",
+          player: this,
+          x: x,
+          y: 0,
+        });
+      }
+      return;
+    }
     const keyTopIsDown = keyboard.isDown(this.keyCodes.top);
     const keyLeftIsDown = keyboard.isDown(this.keyCodes.left);
     const keyBottomIsDown = keyboard.isDown(this.keyCodes.bottom);
     const keyRightIsDown = keyboard.isDown(this.keyCodes.right);
 
     if (keyTopIsDown || keyLeftIsDown || keyBottomIsDown || keyRightIsDown) {
-      const step = 0.001875 * delta;
       const x = keyRightIsDown ? step : keyLeftIsDown ? -step : 0;
       const y = keyTopIsDown ? step : keyBottomIsDown ? -step : 0;
 

@@ -22,7 +22,7 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
   }
 
   wall({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
-    return textureLoader.load("/resources/walls/1.PNG").then((texture) => {
+    return textureLoader.load("resources/walls/1.PNG").then((texture) => {
       return new THREE.MeshStandardMaterial({
         roughness: 1,
         metalness: 0,
@@ -36,7 +36,7 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
   private getFloorTexture({
     textureLoader,
   }: MaterialLoaderProps): Promise<THREE.Texture> {
-    return textureLoader.load("/resources/floor.png").then((texture) => {
+    return textureLoader.load("resources/floor.png").then((texture) => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       texture.repeat.set(3.2 * 10, 3.2 * 10);

@@ -28,9 +28,9 @@ export class PlayerImageLoader extends ResourcesLoader<THREE.Texture> {
     ctx.imageSmoothingEnabled = false;
 
     return Promise.all([
-      this.imageLoader.load("/resources/player/body.png"),
-      this.imageLoader.load("/resources/player/eyeballs.png"),
-      this.imageLoader.load("/resources/player/pupils.png"),
+      this.imageLoader.load("resources/player/body.png"),
+      this.imageLoader.load("resources/player/eyeballs.png"),
+      this.imageLoader.load("resources/player/pupils.png"),
     ]).then(([bodyImg, eyeballsImg, pupilsImg]) => {
       ctx.drawImage(
         renderImageWithColor(bodyImg, new THREE.Color(body)),

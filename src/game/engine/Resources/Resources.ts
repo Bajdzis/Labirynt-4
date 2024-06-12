@@ -61,7 +61,5 @@ export class Resources {
       player1: await playerMaterial,
       player2: await playerMaterial2,
     };
-
-    console.log(this._material);
   }
 }

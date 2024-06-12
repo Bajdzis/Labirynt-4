@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
 
 export class ThreeJsRenderer {
   private renderer: THREE.WebGLRenderer;
+  private labelRenderer: CSS2DRenderer;
   private perspectiveCamera: THREE.PerspectiveCamera;
   private orthographicCamera: THREE.OrthographicCamera;
   private orbitControls: OrbitControls;
@@ -34,21 +36,34 @@ export class ThreeJsRenderer {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.shadowMap.autoUpdate = true;
 
-    window.addEventListener("resize", () => {
-      this.perspectiveCamera.aspect = window.innerWidth / window.innerHeight;
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.domElement.style.position = "absolute";
+    this.labelRenderer.domElement.style.top = "0px";
+    this.labelRenderer.domElement.style.pointerEvents = "none";
 
-      this.orthographicCamera.left = -window.innerWidth / 400;
-      this.orthographicCamera.right = window.innerWidth / 400;
-      this.orthographicCamera.top = window.innerHeight / 400;
-      this.orthographicCamera.bottom = -window.innerHeight / 400;
+    window.addEventListener("resize", () => {
+      const width = window.visualViewport?.width || window.innerWidth;
+      const height = window.visualViewport?.height || window.innerHeight;
+      this.perspectiveCamera.aspect = width / height;
+
+      this.orthographicCamera.left = -width / 400;
+      this.orthographicCamera.right = width / 400;
+      this.orthographicCamera.top = height / 400;
+      this.orthographicCamera.bottom = -height / 400;
       this.orthographicCamera.updateProjectionMatrix();
 
       this.perspectiveCamera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setSize(width, height);
+      this.labelRenderer.setSize(width, height);
     });
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    const width = window.visualViewport?.width || window.innerWidth;
+    const height = window.visualViewport?.height || window.innerHeight;
+
+    this.renderer.setSize(width, height);
+    this.labelRenderer.setSize(width, height);
     main.appendChild(this.renderer.domElement);
+    main.appendChild(this.labelRenderer.domElement);
     this.perspectiveCamera.position.z += 6;
 
     this.orbitControls = new OrbitControls(
@@ -63,5 +78,6 @@ export class ThreeJsRenderer {
 
   render(scene: THREE.Scene) {
     this.renderer.render(scene, this.orthographicCamera);
+    this.labelRenderer.render(scene, this.orthographicCamera);
   }
 }

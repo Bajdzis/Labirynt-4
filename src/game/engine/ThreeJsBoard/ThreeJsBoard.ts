@@ -18,23 +18,27 @@ export class ThreeJsBoard {
     // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     this.scene.add(lightsHelper.getObject());
     this.addObject(
-      new ThreeJsPlayer(this.resources.material.player1, {
-        top: "KeyW",
-        left: "KeyA",
-        bottom: "KeyS",
-        right: "KeyD",
-        action: "KeyE",
-      }),
+      new ThreeJsPlayer(
+        this.resources.material.player1,
+        {
+          top: "KeyW",
+          left: "KeyA",
+          bottom: "KeyS",
+          right: "KeyD",
+          action: "KeyE",
+        },
+        true,
+      ),
     );
-    this.addObject(
-      new ThreeJsPlayer(this.resources.material.player2, {
-        top: "ArrowUp",
-        left: "ArrowLeft",
-        bottom: "ArrowDown",
-        right: "ArrowRight",
-        action: "Numpad0",
-      }),
-    );
+    // this.addObject(
+    //   new ThreeJsPlayer(this.resources.material.player2, {
+    //     top: "ArrowUp",
+    //     left: "ArrowLeft",
+    //     bottom: "ArrowDown",
+    //     right: "ArrowRight",
+    //     action: "Numpad0",
+    //   }),
+    // );
     this.addObject(new Floor(this.resources));
 
     this.addWall(3, 2);
@@ -85,7 +89,6 @@ export class ThreeJsBoard {
         }
       }
       if (playerCanMove) {
-        console.log("changePlayerPosition", newPlayerPosition);
         event.player.changePosition(event.x, event.y);
       }
     } else if (event.name === "throwTorch") {
@@ -100,7 +103,6 @@ export class ThreeJsBoard {
   private addObject(object: ThreeJsBoardObject) {
     this.objects.push(object);
     this.scene.add(object.getObject());
-    console.log(this);
     object.setBoard(this);
   }
 

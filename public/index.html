@@ -4,15 +4,104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gra Labirynt 4</title>
-    <script src="/build/main-bundle.js" defer></script>
     <style>
         body {
             margin: 0;
             padding: 0;
         }
+        #loader {
+            background-color: #002a3e;
+            background-image: url('resources/ui/background.png');
+            background-size: cover;
+            background-position: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #splashScreen {
+            --progress : 0%;
+            background-image: url('resources/ui/splashScreen.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 420px;
+            height: 189px;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            display: flex;
+            padding: 2px 4px;
+            box-sizing: border-box;
+            align-items: end;
+            font-family: sans-serif;
+            font-size: 12px;
+        }
+        #splashScreen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--progress);
+            height: 100%;
+            background-color: rgb(61, 61, 61);
+            z-index: -1;
+        }
+        #splashScreen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color:  rgb(22, 22, 22);
+            z-index: -2;
+        }
+        .label {
+            padding: 4px 6px;
+            border-radius: 2px;
+            font-size: 16px;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.5);
+            font-family: sans-serif;
+        }
     </style>
 </head>
 <body>
     <div id="main"></div>
+    <div id="loader">
+        <div id="splashScreen">Ładowanie...</div>
+    </div>
+    <script>
+        {
+            let loader = document.getElementById('loader');
+            let splashScreen = document.getElementById('splashScreen');
+
+            window.setProgressBar = (msg, value) => {
+                if(splashScreen) {
+                    splashScreen.innerText = msg;
+                    splashScreen.style.setProperty('--progress', `${value}%`);
+                }
+            }
+
+            window.disposeProgressBar = () => {
+                loader.remove();
+                loader = null;
+                splashScreen = null;
+            }
+
+            window.addEventListener('load', () => {
+                const s = document.createElement('script');
+                s.src = 'build/main-bundle.js';
+                s.defer = true;
+                s.async = true;
+                document.head.appendChild(s);
+            });
+        }
+    </script>
 </body>
 </html>

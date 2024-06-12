@@ -2,18 +2,28 @@ import * as THREE from "three";
 import { Player, PlayerKeys } from "../Board/Player";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Light } from "./Light";
+
 export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
   private group: THREE.Group;
 
   private light: Light;
-  constructor(material: THREE.Material, keyCodes: PlayerKeys) {
-    super(keyCodes);
+  constructor(
+    material: THREE.Material,
+    keyCodes: PlayerKeys,
+    useTouchScreen: boolean = false,
+  ) {
+    super(keyCodes, useTouchScreen);
 
     this.group = new THREE.Group();
 
     const body = this.createPlayerBody(material);
 
     this.group.add(body);
+    // const element = document.createElement("div");
+    // element.className = "label";
+    // element.innerHTML = "Jakis tekst";
+    // const elementCss2D = new CSS2DObject(element);
+    // this.group.add(elementCss2D);
 
     this.light = new Light(this.numberOfTorches * 2 + 1.5);
     this.group.add(this.light.getObject());
