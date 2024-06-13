@@ -12,12 +12,15 @@ class MobileGamepad {
     this.createLeftSide().forEach((element) => container.appendChild(element));
     document.body.appendChild(container);
 
-    const showControls = () => {
-      container.style.opacity = "1";
-      window.removeEventListener("touchstart", showControls);
-      this.isActiveValue = true;
+    const showControls = (e: TouchEvent) => {
+      e.preventDefault();
+
+      if (!this.isActiveValue) {
+        container.style.opacity = "1";
+        this.isActiveValue = true;
+      }
     };
-    window.addEventListener("touchstart", showControls, false);
+    document.body.addEventListener("touchstart", showControls, false);
   }
   createLeftSide() {
     const leftArea = document.createElement("div");
@@ -26,7 +29,14 @@ class MobileGamepad {
     leftArea.style.top = "0";
     leftArea.style.bottom = "0";
     leftArea.style.width = "45%";
-    leftArea.style.overflow = "hidden";
+
+    document.body.appendChild(leftArea);
+
+    let rect = leftArea.getBoundingClientRect();
+
+    window.addEventListener("resize", () => {
+      rect = leftArea.getBoundingClientRect();
+    });
 
     const joystickBackground = document.createElement("div");
     joystickBackground.style.position = "absolute";
@@ -50,14 +60,16 @@ class MobileGamepad {
     joystickBackground.appendChild(joystickElement);
     const startPoint = { x: 0, y: 0 };
     leftArea.addEventListener("touchstart", (e) => {
-      const [touch] = e.touches;
+      const touch = this.getFirstTouchInsideRect(e.touches, rect);
+      if (!touch) return;
       startPoint.x = touch.clientX;
       startPoint.y = touch.clientY;
       joystickBackground.style.left = `${touch.clientX - 50}px`;
       joystickBackground.style.top = `${touch.clientY - 50}px`;
     });
     leftArea.addEventListener("touchmove", (e) => {
-      const [touch] = e.touches;
+      const touch = this.getFirstTouchInsideRect(e.touches, rect);
+      if (!touch) return;
       const currentPoint = { x: touch.clientX, y: touch.clientY };
       const deltaX = currentPoint.x - startPoint.x;
       const deltaY = currentPoint.y - startPoint.y;
@@ -74,14 +86,16 @@ class MobileGamepad {
         joystickElement.style.top = `${deltaY}px`;
       }
     });
-    leftArea.addEventListener("touchend", () => {
+    const stop = () => {
       joystickElement.style.left = "0px";
       joystickElement.style.top = "0px";
       this.axisX = 0;
       this.axisY = 0;
-    });
+    };
+    leftArea.addEventListener("touchend", stop);
+    leftArea.addEventListener("touchcancel", stop);
 
-    return [leftArea, joystickBackground];
+    return [joystickBackground];
   }
   createRightSide() {
     const rightArea = document.createElement("div");
@@ -90,7 +104,13 @@ class MobileGamepad {
     rightArea.style.top = "0";
     rightArea.style.bottom = "0";
     rightArea.style.width = "45%";
-    rightArea.style.overflow = "hidden";
+
+    document.body.appendChild(rightArea);
+
+    let rect = rightArea.getBoundingClientRect();
+    window.addEventListener("resize", () => {
+      rect = rightArea.getBoundingClientRect();
+    });
 
     const button = document.createElement("div");
     button.style.position = "absolute";
@@ -103,18 +123,37 @@ class MobileGamepad {
     button.style.pointerEvents = "none";
 
     rightArea.addEventListener("touchstart", (e) => {
-      const [touch] = e.touches;
+      const touch = this.getFirstTouchInsideRect(e.touches, rect);
+      if (!touch) return;
       button.style.left = `${touch.clientX - 25}px`;
       button.style.top = `${touch.clientY - 25}px`;
       this.actionButtonState = true;
       button.style.backgroundColor = "rgba(255,255,255,0.75)";
     });
-    rightArea.addEventListener("touchend", () => {
+
+    const stop = () => {
       this.actionButtonState = false;
       button.style.backgroundColor = "rgba(255,255,255,0.5)";
-    });
+    };
+    rightArea.addEventListener("touchend", stop);
+    rightArea.addEventListener("touchcancel", stop);
 
-    return [rightArea, button];
+    return [button];
+  }
+
+  getFirstTouchInsideRect(touches: TouchList, rect: DOMRect) {
+    for (let i = 0; i < touches.length; i++) {
+      const touch = touches[i];
+      if (
+        touch.clientX > rect.left &&
+        touch.clientX < rect.right &&
+        touch.clientY > rect.top &&
+        touch.clientY < rect.bottom
+      ) {
+        return touch;
+      }
+    }
+    return null;
   }
 
   isActive(): boolean {
