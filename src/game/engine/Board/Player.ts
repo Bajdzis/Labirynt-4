@@ -1,5 +1,9 @@
-import { keyboard, KeyboardCode } from "../IO/Keyboard";
-import { mobileGamepad } from "../IO/MobileGamepad";
+import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
+import { KeyboardMovement } from "../IO/Behaviors/KeyboardMovement";
+import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
+import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
+import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
+import { KeyboardCode } from "../IO/Keyboard";
 import { ThreeJsBoard } from "../ThreeJsBoard/ThreeJsBoard";
 import { BoardObject } from "./BoardObject";
 
@@ -17,16 +21,24 @@ export class Player implements BoardObject {
   public readonly width = 0.2;
   public readonly height = 0.2;
   public angle = 0.0;
-  private keyCodes: PlayerKeys;
-  private useTouchScreen: boolean;
   protected board: ThreeJsBoard | null = null;
   protected numberOfTorches: number = 2;
+  private moveBehavior: ControlBehavior<{ x: number; y: number }>;
+  private actionBehavior: ControlBehavior<true>;
 
   constructor(keyCodes: PlayerKeys, useTouchScreen: boolean = false) {
-    this.keyCodes = keyCodes;
     this.x = 0.06;
     this.y = 0.06;
-    this.useTouchScreen = useTouchScreen;
+
+    this.moveBehavior = new ControlBehavior([new KeyboardMovement(keyCodes)]);
+    this.actionBehavior = new ControlBehavior([
+      new KeyboardPressButton(keyCodes.action),
+    ]);
+
+    if (useTouchScreen) {
+      this.moveBehavior.add(new MobileGamePadMovement());
+      this.actionBehavior.add(new MobileGamepadPressButton());
+    }
   }
 
   setBoard(board: ThreeJsBoard): void {
@@ -39,63 +51,18 @@ export class Player implements BoardObject {
   }
 
   update(delta: number): void {
-    const keyActionIsDown =
-      (keyboard.isChanged(this.keyCodes.action) &&
-        keyboard.isDown(this.keyCodes.action)) ||
-      (this.useTouchScreen &&
-        mobileGamepad.isChanged() &&
-        mobileGamepad.isDown());
-
-    if (keyActionIsDown && this.numberOfTorches > 0) {
-      this.numberOfTorches -= 1;
-      this.board?.sendEvent({
-        name: "throwTorch",
-        player: this,
-      });
-    }
-
-    const step = 0.001875 * delta;
-    if (this.useTouchScreen && mobileGamepad.isActive()) {
-      const x = mobileGamepad.getAxisX() * step;
-      const y = mobileGamepad.getAxisY() * step;
-      if (x !== 0 || y !== 0) {
-        this.angle = Math.atan2(y, x);
-      }
-      if (y !== 0) {
-        this.board?.sendEvent({
-          name: "changePlayerPosition",
-          player: this,
-          x: 0,
-          y: y,
-        });
-      }
-
-      if (x !== 0) {
-        this.board?.sendEvent({
-          name: "changePlayerPosition",
-          player: this,
-          x: x,
-          y: 0,
-        });
-      }
-      return;
-    }
-    const keyTopIsDown = keyboard.isDown(this.keyCodes.top);
-    const keyLeftIsDown = keyboard.isDown(this.keyCodes.left);
-    const keyBottomIsDown = keyboard.isDown(this.keyCodes.bottom);
-    const keyRightIsDown = keyboard.isDown(this.keyCodes.right);
-
-    if (keyTopIsDown || keyLeftIsDown || keyBottomIsDown || keyRightIsDown) {
-      const x = keyRightIsDown ? step : keyLeftIsDown ? -step : 0;
-      const y = keyTopIsDown ? step : keyBottomIsDown ? -step : 0;
-
+    this.moveBehavior.update(delta);
+    const movementState = this.moveBehavior.getState();
+    if (movementState) {
+      const step = 0.001875 * delta;
+      const { x, y } = movementState;
       this.angle = Math.atan2(y, x);
       if (y !== 0) {
         this.board?.sendEvent({
           name: "changePlayerPosition",
           player: this,
           x: 0,
-          y: y,
+          y: y * step,
         });
       }
 
@@ -103,10 +70,20 @@ export class Player implements BoardObject {
         this.board?.sendEvent({
           name: "changePlayerPosition",
           player: this,
-          x: x,
+          x: x * step,
           y: 0,
         });
       }
+    }
+    this.actionBehavior.update(delta);
+    const doAction = this.actionBehavior.getState();
+
+    if (doAction && this.numberOfTorches > 0) {
+      this.numberOfTorches -= 1;
+      this.board?.sendEvent({
+        name: "throwTorch",
+        player: this,
+      });
     }
   }
 }

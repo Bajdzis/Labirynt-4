@@ -1,7 +1,6 @@
 class MobileGamepad {
   private isActiveValue: boolean = false;
   private actionButtonState: boolean = false;
-  private lastActionButtonState: boolean = false;
   private axisX: number = 0;
   private axisY: number = 0;
   constructor() {
@@ -162,12 +161,6 @@ class MobileGamepad {
 
   isDown(): boolean {
     return this.actionButtonState;
-  }
-
-  isChanged(): boolean {
-    const change = this.actionButtonState !== this.lastActionButtonState;
-    this.lastActionButtonState = this.actionButtonState;
-    return change;
   }
 
   getAxisX(): number {
