@@ -44,4 +44,8 @@ export class Light {
     this.light.distance = 0.32 * size;
     this.light.shadow.camera.far = 0.32 * size - 1;
   }
+
+  remove() {
+    lightsHelper.hidePointLight(this.light);
+  }
 }

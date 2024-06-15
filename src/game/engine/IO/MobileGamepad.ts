@@ -7,8 +7,6 @@ class MobileGamepad {
     const container = document.createElement("div");
     container.style.opacity = "0";
 
-    this.createRightSide().forEach((element) => container.appendChild(element));
-    this.createLeftSide().forEach((element) => container.appendChild(element));
     document.body.appendChild(container);
 
     const showControls = (e: TouchEvent) => {
@@ -17,6 +15,12 @@ class MobileGamepad {
       if (!this.isActiveValue) {
         container.style.opacity = "1";
         this.isActiveValue = true;
+        this.createRightSide().forEach((element) =>
+          container.appendChild(element),
+        );
+        this.createLeftSide().forEach((element) =>
+          container.appendChild(element),
+        );
       }
     };
     document.body.addEventListener("touchstart", showControls, false);

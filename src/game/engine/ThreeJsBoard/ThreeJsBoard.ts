@@ -7,7 +7,71 @@ import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Player } from "../Board/Player";
 import { objectContainsOther } from "../Utils/math/objectContainsOther";
 import { Torch } from "./Torch";
-import { lightsHelper } from "./LightsHelper";
+import { boxParticles } from "../Particles/instances";
+
+type GameEvent =
+  | {
+      name: "changePlayerPosition";
+      player: Player;
+      x: number;
+      y: number;
+    }
+  | {
+      name: "doAction";
+      player: Player;
+    }
+  | {
+      name: "throwTorch";
+      player: Player;
+    }
+  | {
+      name: "grabTorch";
+      torch: Torch;
+      player: Player;
+    };
+
+boxParticles.addGroupOfParticles({
+  colorStart: new THREE.Color("red"),
+  colorStop: new THREE.Color("white"),
+  maxLife: 5000,
+  numberOfParticles: 200,
+  state: "active",
+  type: {
+    type: "rectangle",
+    width: 0.2,
+    height: 0.2,
+    x: 0,
+    y: -1,
+  },
+});
+
+boxParticles.addGroupOfParticles({
+  colorStart: new THREE.Color("blue"),
+  colorStop: new THREE.Color("white"),
+  maxLife: 1000,
+  numberOfParticles: 200,
+  state: "active",
+  type: {
+    type: "circle",
+    radius: 0.2,
+    x: 1,
+    y: -1,
+  },
+});
+
+boxParticles.addGroupOfParticles({
+  colorStart: new THREE.Color("white"),
+  colorStop: new THREE.Color("green"),
+  maxLife: 2000,
+  numberOfParticles: 200,
+  state: "active",
+  type: {
+    type: "circle-center",
+    radius: 0.2,
+    x: -1,
+    y: -1,
+  },
+});
 
 export class ThreeJsBoard {
   private scene: THREE.Scene;
@@ -16,7 +80,8 @@ export class ThreeJsBoard {
   constructor(private resources: Resources) {
     this.scene = new THREE.Scene();
     // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    this.scene.add(lightsHelper.getObject());
+
+    this.scene.add(boxParticles.getObject());
     this.addObject(
       new ThreeJsPlayer(
         this.resources.material.player1,
@@ -56,22 +121,55 @@ export class ThreeJsBoard {
   }
 
   update(delta: number) {
-    this.objects.forEach((object) => object.update(delta));
+    this.objects.forEach((object) => {
+      if (object instanceof Torch) {
+        object.hideTip();
+      }
+    });
+
+    boxParticles.update(delta);
+    this.objects.forEach((object) => {
+      object.update(delta);
+
+      if (object instanceof ThreeJsPlayer) {
+        const action = this.getActionForPlayer(object);
+        if (action?.name === "grabTorch") {
+          action.torch.showTip();
+        }
+      }
+    });
   }
 
-  sendEvent(
-    event:
-      | {
-          name: "changePlayerPosition";
-          player: Player;
-          x: number;
-          y: number;
+  getActionForPlayer(player: Player): GameEvent | null {
+    for (const object of this.objects) {
+      if (object instanceof Torch) {
+        if (
+          objectContainsOther(object, player) &&
+          player.canPlayerGrabTorch()
+        ) {
+          object.showTip();
+          return {
+            name: "grabTorch",
+            torch: object,
+            player: player,
+          };
+        } else {
+          object.hideTip();
         }
-      | {
-          name: "throwTorch";
-          player: Player;
-        },
-  ) {
+      }
+    }
+
+    if (player.canPlayerThrowTorch()) {
+      return {
+        name: "throwTorch",
+        player: player,
+      };
+    }
+
+    return null;
+  }
+
+  sendEvent(event: GameEvent) {
     if (event.name === "changePlayerPosition") {
       let playerCanMove = true;
       const newPlayerPosition = {
@@ -91,8 +189,17 @@ export class ThreeJsBoard {
       if (playerCanMove) {
         event.player.changePosition(event.x, event.y);
       }
+    } else if (event.name === "doAction") {
+      const newEvent = this.getActionForPlayer(event.player);
+      if (newEvent) {
+        this.sendEvent(newEvent);
+      }
     } else if (event.name === "throwTorch") {
+      event.player.throwTorch();
       this.addObject(new Torch(event.player.x, event.player.y));
+    } else if (event.name === "grabTorch") {
+      event.player.grabTorch();
+      this.removeObject(event.torch);
     }
   }
 
@@ -101,9 +208,16 @@ export class ThreeJsBoard {
   }
 
   private addObject(object: ThreeJsBoardObject) {
+    object.update(0);
     this.objects.push(object);
     this.scene.add(object.getObject());
     object.setBoard(this);
+  }
+
+  private removeObject(object: ThreeJsBoardObject) {
+    this.objects = this.objects.filter((obj) => obj !== object);
+    object.remove && object.remove();
+    this.scene.remove(object.getObject());
   }
 
   private addWall(x: number, y: number) {

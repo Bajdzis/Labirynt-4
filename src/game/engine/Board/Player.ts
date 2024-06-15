@@ -78,12 +78,27 @@ export class Player implements BoardObject {
     this.actionBehavior.update(delta);
     const doAction = this.actionBehavior.getState();
 
-    if (doAction && this.numberOfTorches > 0) {
-      this.numberOfTorches -= 1;
+    if (doAction) {
       this.board?.sendEvent({
-        name: "throwTorch",
+        name: "doAction",
         player: this,
       });
     }
+  }
+
+  canPlayerThrowTorch() {
+    return this.numberOfTorches > 0;
+  }
+
+  canPlayerGrabTorch() {
+    return this.numberOfTorches < 2;
+  }
+
+  grabTorch() {
+    this.numberOfTorches++;
+  }
+
+  throwTorch() {
+    this.numberOfTorches--;
   }
 }

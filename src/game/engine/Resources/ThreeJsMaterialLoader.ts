@@ -49,16 +49,17 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
     return this.getFloorTexture(props).then((texture) => {
       return new THREE.MeshStandardMaterial({
         map: texture,
+        transparent: true,
+        opacity: 1,
       });
     });
   }
 
   floorShadow(props: MaterialLoaderProps): Promise<THREE.Material> {
     return this.getFloorTexture(props).then((texture) => {
-      return new THREE.MeshPhysicalMaterial({
+      return new THREE.MeshStandardMaterial({
         transparent: true,
         opacity: 0.25,
-        transmission: 0,
         map: texture,
       });
     });

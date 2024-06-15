@@ -4,7 +4,7 @@ class LightsHelper {
   private group = new THREE.Group();
   private pointLights: THREE.PointLight[] = [];
   constructor() {
-    this.createLights(8);
+    this.createLights(4);
   }
 
   createLights(quantity: number) {
@@ -27,16 +27,26 @@ class LightsHelper {
     color: THREE.ColorRepresentation = "white",
     intensity: number = 1,
     distance: number = 1,
+    decay: number = 2,
   ): THREE.PointLight {
     const light = this.pointLights.find((light) => light.intensity === 0);
     if (light) {
       light.color.set(color);
       light.intensity = intensity;
       light.distance = distance;
+      light.decay = decay;
       return light;
     }
     this.createLights(4);
-    return this.getPointLight(color, intensity, distance);
+    return this.getPointLight(color, intensity, distance, decay);
+  }
+
+  hidePointLight(light: THREE.PointLight) {
+    light.intensity = 0;
+    light.parent?.remove(light);
+    this.pointLights = this.pointLights.filter((l) => l !== light);
+    light.dispose();
+    this.createLights(1);
   }
 }
 

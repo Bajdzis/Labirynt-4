@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
+import { lightsHelper } from "./ThreeJsBoard/LightsHelper";
 
 export class ThreeJsRenderer {
   private renderer: THREE.WebGLRenderer;
@@ -8,8 +9,11 @@ export class ThreeJsRenderer {
   private perspectiveCamera: THREE.PerspectiveCamera;
   private orthographicCamera: THREE.OrthographicCamera;
   private orbitControls: OrbitControls;
+  private scene: THREE.Scene;
 
   constructor() {
+    this.scene = new THREE.Scene();
+    this.scene.add(lightsHelper.getObject());
     const main = document.getElementById("main");
     if (!main)
       throw new Error(`No element with id 'main' found in the document`);
@@ -76,8 +80,11 @@ export class ThreeJsRenderer {
     this.orbitControls.update(delta);
   }
 
-  render(scene: THREE.Scene) {
-    this.renderer.render(scene, this.orthographicCamera);
-    this.labelRenderer.render(scene, this.orthographicCamera);
+  render(object: THREE.Object3D) {
+    this.scene.add(object);
+    this.renderer.render(this.scene, this.perspectiveCamera);
+    this.labelRenderer.render(this.scene, this.perspectiveCamera);
+    console.log(this.renderer.info);
+    this.scene.remove(object);
   }
 }
