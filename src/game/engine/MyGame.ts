@@ -20,6 +20,6 @@ export class MyGame extends BrowserGame {
   }
 
   protected render() {
-    this.renderer.render(this.board.getScene());
+    this.renderer.render(this.board.getScene(), this.board.getCamera());
   }
 }

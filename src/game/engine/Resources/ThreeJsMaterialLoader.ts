@@ -39,7 +39,7 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
     return textureLoader.load("resources/floor.png").then((texture) => {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(3.2 * 10, 3.2 * 10);
+      texture.repeat.set(3.2 * 100, 3.2 * 100);
 
       return texture;
     });

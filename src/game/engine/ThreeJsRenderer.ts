@@ -7,7 +7,6 @@ export class ThreeJsRenderer {
   private renderer: THREE.WebGLRenderer;
   private labelRenderer: CSS2DRenderer;
   private perspectiveCamera: THREE.PerspectiveCamera;
-  private orthographicCamera: THREE.OrthographicCamera;
   private orbitControls: OrbitControls;
   private scene: THREE.Scene;
 
@@ -25,16 +24,8 @@ export class ThreeJsRenderer {
       1000,
     );
 
-    this.orthographicCamera = new THREE.OrthographicCamera(
-      -window.innerWidth / 400,
-      window.innerWidth / 400,
-      window.innerHeight / 400,
-      -window.innerHeight / 400,
-      -1,
-      1,
-    );
-
     this.renderer = new THREE.WebGLRenderer();
+    this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setClearColor(0x000000);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -49,12 +40,6 @@ export class ThreeJsRenderer {
       const width = window.visualViewport?.width || window.innerWidth;
       const height = window.visualViewport?.height || window.innerHeight;
       this.perspectiveCamera.aspect = width / height;
-
-      this.orthographicCamera.left = -width / 400;
-      this.orthographicCamera.right = width / 400;
-      this.orthographicCamera.top = height / 400;
-      this.orthographicCamera.bottom = -height / 400;
-      this.orthographicCamera.updateProjectionMatrix();
 
       this.perspectiveCamera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
@@ -80,11 +65,13 @@ export class ThreeJsRenderer {
     this.orbitControls.update(delta);
   }
 
-  render(object: THREE.Object3D) {
+  render(
+    object: THREE.Object3D,
+    camera: THREE.Camera = this.perspectiveCamera,
+  ) {
     this.scene.add(object);
-    this.renderer.render(this.scene, this.perspectiveCamera);
-    this.labelRenderer.render(this.scene, this.perspectiveCamera);
-    console.log(this.renderer.info);
+    this.renderer.render(this.scene, camera);
+    this.labelRenderer.render(this.scene, camera);
     this.scene.remove(object);
   }
 }

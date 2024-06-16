@@ -8,6 +8,7 @@ import { Player } from "../Board/Player";
 import { objectContainsOther } from "../Utils/math/objectContainsOther";
 import { Torch } from "./Torch";
 import { boxParticles } from "../Particles/instances";
+import { GameCamera } from "../GameCamera";
 
 type GameEvent =
   | {
@@ -76,6 +77,7 @@ boxParticles.addGroupOfParticles({
 export class ThreeJsBoard {
   private scene: THREE.Scene;
   private objects: ThreeJsBoardObject[] = [];
+  private camera: GameCamera = new GameCamera();
 
   constructor(private resources: Resources) {
     this.scene = new THREE.Scene();
@@ -138,6 +140,7 @@ export class ThreeJsBoard {
         }
       }
     });
+    this.updateCameraPosition();
   }
 
   getActionForPlayer(player: Player): GameEvent | null {
@@ -205,6 +208,26 @@ export class ThreeJsBoard {
 
   getScene() {
     return this.scene;
+  }
+
+  getCamera() {
+    return this.camera.getCamera();
+  }
+
+  updateCameraPosition() {
+    const playersAreaToShow = this.objects.reduce((acc, object) => {
+      if (object instanceof ThreeJsPlayer) {
+        acc.push(
+          new THREE.Box2(
+            new THREE.Vector2(object.x - 0.64, object.y - 0.64),
+            new THREE.Vector2(object.x + 0.64, object.y + 0.64),
+          ),
+        );
+      }
+      return acc;
+    }, [] as THREE.Box2[]);
+
+    this.camera.setAreasToShow(playersAreaToShow);
   }
 
   private addObject(object: ThreeJsBoardObject) {

@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { Resources } from "../Resources/Resources";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
-const WIDTH_FLOOR = 30;
-const HEIGHT_FLOOR = 30;
+const WIDTH_FLOOR = 300;
+const HEIGHT_FLOOR = 300;
 
 export class Floor implements ThreeJsBoardObject {
   private object: THREE.Group;
