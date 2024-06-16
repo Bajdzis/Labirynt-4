@@ -2,45 +2,50 @@ import * as THREE from "three";
 import { Resources } from "../Resources/Resources";
 import { Wall } from "../Board/Wall";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
+import { random } from "../Utils/math/random";
 
 export class ThreeJsWall extends Wall implements ThreeJsBoardObject {
-  private mesh: THREE.Group;
-  private static wallGeometry = new THREE.BoxGeometry(0.32, 0.32, 0.32);
-  private static outlineGeometry = new THREE.PlaneGeometry(0.34, 0.34);
+  private matrix: THREE.Matrix4;
+  private matrixOutline: THREE.Matrix4;
 
   constructor(resources: Resources, x: number, y: number) {
     super(x, y);
+    const position = new THREE.Vector3(this.x, this.y, 0.16);
 
-    this.mesh = new THREE.Group();
-    const mesh = new THREE.Mesh(
-      ThreeJsWall.wallGeometry,
-      resources.material.wall,
-    );
-    this.mesh.add(mesh);
-    const outlineMesh = new THREE.Mesh(
-      ThreeJsWall.outlineGeometry,
-      new THREE.MeshStandardMaterial({
-        color: "#505050",
-        roughness: 1,
-        metalness: 0,
-      }),
-    );
-    outlineMesh.position.z = 0.15;
-    this.mesh.add(outlineMesh);
+    this.matrix = new THREE.Matrix4();
+    const rotation = Math.floor(random(0, 6));
+    if (rotation === 0) {
+      this.matrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+    } else if (rotation === 1) {
+      this.matrix.makeRotationAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+    } else if (rotation === 2) {
+      this.matrix.makeRotationAxis(new THREE.Vector3(-1, 0, 0), Math.PI / 2);
+    } else if (rotation === 3) {
+      this.matrix.makeRotationAxis(new THREE.Vector3(0, -1, 0), Math.PI / 2);
+    } else if (rotation === 4) {
+      this.matrix.makeRotationAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+    }
+    // else if(rotation === 5){
+    //   // 0,0 0
+    // }
+    this.matrix.setPosition(position);
 
-    this.mesh.position.x = this.x;
-    this.mesh.position.y = this.y;
-    this.mesh.position.z = 0.16;
-    mesh.castShadow = true;
+    this.matrixOutline = new THREE.Matrix4();
+    this.matrixOutline.setPosition(position);
+  }
+
+  getMatrix(): THREE.Matrix4 {
+    return this.matrix;
+  }
+
+  getMatrixOutline(): THREE.Matrix4 {
+    return this.matrixOutline;
   }
 
   getObject() {
-    return this.mesh;
+    return null;
   }
-  update(): void {
-    this.mesh.position.x = this.x;
-    this.mesh.position.y = this.y;
-  }
+  update(): void {}
   setBoard(): void {
     // do nothing
   }

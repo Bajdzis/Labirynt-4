@@ -20,6 +20,7 @@ export class Resources {
         floorShadow: THREE.Material;
         player1: THREE.Material;
         player2: THREE.Material;
+        wallOutline: THREE.Material;
       }
     | undefined = undefined;
 
@@ -53,6 +54,7 @@ export class Resources {
     );
     const playerMaterial = counter(this.threeJsMaterialLoader.load("player1"));
     const playerMaterial2 = counter(this.threeJsMaterialLoader.load("player2"));
+    const wallOutline = counter(this.threeJsMaterialLoader.load("wallOutline"));
 
     this._material = {
       wall: await wallMaterial,
@@ -60,6 +62,7 @@ export class Resources {
       floorShadow: await floorShadowMaterial,
       player1: await playerMaterial,
       player2: await playerMaterial2,
+      wallOutline: await wallOutline,
     };
   }
 }

@@ -3,7 +3,13 @@ import { ResourcesLoader } from "./ResourcesLoader";
 import { ThreeJsTextureLoader } from "./ThreeJsTextureLoader";
 import { PlayerImageLoader } from "./PlayerImageLoader";
 
-type MaterialName = "wall" | "floor" | "floorShadow" | "player1" | "player2";
+type MaterialName =
+  | "wall"
+  | "wallOutline"
+  | "floor"
+  | "floorShadow"
+  | "player1"
+  | "player2";
 
 interface MaterialLoaderProps {
   textureLoader: ThreeJsTextureLoader;
@@ -22,7 +28,7 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
   }
 
   wall({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
-    return textureLoader.load("resources/walls/1.PNG").then((texture) => {
+    return textureLoader.load("resources/walls.png").then((texture) => {
       return new THREE.MeshStandardMaterial({
         roughness: 1,
         metalness: 0,
@@ -84,5 +90,17 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
 
   player2(props: MaterialLoaderProps): Promise<THREE.Material> {
     return this.player(props, "red");
+  }
+
+  wallOutline(): Promise<THREE.Material> {
+    return new Promise((resolve) => {
+      resolve(
+        new THREE.MeshStandardMaterial({
+          color: "#505050",
+          roughness: 1,
+          metalness: 0,
+        }),
+      );
+    });
   }
 }

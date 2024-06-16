@@ -9,6 +9,7 @@ import { objectContainsOther } from "../Utils/math/objectContainsOther";
 import { Torch } from "./Torch";
 import { boxParticles } from "../Particles/instances";
 import { GameCamera } from "../GameCamera";
+import { ThreeJsWalls } from "./ThreeJsWalls";
 
 type GameEvent =
   | {
@@ -77,6 +78,7 @@ boxParticles.addGroupOfParticles({
 export class ThreeJsBoard {
   private scene: THREE.Scene;
   private objects: ThreeJsBoardObject[] = [];
+  private wallsGroup;
   private camera: GameCamera = new GameCamera();
 
   constructor(private resources: Resources) {
@@ -120,9 +122,18 @@ export class ThreeJsBoard {
     this.addWall(2, 0);
     this.addWall(3, 0);
     this.addWall(3, 1);
+
+    const walls = this.objects.filter(
+      (object) => object instanceof ThreeJsWall,
+    ) as ThreeJsWall[];
+
+    this.wallsGroup = new ThreeJsWalls(resources, walls);
+
+    this.scene.add(this.wallsGroup.getObject());
   }
 
   update(delta: number) {
+    this.wallsGroup.update();
     this.objects.forEach((object) => {
       if (object instanceof Torch) {
         object.hideTip();
@@ -233,14 +244,16 @@ export class ThreeJsBoard {
   private addObject(object: ThreeJsBoardObject) {
     object.update(0);
     this.objects.push(object);
-    this.scene.add(object.getObject());
+    const object3D = object.getObject();
+    object3D && this.scene.add(object3D);
     object.setBoard(this);
   }
 
   private removeObject(object: ThreeJsBoardObject) {
     this.objects = this.objects.filter((obj) => obj !== object);
     object.remove && object.remove();
-    this.scene.remove(object.getObject());
+    const object3D = object.getObject();
+    object3D && this.scene.remove(object3D);
   }
 
   private addWall(x: number, y: number) {

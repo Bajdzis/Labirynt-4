@@ -1,7 +1,8 @@
-import { Mesh, PlaneGeometry } from "three";
+import { InstancedMesh, Mesh } from "three";
 import { MyGame } from "./engine/MyGame";
 import { Resources } from "./engine/Resources/Resources";
 import { ThreeJsRenderer } from "./engine/ThreeJsRenderer";
+import { wallOutlineGeometry } from "./engine/Resources/Geometries";
 
 declare global {
   interface Window {
@@ -24,28 +25,26 @@ resources
 
     await waitForEnd(() => {
       renderer.render(
-        new Mesh(new PlaneGeometry(1, 1), resources.material.player1),
+        new Mesh(wallOutlineGeometry, resources.material.player1),
       );
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 60);
     await waitForEnd(() => {
-      renderer.render(
-        new Mesh(new PlaneGeometry(1, 1), resources.material.floor),
-      );
+      renderer.render(new Mesh(wallOutlineGeometry, resources.material.floor));
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 70);
     await waitForEnd(() => {
       renderer.render(
-        new Mesh(new PlaneGeometry(1, 1), resources.material.floorShadow),
+        new Mesh(wallOutlineGeometry, resources.material.floorShadow),
       );
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 80);
     await waitForEnd(() => {
       renderer.render(
-        new Mesh(new PlaneGeometry(1, 1), resources.material.wall),
+        new InstancedMesh(wallOutlineGeometry, resources.material.wall, 1),
       );
     });
 
