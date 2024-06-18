@@ -1,6 +1,6 @@
 import { InstancedMesh, Mesh } from "three";
 import { MyGame } from "./engine/MyGame";
-import { Resources } from "./engine/Resources/Resources";
+import { resources } from "./engine/Resources/Resources";
 import { ThreeJsRenderer } from "./engine/ThreeJsRenderer";
 import { wallOutlineGeometry } from "./engine/Resources/Geometries";
 
@@ -12,8 +12,6 @@ declare global {
 }
 
 window.setProgressBar("Przetwarzanie zasobów...", 2);
-
-const resources = new Resources();
 
 resources
   .prepareAllResources((progress) => {
@@ -50,7 +48,7 @@ resources
 
     window.setProgressBar("Kompilowanie shaderów...", 90);
     await waitForEnd(() => {
-      const game = new MyGame(resources, renderer);
+      const game = new MyGame(renderer);
 
       game.run();
     });

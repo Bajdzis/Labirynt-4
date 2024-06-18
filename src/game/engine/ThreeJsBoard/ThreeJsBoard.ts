@@ -1,7 +1,11 @@
 import * as THREE from "three";
-import { Resources } from "../Resources/Resources";
+import { resources } from "../Resources/Resources";
 import { Floor } from "./Floor";
-import { ThreeJsPlayer } from "./ThreeJsPlayer";
+import {
+  FirstPlayerPrototype,
+  SecondPlayerPrototype,
+  ThreeJsPlayer,
+} from "./ThreeJsPlayer";
 import { ThreeJsWall } from "./ThreeJsWall";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Player } from "../Board/Player";
@@ -10,6 +14,9 @@ import { Torch } from "./Torch";
 import { boxParticles } from "../Particles/instances";
 import { GameCamera } from "../GameCamera";
 import { ThreeJsWalls } from "./ThreeJsWalls";
+import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
+import { KeyboardTouchButton } from "../IO/Behaviors/KeyboardTouchButton";
+import { Destination } from "./Destination";
 
 type GameEvent =
   | {
@@ -17,6 +24,10 @@ type GameEvent =
       player: Player;
       x: number;
       y: number;
+    }
+  | {
+      name: "useDestination";
+      player: Player;
     }
   | {
       name: "doAction";
@@ -32,110 +43,49 @@ type GameEvent =
       player: Player;
     };
 
-boxParticles.addGroupOfParticles({
-  colorStart: new THREE.Color("red"),
-  colorStop: new THREE.Color("white"),
-  maxLife: 5000,
-  numberOfParticles: 200,
-  state: "active",
-  type: {
-    type: "rectangle",
-    width: 0.2,
-    height: 0.2,
-    x: 0,
-    y: -1,
-  },
-});
-
-boxParticles.addGroupOfParticles({
-  colorStart: new THREE.Color("blue"),
-  colorStop: new THREE.Color("white"),
-  maxLife: 1000,
-  numberOfParticles: 200,
-  state: "active",
-  type: {
-    type: "circle",
-    radius: 0.2,
-    x: 1,
-    y: -1,
-  },
-});
-
-boxParticles.addGroupOfParticles({
-  colorStart: new THREE.Color("white"),
-  colorStop: new THREE.Color("green"),
-  maxLife: 2000,
-  numberOfParticles: 200,
-  state: "active",
-  type: {
-    type: "circle-center",
-    radius: 0.2,
-    x: -1,
-    y: -1,
-  },
-});
-
 export class ThreeJsBoard {
   private scene: THREE.Scene;
   private objects: ThreeJsBoardObject[] = [];
-  private wallsGroup;
+  private wallsGroup: ThreeJsWalls;
   private camera: GameCamera = new GameCamera();
+  private addSecondPlayerBehavior: ControlBehavior<true> = new ControlBehavior([
+    new KeyboardTouchButton("ArrowUp"),
+    new KeyboardTouchButton("ArrowLeft"),
+    new KeyboardTouchButton("ArrowDown"),
+    new KeyboardTouchButton("ArrowRight"),
+    new KeyboardTouchButton("Numpad0"),
+  ]);
+  private secondPlayerAlreadyAdded = false;
 
-  constructor(private resources: Resources) {
+  constructor() {
+    this.wallsGroup = new ThreeJsWalls(resources, []);
     this.scene = new THREE.Scene();
     // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
     this.scene.add(boxParticles.getObject());
-    this.addObject(
-      new ThreeJsPlayer(
-        this.resources.material.player1,
-        {
-          top: "KeyW",
-          left: "KeyA",
-          bottom: "KeyS",
-          right: "KeyD",
-          action: "KeyE",
-        },
-        true,
-      ),
-    );
-    // this.addObject(
-    //   new ThreeJsPlayer(this.resources.material.player2, {
-    //     top: "ArrowUp",
-    //     left: "ArrowLeft",
-    //     bottom: "ArrowDown",
-    //     right: "ArrowRight",
-    //     action: "Numpad0",
-    //   }),
-    // );
-    this.addObject(new Floor(this.resources));
-
-    this.addWall(3, 2);
-    this.addWall(3, 2);
-    this.addWall(2, 2);
-    this.addWall(1, 2);
-    this.addWall(0, 2);
-    this.addWall(-1, 2);
-    this.addWall(-1, 1);
-    this.addWall(-1, 0);
-    this.addWall(1, 0);
-    this.addWall(2, 0);
-    this.addWall(3, 0);
-    this.addWall(3, 1);
-
-    const walls = this.objects.filter(
-      (object) => object instanceof ThreeJsWall,
-    ) as ThreeJsWall[];
-
-    this.wallsGroup = new ThreeJsWalls(resources, walls);
-
-    this.scene.add(this.wallsGroup.getObject());
+    const player1 = new FirstPlayerPrototype();
+    this.addObject(player1);
+    this.addObject(new Floor(resources));
+    this.loadLevel(0);
   }
 
   update(delta: number) {
+    if (!this.secondPlayerAlreadyAdded) {
+      this.addSecondPlayerBehavior.update(delta);
+      if (this.addSecondPlayerBehavior.getState()) {
+        const player = new SecondPlayerPrototype();
+        player.changePosition(
+          resources.levels[0].startPosition[0] * 0.32,
+          resources.levels[0].startPosition[1] * 0.32,
+        );
+
+        this.addObject(player);
+        this.secondPlayerAlreadyAdded = true;
+      }
+    }
     this.wallsGroup.update();
     this.objects.forEach((object) => {
-      if (object instanceof Torch) {
+      if (object instanceof Torch || object instanceof Destination) {
         object.hideTip();
       }
     });
@@ -156,6 +106,15 @@ export class ThreeJsBoard {
 
   getActionForPlayer(player: Player): GameEvent | null {
     for (const object of this.objects) {
+      if (object instanceof Destination) {
+        if (objectContainsOther(object, player)) {
+          object.showTip();
+          return {
+            name: "useDestination",
+            player: player,
+          };
+        }
+      }
       if (object instanceof Torch) {
         if (
           objectContainsOther(object, player) &&
@@ -167,8 +126,6 @@ export class ThreeJsBoard {
             torch: object,
             player: player,
           };
-        } else {
-          object.hideTip();
         }
       }
     }
@@ -214,7 +171,44 @@ export class ThreeJsBoard {
     } else if (event.name === "grabTorch") {
       event.player.grabTorch();
       this.removeObject(event.torch);
+    } else if (event.name === "useDestination") {
+      this.loadLevel(1);
     }
+  }
+
+  loadLevel(level: number) {
+    this.objects.forEach((object) => {
+      if (object instanceof ThreeJsPlayer) {
+        object.setPosition(
+          resources.levels[level].startPosition[0] * 0.32,
+          resources.levels[level].startPosition[1] * 0.32,
+        );
+      } else if (!(object instanceof Floor)) {
+        this.removeObject(object);
+      }
+    });
+
+    resources.levels[level].wallsPositions.forEach(([x, y]) => {
+      this.addWall(x, y);
+    });
+    resources.levels[level].slotsPositions.forEach(([x, y]) => {
+      this.addObject(new Torch(x * 0.32, y * 0.32));
+    });
+
+    this.addObject(
+      new Destination(
+        resources.levels[level].endPosition[0] * 0.32,
+        resources.levels[level].endPosition[1] * 0.32,
+      ),
+    );
+
+    const walls = this.objects.filter(
+      (object) => object instanceof ThreeJsWall,
+    ) as ThreeJsWall[];
+    this.scene.remove(this.wallsGroup.getObject());
+    this.wallsGroup = new ThreeJsWalls(resources, walls);
+
+    this.scene.add(this.wallsGroup.getObject());
   }
 
   getScene() {
@@ -257,6 +251,6 @@ export class ThreeJsBoard {
   }
 
   private addWall(x: number, y: number) {
-    this.addObject(new ThreeJsWall(this.resources, x, y));
+    this.addObject(new ThreeJsWall(x, y));
   }
 }

@@ -8,7 +8,8 @@
     "http-server": "http-server",
     "dev": "concurrently \"npm run http-server\" \"npm run webpack -- --watch\"",
     "prod": "webpack --mode production && http-server",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",

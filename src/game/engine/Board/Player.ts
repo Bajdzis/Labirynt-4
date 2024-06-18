@@ -1,8 +1,4 @@
 import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
-import { KeyboardMovement } from "../IO/Behaviors/KeyboardMovement";
-import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
-import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
-import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
 import { KeyboardCode } from "../IO/Keyboard";
 import { ThreeJsBoard } from "../ThreeJsBoard/ThreeJsBoard";
 import { BoardObject } from "./BoardObject";
@@ -23,26 +19,22 @@ export class Player implements BoardObject {
   public angle = 0.0;
   protected board: ThreeJsBoard | null = null;
   protected numberOfTorches: number = 2;
-  private moveBehavior: ControlBehavior<{ x: number; y: number }>;
-  private actionBehavior: ControlBehavior<true>;
 
-  constructor(keyCodes: PlayerKeys, useTouchScreen: boolean = false) {
+  constructor(
+    private moveBehavior: ControlBehavior<{ x: number; y: number }>,
+    private actionBehavior: ControlBehavior<true>,
+  ) {
     this.x = 0.06;
     this.y = 0.06;
-
-    this.moveBehavior = new ControlBehavior([new KeyboardMovement(keyCodes)]);
-    this.actionBehavior = new ControlBehavior([
-      new KeyboardPressButton(keyCodes.action),
-    ]);
-
-    if (useTouchScreen) {
-      this.moveBehavior.add(new MobileGamePadMovement());
-      this.actionBehavior.add(new MobileGamepadPressButton());
-    }
   }
 
   setBoard(board: ThreeJsBoard): void {
     this.board = board;
+  }
+
+  setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
   }
 
   changePosition(x: number, y: number) {

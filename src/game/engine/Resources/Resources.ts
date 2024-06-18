@@ -3,6 +3,7 @@ import { ThreeJsTextureLoader } from "./ThreeJsTextureLoader";
 import { ImageLoader } from "./ImageLoader";
 import { PlayerImageLoader } from "./PlayerImageLoader";
 import { ThreeJsMaterialLoader } from "./ThreeJsMaterialLoader";
+import { LevelLoader, Level } from "./LevelLoader";
 
 export class Resources {
   private threeJsTextureLoader = new ThreeJsTextureLoader();
@@ -12,7 +13,9 @@ export class Resources {
     textureLoader: this.threeJsTextureLoader,
     playerImageLoader: this.playerImageLoader,
   });
+  private levelLoader = new LevelLoader({ imageLoader: this.imageLoader });
 
+  private _levels: Level[] | undefined = undefined;
   private _material:
     | {
         wall: THREE.Material;
@@ -29,6 +32,13 @@ export class Resources {
       throw new Error("Resources are not loaded yet");
     }
     return this._material;
+  }
+
+  get levels() {
+    if (!this._levels) {
+      throw new Error("Resources are not loaded yet");
+    }
+    return this._levels;
   }
 
   async prepareAllResources(
@@ -56,6 +66,11 @@ export class Resources {
     const playerMaterial2 = counter(this.threeJsMaterialLoader.load("player2"));
     const wallOutline = counter(this.threeJsMaterialLoader.load("wallOutline"));
 
+    this._levels = await Promise.all([
+      counter(this.levelLoader.load("resources/level1.png")),
+      counter(this.levelLoader.load("resources/level2.png")),
+    ]);
+
     this._material = {
       wall: await wallMaterial,
       floor: await floorMaterial,
@@ -66,3 +81,5 @@ export class Resources {
     };
   }
 }
+
+export const resources = new Resources();

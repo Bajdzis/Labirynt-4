@@ -1,29 +1,33 @@
 import * as THREE from "three";
-import { Player, PlayerKeys } from "../Board/Player";
+import { Player } from "../Board/Player";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Light } from "./Light";
+import { resources } from "../Resources/Resources";
+import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
+import { KeyboardMovement } from "../IO/Behaviors/KeyboardMovement";
+import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
+import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
+import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
 
-export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
+export abstract class ThreeJsPlayer
+  extends Player
+  implements ThreeJsBoardObject
+{
   private group: THREE.Group;
 
   private light: Light;
   constructor(
     material: THREE.Material,
-    keyCodes: PlayerKeys,
-    useTouchScreen: boolean = false,
+    moveBehavior: ControlBehavior<{ x: number; y: number }>,
+    actionBehavior: ControlBehavior<true>,
   ) {
-    super(keyCodes, useTouchScreen);
+    super(moveBehavior, actionBehavior);
 
     this.group = new THREE.Group();
 
     const body = this.createPlayerBody(material);
 
     this.group.add(body);
-    // const element = document.createElement("div");
-    // element.className = "label";
-    // element.innerHTML = "Jakis tekst";
-    // const elementCss2D = new CSS2DObject(element);
-    // this.group.add(elementCss2D);
 
     this.light = new Light(this.numberOfTorches * 2 + 1.5);
     const obj = this.light.getObject();
@@ -57,5 +61,45 @@ export class ThreeJsPlayer extends Player implements ThreeJsBoardObject {
     const body = new THREE.Mesh(playerGeometry, material);
     body.position.z = 0.16;
     return body;
+  }
+}
+
+export class FirstPlayerPrototype extends ThreeJsPlayer {
+  constructor() {
+    const moveBehavior = new ControlBehavior([
+      new KeyboardMovement({
+        top: "KeyW",
+        left: "KeyA",
+        bottom: "KeyS",
+        right: "KeyD",
+      }),
+      new MobileGamePadMovement(),
+    ]);
+
+    const actionBehavior = new ControlBehavior([
+      new KeyboardPressButton("KeyE"),
+      new MobileGamepadPressButton(),
+    ]);
+
+    super(resources.material.player1, moveBehavior, actionBehavior);
+  }
+}
+
+export class SecondPlayerPrototype extends ThreeJsPlayer {
+  constructor() {
+    const moveBehavior = new ControlBehavior([
+      new KeyboardMovement({
+        top: "ArrowUp",
+        left: "ArrowLeft",
+        bottom: "ArrowDown",
+        right: "ArrowRight",
+      }),
+    ]);
+
+    const actionBehavior = new ControlBehavior([
+      new KeyboardPressButton("Numpad0"),
+    ]);
+
+    super(resources.material.player2, moveBehavior, actionBehavior);
   }
 }

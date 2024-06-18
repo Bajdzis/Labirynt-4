@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { Resources } from "../Resources/Resources";
 import { Wall } from "../Board/Wall";
 import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { random } from "../Utils/math/random";
@@ -8,7 +7,7 @@ export class ThreeJsWall extends Wall implements ThreeJsBoardObject {
   private matrix: THREE.Matrix4;
   private matrixOutline: THREE.Matrix4;
 
-  constructor(resources: Resources, x: number, y: number) {
+  constructor(x: number, y: number) {
     super(x, y);
     const position = new THREE.Vector3(this.x, this.y, 0.16);
 
