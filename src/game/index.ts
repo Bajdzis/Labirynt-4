@@ -11,11 +11,11 @@ declare global {
   }
 }
 
-window.setProgressBar("Przetwarzanie zasobów...", 2);
+window.setProgressBar("Pobieranie zasobów...", 2);
 
 resources
   .prepareAllResources((progress) => {
-    window.setProgressBar("Przetwarzanie zasobów...", progress * 50);
+    window.setProgressBar("Pobieranie zasobów...", progress * 50);
   })
   .then(async () => {
     const renderer = new ThreeJsRenderer();
@@ -23,26 +23,32 @@ resources
 
     await waitForEnd(() => {
       renderer.render(
-        new Mesh(wallOutlineGeometry, resources.material.player1),
+        new Mesh(wallOutlineGeometry, resources.data.materials.player1),
       );
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 60);
     await waitForEnd(() => {
-      renderer.render(new Mesh(wallOutlineGeometry, resources.material.floor));
+      renderer.render(
+        new Mesh(wallOutlineGeometry, resources.data.materials.floor),
+      );
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 70);
     await waitForEnd(() => {
       renderer.render(
-        new Mesh(wallOutlineGeometry, resources.material.floorShadow),
+        new Mesh(wallOutlineGeometry, resources.data.materials.floorShadow),
       );
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 80);
     await waitForEnd(() => {
       renderer.render(
-        new InstancedMesh(wallOutlineGeometry, resources.material.wall, 1),
+        new InstancedMesh(
+          wallOutlineGeometry,
+          resources.data.materials.wall,
+          1,
+        ),
       );
     });
 

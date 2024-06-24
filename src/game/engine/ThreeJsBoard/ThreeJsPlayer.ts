@@ -81,7 +81,7 @@ export class FirstPlayerPrototype extends ThreeJsPlayer {
       new MobileGamepadPressButton(),
     ]);
 
-    super(resources.material.player1, moveBehavior, actionBehavior);
+    super(resources.data.materials.player1, moveBehavior, actionBehavior);
   }
 }
 
@@ -100,6 +100,6 @@ export class SecondPlayerPrototype extends ThreeJsPlayer {
       new KeyboardPressButton("Numpad0"),
     ]);
 
-    super(resources.material.player2, moveBehavior, actionBehavior);
+    super(resources.data.materials.player2, moveBehavior, actionBehavior);
   }
 }

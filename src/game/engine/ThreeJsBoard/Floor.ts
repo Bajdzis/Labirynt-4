@@ -16,14 +16,14 @@ export class Floor implements ThreeJsBoardObject {
 
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(0.32 * WIDTH_FLOOR, 0.32 * HEIGHT_FLOOR),
-      resources.material.floor,
+      resources.data.materials.floor,
     );
 
     this.object.add(floor);
 
     const floorShadow = new THREE.Mesh(
       new THREE.PlaneGeometry(0.32 * WIDTH_FLOOR, 0.32 * HEIGHT_FLOOR),
-      resources.material.floorShadow,
+      resources.data.materials.floorShadow,
     );
 
     floorShadow.receiveShadow = true;

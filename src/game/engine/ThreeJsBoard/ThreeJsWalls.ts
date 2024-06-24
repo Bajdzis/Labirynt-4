@@ -14,14 +14,14 @@ export class ThreeJsWalls {
   ) {
     this.wall = new THREE.InstancedMesh(
       wallGeometry,
-      resources.material.wall,
+      resources.data.materials.wall,
       walls.length,
     );
 
     this.wall.castShadow = true;
     this.outline = new THREE.InstancedMesh(
       wallOutlineGeometry,
-      resources.material.wallOutline,
+      resources.data.materials.wallOutline,
       walls.length,
     );
     this.group.add(this.wall);

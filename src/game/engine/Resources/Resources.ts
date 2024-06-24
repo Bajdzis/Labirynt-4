@@ -1,9 +1,9 @@
-import * as THREE from "three";
 import { ThreeJsTextureLoader } from "./ThreeJsTextureLoader";
 import { ImageLoader } from "./ImageLoader";
 import { PlayerImageLoader } from "./PlayerImageLoader";
 import { ThreeJsMaterialLoader } from "./ThreeJsMaterialLoader";
-import { LevelLoader, Level } from "./LevelLoader";
+import { LevelLoader } from "./LevelLoader";
+import { AudioLoader } from "./AudioLoader";
 
 export class Resources {
   private threeJsTextureLoader = new ThreeJsTextureLoader();
@@ -14,36 +14,22 @@ export class Resources {
     playerImageLoader: this.playerImageLoader,
   });
   private levelLoader = new LevelLoader({ imageLoader: this.imageLoader });
+  private audioLoader = new AudioLoader();
 
-  private _levels: Level[] | undefined = undefined;
-  private _material:
-    | {
-        wall: THREE.Material;
-        floor: THREE.Material;
-        floorShadow: THREE.Material;
-        player1: THREE.Material;
-        player2: THREE.Material;
-        wallOutline: THREE.Material;
-      }
+  private _data:
+    | Awaited<ReturnType<typeof this.createAllResources>>
     | undefined = undefined;
 
-  get material() {
-    if (!this._material) {
+  get data() {
+    if (!this._data) {
       throw new Error("Resources are not loaded yet");
     }
-    return this._material;
+    return this._data;
   }
 
-  get levels() {
-    if (!this._levels) {
-      throw new Error("Resources are not loaded yet");
-    }
-    return this._levels;
-  }
-
-  async prepareAllResources(
+  private async createAllResources(
     progressCallback: (progress: number) => void,
-  ): Promise<void> {
+  ) {
     let numberOfLoaded = 0;
     let numberOfResources = 0;
 
@@ -66,19 +52,49 @@ export class Resources {
     const playerMaterial2 = counter(this.threeJsMaterialLoader.load("player2"));
     const wallOutline = counter(this.threeJsMaterialLoader.load("wallOutline"));
 
-    this._levels = await Promise.all([
-      counter(this.levelLoader.load("resources/level1.png")),
-      counter(this.levelLoader.load("resources/level2.png")),
-    ]);
-
-    this._material = {
-      wall: await wallMaterial,
-      floor: await floorMaterial,
-      floorShadow: await floorShadowMaterial,
-      player1: await playerMaterial,
-      player2: await playerMaterial2,
-      wallOutline: await wallOutline,
+    return {
+      materials: {
+        wall: await wallMaterial,
+        floor: await floorMaterial,
+        floorShadow: await floorShadowMaterial,
+        player1: await playerMaterial,
+        player2: await playerMaterial2,
+        wallOutline: await wallOutline,
+      },
+      levels: await Promise.all([
+        counter(this.levelLoader.load("resources/level1.png")),
+        counter(this.levelLoader.load("resources/level2.png")),
+      ]),
+      sounds: {
+        theme: await counter(
+          this.audioLoader.load("resources/sounds/theme.mp3", "1"),
+        ),
+        door: await counter(
+          this.audioLoader.load("resources/sounds/interactions/door.mp3", "1"),
+        ),
+        switch: await counter(
+          this.audioLoader.load(
+            "resources/sounds/interactions/switch.mp3",
+            "1",
+          ),
+        ),
+        teleport: await counter(
+          this.audioLoader.load(
+            "resources/sounds/interactions/teleport.mp3",
+            "1",
+          ),
+        ),
+        torch: await counter(
+          this.audioLoader.load("resources/sounds/interactions/torch.mp3", "1"),
+        ),
+      },
     };
+  }
+
+  async prepareAllResources(
+    progressCallback: (progress: number) => void,
+  ): Promise<void> {
+    this._data = await this.createAllResources(progressCallback);
   }
 }
 

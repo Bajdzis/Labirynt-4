@@ -75,8 +75,8 @@ export class ThreeJsBoard {
       if (this.addSecondPlayerBehavior.getState()) {
         const player = new SecondPlayerPrototype();
         player.changePosition(
-          resources.levels[0].startPosition[0] * 0.32,
-          resources.levels[0].startPosition[1] * 0.32,
+          resources.data.levels[0].startPosition[0] * 0.32,
+          resources.data.levels[0].startPosition[1] * 0.32,
         );
 
         this.addObject(player);
@@ -166,12 +166,15 @@ export class ThreeJsBoard {
         this.sendEvent(newEvent);
       }
     } else if (event.name === "throwTorch") {
+      resources.data.sounds.torch.play();
       event.player.throwTorch();
       this.addObject(new Torch(event.player.x, event.player.y));
     } else if (event.name === "grabTorch") {
+      resources.data.sounds.torch.play();
       event.player.grabTorch();
       this.removeObject(event.torch);
     } else if (event.name === "useDestination") {
+      resources.data.sounds.teleport.play();
       this.loadLevel(1);
     }
   }
@@ -180,25 +183,25 @@ export class ThreeJsBoard {
     this.objects.forEach((object) => {
       if (object instanceof ThreeJsPlayer) {
         object.setPosition(
-          resources.levels[level].startPosition[0] * 0.32,
-          resources.levels[level].startPosition[1] * 0.32,
+          resources.data.levels[level].startPosition[0] * 0.32,
+          resources.data.levels[level].startPosition[1] * 0.32,
         );
       } else if (!(object instanceof Floor)) {
         this.removeObject(object);
       }
     });
 
-    resources.levels[level].wallsPositions.forEach(([x, y]) => {
+    resources.data.levels[level].wallsPositions.forEach(([x, y]) => {
       this.addWall(x, y);
     });
-    resources.levels[level].slotsPositions.forEach(([x, y]) => {
+    resources.data.levels[level].slotsPositions.forEach(([x, y]) => {
       this.addObject(new Torch(x * 0.32, y * 0.32));
     });
 
     this.addObject(
       new Destination(
-        resources.levels[level].endPosition[0] * 0.32,
-        resources.levels[level].endPosition[1] * 0.32,
+        resources.data.levels[level].endPosition[0] * 0.32,
+        resources.data.levels[level].endPosition[1] * 0.32,
       ),
     );
 
