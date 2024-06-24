@@ -21,7 +21,7 @@ export class AudioLoader extends ResourcesLoader<GameAudio> {
   }
 }
 
-class GameAudio {
+export class GameAudio {
   private clone: HTMLAudioElement;
 
   constructor(
