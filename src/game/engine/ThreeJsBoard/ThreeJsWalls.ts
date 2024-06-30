@@ -4,7 +4,7 @@ import { wallGeometry, wallOutlineGeometry } from "../Resources/Geometries";
 import { ThreeJsWall } from "./ThreeJsWall";
 
 export class ThreeJsWalls {
-  private group: THREE.Group = new THREE.Group();
+  private group: THREE.Group;
   private wall: THREE.InstancedMesh;
   private outline: THREE.InstancedMesh;
 
@@ -12,6 +12,8 @@ export class ThreeJsWalls {
     resources: Resources,
     private walls: ThreeJsWall[],
   ) {
+    this.group = new THREE.Group();
+
     this.wall = new THREE.InstancedMesh(
       wallGeometry,
       resources.data.materials.wall,
@@ -24,16 +26,9 @@ export class ThreeJsWalls {
       resources.data.materials.wallOutline,
       walls.length,
     );
+    this.update();
     this.group.add(this.wall);
     this.group.add(this.outline);
-  }
-
-  setWalls(walls: ThreeJsWall[]) {
-    this.walls = walls;
-    this.wall.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.outline.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.wall.count = walls.length;
-    this.outline.count = walls.length;
   }
 
   getObject() {

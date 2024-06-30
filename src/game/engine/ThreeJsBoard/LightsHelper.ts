@@ -3,33 +3,67 @@ import * as THREE from "three";
 class LightsHelper {
   private group = new THREE.Group();
   private pointLights: THREE.PointLight[] = [];
-  constructor() {
-    this.createLights(4);
-  }
+  constructor() {}
 
-  createLights(quantity: number) {
+  createLights(quantity: number, castShadow = false) {
+    console.log({
+      pointLightsNum: this.pointLights.length,
+      quantity,
+      castShadow,
+    });
     for (let i = 0; i < quantity; i++) {
       const light = new THREE.PointLight("white", 0, 0);
-      light.castShadow = true;
-
-      light.shadow.mapSize.width = 128;
-      light.shadow.mapSize.height = 128;
+      if (castShadow) {
+        light.castShadow = true;
+        light.shadow.mapSize.width = 128;
+        light.shadow.mapSize.height = 128;
+      }
       this.pointLights.push(light);
       this.group.add(light);
     }
   }
 
-  getObject() {
+  getObject(maxTexturesCapabilities: number) {
+    if (this.pointLights.length === 0) {
+      this.createLights(
+        Math.min(Math.floor(maxTexturesCapabilities / 2), 16),
+        true,
+      );
+      this.createLights(6, false);
+    }
+
     return this.group;
   }
 
-  getPointLight(
+  getPointLightWithShadow(
     color: THREE.ColorRepresentation = "white",
     intensity: number = 1,
     distance: number = 1,
     decay: number = 2,
   ): THREE.PointLight {
-    const light = this.pointLights.find((light) => light.intensity === 0);
+    const light = this.pointLights.find(
+      (light) => light.intensity === 0 && light.castShadow,
+    );
+    if (light) {
+      light.color.set(color);
+      light.intensity = intensity;
+      light.distance = distance;
+      light.decay = decay;
+      return light;
+    }
+
+    return this.getPointLightWithoutShadow(color, intensity, distance, decay);
+  }
+
+  getPointLightWithoutShadow(
+    color: THREE.ColorRepresentation = "white",
+    intensity: number = 1,
+    distance: number = 1,
+    decay: number = 2,
+  ): THREE.PointLight {
+    const light = this.pointLights.find(
+      (light) => light.intensity === 0 && light.castShadow === false,
+    );
     if (light) {
       light.color.set(color);
       light.intensity = intensity;
@@ -38,7 +72,7 @@ class LightsHelper {
       return light;
     }
     this.createLights(4);
-    return this.getPointLight(color, intensity, distance, decay);
+    return this.getPointLightWithoutShadow(color, intensity, distance, decay);
   }
 
   hidePointLight(light: THREE.PointLight) {
@@ -46,7 +80,7 @@ class LightsHelper {
     light.parent?.remove(light);
     this.pointLights = this.pointLights.filter((l) => l !== light);
     light.dispose();
-    this.createLights(1);
+    this.createLights(1, light.castShadow);
   }
 }
 

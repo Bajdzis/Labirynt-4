@@ -7,8 +7,8 @@ export class Light {
   private light: THREE.PointLight;
 
   private lightTimer: Timer;
-  constructor(size: number) {
-    this.light = this.createLight(size);
+  constructor(size: number, shadow = true) {
+    this.light = this.createLight(size, shadow);
 
     this.lightTimer = new Timer(150, () => {
       this.light.position.x = random(-0.01, 0.01);
@@ -25,8 +25,10 @@ export class Light {
     this.lightTimer.update(delta);
   }
 
-  createLight(size: number) {
-    const light = lightsHelper.getPointLight("orange", 0.5, 0.32 * size);
+  createLight(size: number, shadow: boolean) {
+    const light = lightsHelper[
+      shadow ? "getPointLightWithShadow" : "getPointLightWithoutShadow"
+    ]("orange", 0.5, 0.32 * size);
     light.position.z = 0.4;
 
     light.shadow.camera.near = 0.01;

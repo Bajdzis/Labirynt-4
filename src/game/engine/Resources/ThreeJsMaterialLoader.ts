@@ -5,6 +5,10 @@ import { PlayerImageLoader } from "./PlayerImageLoader";
 
 type MaterialName =
   | "wall"
+  | "torch"
+  | "door"
+  | "key"
+  | "cauldron"
   | "wallOutline"
   | "floor"
   | "floorShadow"
@@ -28,7 +32,21 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
   }
 
   wall({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
-    return textureLoader.load("resources/walls.png").then((texture) => {
+    return textureLoader
+      .load("resources/elements/walls.png")
+      .then((texture) => {
+        return new THREE.MeshStandardMaterial({
+          roughness: 1,
+          metalness: 0,
+          map: texture,
+          bumpMap: texture,
+          bumpScale: 0.75,
+        });
+      });
+  }
+
+  door({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+    return textureLoader.load("resources/elements/door.png").then((texture) => {
       return new THREE.MeshStandardMaterial({
         roughness: 1,
         metalness: 0,
@@ -37,6 +55,33 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
         bumpScale: 0.75,
       });
     });
+  }
+
+  key({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+    return textureLoader.load("resources/elements/key.png").then((texture) => {
+      return new THREE.MeshStandardMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 1,
+      });
+    });
+  }
+
+  cauldron({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+    return textureLoader
+      .load("resources/elements/cauldron.png")
+      .then((texture) => {
+        return new THREE.MeshStandardMaterial({
+          map: texture,
+          bumpMap: texture,
+          transparent: true,
+          opacity: 1,
+        });
+      });
+  }
+
+  async torch(): Promise<THREE.Material> {
+    return new THREE.MeshStandardMaterial({ color: "brown" });
   }
 
   private getFloorTexture({

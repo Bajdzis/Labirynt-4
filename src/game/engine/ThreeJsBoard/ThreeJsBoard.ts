@@ -17,6 +17,9 @@ import { ThreeJsWalls } from "./ThreeJsWalls";
 import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
 import { KeyboardTouchButton } from "../IO/Behaviors/KeyboardTouchButton";
 import { Destination } from "./Destination";
+import { Key } from "./Key";
+import { Door } from "./Door";
+import { Cauldron } from "./Cauldron";
 
 type GameEvent =
   | {
@@ -40,6 +43,16 @@ type GameEvent =
   | {
       name: "grabTorch";
       torch: Torch;
+      player: Player;
+    }
+  | {
+      name: "pickKey";
+      key: Key;
+      player: Player;
+    }
+  | {
+      name: "openDoor";
+      door: Door;
       player: Player;
     };
 
@@ -85,7 +98,12 @@ export class ThreeJsBoard {
     }
     this.wallsGroup.update();
     this.objects.forEach((object) => {
-      if (object instanceof Torch || object instanceof Destination) {
+      if (
+        object instanceof Torch ||
+        object instanceof Destination ||
+        object instanceof Key ||
+        object instanceof Door
+      ) {
         object.hideTip();
       }
     });
@@ -93,6 +111,20 @@ export class ThreeJsBoard {
     boxParticles.update(delta);
     this.objects.forEach((object) => {
       object.update(delta);
+
+      if (object instanceof Cauldron) {
+        const players = this.objects.filter(
+          (object) => object instanceof ThreeJsPlayer,
+        ) as ThreeJsPlayer[];
+        const somePlayerContains = players.some((player) =>
+          objectContainsOther(object, player),
+        );
+        if (somePlayerContains) {
+          object.activate();
+        } else {
+          object.deactivate();
+        }
+      }
 
       if (object instanceof ThreeJsPlayer) {
         const action = this.getActionForPlayer(object);
@@ -128,6 +160,26 @@ export class ThreeJsBoard {
           };
         }
       }
+      if (object instanceof Key) {
+        if (objectContainsOther(object, player)) {
+          object.showTip();
+          return {
+            name: "pickKey",
+            key: object,
+            player: player,
+          };
+        }
+      }
+      if (object instanceof Door) {
+        if (objectContainsOther(object, player)) {
+          object.showTip();
+          return {
+            name: "openDoor",
+            door: object,
+            player: player,
+          };
+        }
+      }
     }
 
     if (player.canPlayerThrowTorch()) {
@@ -155,6 +207,11 @@ export class ThreeJsBoard {
             playerCanMove = false;
             break;
           }
+        } else if (object instanceof Door) {
+          if (!object.canMoveThrough(newPlayerPosition)) {
+            playerCanMove = false;
+            break;
+          }
         }
       }
       if (playerCanMove) {
@@ -173,6 +230,13 @@ export class ThreeJsBoard {
       resources.data.sounds.torch.play();
       event.player.grabTorch();
       this.removeObject(event.torch);
+    } else if (event.name === "pickKey") {
+      resources.data.sounds.key.play();
+      event.player.pickKey(event.key);
+      this.removeObject(event.key);
+    } else if (event.name === "openDoor") {
+      resources.data.sounds.door.play();
+      event.door.toggle();
     } else if (event.name === "useDestination") {
       resources.data.sounds.teleport.play();
       this.loadLevel(1);
@@ -195,7 +259,7 @@ export class ThreeJsBoard {
       this.addWall(x, y);
     });
     resources.data.levels[level].slotsPositions.forEach(([x, y]) => {
-      this.addObject(new Torch(x * 0.32, y * 0.32));
+      this.addObject(new Cauldron(x * 0.32, y * 0.32));
     });
 
     this.addObject(

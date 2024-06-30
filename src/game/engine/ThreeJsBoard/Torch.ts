@@ -3,6 +3,7 @@ import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Light } from "./Light";
 import { Tooltip } from "./Tooltip";
 import { boxParticles } from "../Particles/instances";
+import { resources } from "../Resources/Resources";
 
 export class Torch implements ThreeJsBoardObject {
   private group: THREE.Group;
@@ -98,14 +99,11 @@ export class Torch implements ThreeJsBoardObject {
   }
 
   createTorchMesh() {
-    const playerGeometry = new THREE.BoxGeometry(0.02, 0.24, 0.02);
-    playerGeometry.rotateY(Math.PI / 4);
-    playerGeometry.rotateZ(Math.PI / 4);
+    const torchGeometry = new THREE.BoxGeometry(0.02, 0.24, 0.02);
+    torchGeometry.rotateY(Math.PI / 4);
+    torchGeometry.rotateZ(Math.PI / 4);
 
-    const body = new THREE.Mesh(
-      playerGeometry,
-      new THREE.MeshStandardMaterial({ color: "brown" }),
-    );
+    const body = new THREE.Mesh(torchGeometry, resources.data.materials.torch);
     body.receiveShadow = true;
     body.position.z = 0.01;
     return body;

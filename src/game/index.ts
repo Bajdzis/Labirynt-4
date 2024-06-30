@@ -41,6 +41,13 @@ resources
       );
     });
 
+    window.setProgressBar("Kompilowanie shaderów...", 75);
+    await waitForEnd(() => {
+      renderer.render(
+        new Mesh(wallOutlineGeometry, resources.data.materials.torch),
+      );
+    });
+
     window.setProgressBar("Kompilowanie shaderów...", 80);
     await waitForEnd(() => {
       renderer.render(

@@ -1,5 +1,6 @@
 import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
 import { KeyboardCode } from "../IO/Keyboard";
+import { Key } from "../ThreeJsBoard/Key";
 import { ThreeJsBoard } from "../ThreeJsBoard/ThreeJsBoard";
 import { BoardObject } from "./BoardObject";
 
@@ -19,6 +20,7 @@ export class Player implements BoardObject {
   public angle = 0.0;
   protected board: ThreeJsBoard | null = null;
   protected numberOfTorches: number = 2;
+  private doorKeys: string[] = [];
 
   constructor(
     private moveBehavior: ControlBehavior<{ x: number; y: number }>,
@@ -84,6 +86,10 @@ export class Player implements BoardObject {
 
   canPlayerGrabTorch() {
     return this.numberOfTorches < 2;
+  }
+
+  pickKey(key: Key) {
+    this.doorKeys.push(key.name);
   }
 
   grabTorch() {

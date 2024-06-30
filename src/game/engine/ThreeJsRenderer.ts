@@ -12,7 +12,6 @@ export class ThreeJsRenderer {
 
   constructor() {
     this.scene = new THREE.Scene();
-    this.scene.add(lightsHelper.getObject());
     const main = document.getElementById("main");
     if (!main)
       throw new Error(`No element with id 'main' found in the document`);
@@ -31,6 +30,9 @@ export class ThreeJsRenderer {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.shadowMap.autoUpdate = true;
 
+    this.scene.add(
+      lightsHelper.getObject(this.renderer.capabilities.maxTextures),
+    );
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.domElement.style.position = "absolute";
     this.labelRenderer.domElement.style.top = "0px";

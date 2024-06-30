@@ -32,7 +32,11 @@ export class Resources {
     counter: (promise: Promise<Material>) => Promise<Material>,
   ) {
     const wall = counter(this.threeJsMaterialLoader.load("wall"));
+    const torch = counter(this.threeJsMaterialLoader.load("torch"));
     const floor = counter(this.threeJsMaterialLoader.load("floor"));
+    const door = counter(this.threeJsMaterialLoader.load("door"));
+    const key = counter(this.threeJsMaterialLoader.load("key"));
+    const cauldron = counter(this.threeJsMaterialLoader.load("cauldron"));
     const floorShadow = counter(this.threeJsMaterialLoader.load("floorShadow"));
     const playerl = counter(this.threeJsMaterialLoader.load("player1"));
     const player2 = counter(this.threeJsMaterialLoader.load("player2"));
@@ -40,7 +44,11 @@ export class Resources {
 
     return {
       wall: await wall,
+      torch: await torch,
       floor: await floor,
+      door: await door,
+      key: await key,
+      cauldron: await cauldron,
       floorShadow: await floorShadow,
       player1: await playerl,
       player2: await player2,
@@ -66,6 +74,9 @@ export class Resources {
     const torch = counter(
       this.audioLoader.load("resources/sounds/interactions/torch.mp3", "1"),
     );
+    const key = counter(
+      this.audioLoader.load("resources/sounds/interactions/key.mp3", "1"),
+    );
 
     return {
       theme: await theme,
@@ -73,6 +84,7 @@ export class Resources {
       switch: await switchAudio,
       teleport: await teleport,
       torch: await torch,
+      key: await key,
     };
   }
 
