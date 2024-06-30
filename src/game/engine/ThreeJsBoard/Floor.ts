@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { Resources } from "../Resources/Resources";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
+import { BoardObject, Rectangle } from "../Board/BoardObject";
 const WIDTH_FLOOR = 300;
 const HEIGHT_FLOOR = 300;
 
-export class Floor implements ThreeJsBoardObject {
+export class Floor extends BoardObject implements Rectangle {
   private object: THREE.Group;
   public x = 0;
   public y = 0;
@@ -12,6 +12,7 @@ export class Floor implements ThreeJsBoardObject {
   public readonly height = 0.32 * HEIGHT_FLOOR;
 
   constructor(resources: Resources) {
+    super();
     this.object = new THREE.Group();
 
     const floor = new THREE.Mesh(
@@ -35,7 +36,4 @@ export class Floor implements ThreeJsBoardObject {
   getObject() {
     return this.object;
   }
-
-  update(): void {}
-  setBoard(): void {}
 }

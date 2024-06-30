@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Tooltip } from "./Tooltip";
 import { boxParticles } from "../Particles/instances";
+import { BoardObject, Rectangle } from "../Board/BoardObject";
 
-export class Destination implements ThreeJsBoardObject {
+export class Destination extends BoardObject implements Rectangle {
   private group: THREE.Group;
   private tip: Tooltip;
   private destroyParticles: (() => void)[];
@@ -14,12 +14,14 @@ export class Destination implements ThreeJsBoardObject {
   setBoard(): void {}
 
   constructor(x: number, y: number) {
+    super();
     this.x = x;
     this.y = y;
     this.width = 0.32;
     this.height = 0.32;
     this.group = new THREE.Group();
-
+    this.group.position.x = this.x;
+    this.group.position.y = this.y;
     this.tip = new Tooltip("Teleport", 0, -0.16);
     this.group.add(this.tip.getObject());
 
@@ -42,11 +44,6 @@ export class Destination implements ThreeJsBoardObject {
 
   getObject() {
     return this.group;
-  }
-
-  update(delta: number) {
-    this.group.position.x = this.x;
-    this.group.position.y = this.y;
   }
 
   createTorchMesh() {

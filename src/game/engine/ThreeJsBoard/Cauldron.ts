@@ -1,22 +1,22 @@
 import * as THREE from "three";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { resources } from "../Resources/Resources";
 import { Light } from "./Light";
 import { boxParticles } from "../Particles/instances";
+import { BoardObject, Rectangle } from "../Board/BoardObject";
 
-export class Cauldron implements ThreeJsBoardObject {
+export class Cauldron extends BoardObject implements Rectangle {
   private group: THREE.Group;
   private isActive: boolean = false;
   height: number;
   width: number;
   x: number;
   y: number;
-  setBoard(): void {}
 
   private destroyParticles: (() => void)[];
 
   private light: Light | null;
   constructor(x: number, y: number) {
+    super();
     this.light = null;
 
     this.x = x;
@@ -24,6 +24,8 @@ export class Cauldron implements ThreeJsBoardObject {
     this.width = 0.32;
     this.height = 0.32;
     this.group = new THREE.Group();
+    this.group.position.x = x;
+    this.group.position.y = y;
     this.destroyParticles = [];
 
     this.group.add(this.createMesh());
@@ -71,11 +73,6 @@ export class Cauldron implements ThreeJsBoardObject {
   }
   getObject() {
     return this.group;
-  }
-
-  update(delta: number) {
-    this.group.position.x = this.x;
-    this.group.position.y = this.y;
   }
 
   createMesh() {

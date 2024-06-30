@@ -1,11 +1,10 @@
 import * as THREE from "three";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Tooltip } from "./Tooltip";
 import { resources } from "../Resources/Resources";
-import { BoardObject } from "../Board/BoardObject";
 import { objectContainsOther } from "../Utils/math/objectContainsOther";
+import { BoardObject, Rectangle } from "../Board/BoardObject";
 
-export class Door implements ThreeJsBoardObject {
+export class Door extends BoardObject implements Rectangle {
   private group: THREE.Group;
   private left: THREE.Mesh;
   private right: THREE.Mesh;
@@ -19,6 +18,7 @@ export class Door implements ThreeJsBoardObject {
   setBoard(): void {}
 
   constructor(x: number, y: number, keyName: string) {
+    super();
     this.x = x;
     this.y = y;
     this.keyName = keyName;
@@ -37,7 +37,7 @@ export class Door implements ThreeJsBoardObject {
     this.group.add(this.right);
   }
 
-  canMoveThrough(rect: Omit<BoardObject, "update">): boolean {
+  canMoveThrough(rect: Rectangle): boolean {
     if (this.isOpen) {
       return true;
     }

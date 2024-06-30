@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { Player } from "../Board/Player";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Light } from "./Light";
 import { resources } from "../Resources/Resources";
 import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
@@ -9,10 +8,7 @@ import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
 import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
 import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
 
-export abstract class ThreeJsPlayer
-  extends Player
-  implements ThreeJsBoardObject
-{
+export abstract class ThreeJsPlayer extends Player {
   private group: THREE.Group;
 
   private light: Light;

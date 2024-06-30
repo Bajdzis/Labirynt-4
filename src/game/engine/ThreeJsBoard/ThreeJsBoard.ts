@@ -7,7 +7,6 @@ import {
   ThreeJsPlayer,
 } from "./ThreeJsPlayer";
 import { ThreeJsWall } from "./ThreeJsWall";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Player } from "../Board/Player";
 import { objectContainsOther } from "../Utils/math/objectContainsOther";
 import { Torch } from "./Torch";
@@ -20,6 +19,7 @@ import { Destination } from "./Destination";
 import { Key } from "./Key";
 import { Door } from "./Door";
 import { Cauldron } from "./Cauldron";
+import { BoardObject } from "../Board/BoardObject";
 
 type GameEvent =
   | {
@@ -58,7 +58,7 @@ type GameEvent =
 
 export class ThreeJsBoard {
   private scene: THREE.Scene;
-  private objects: ThreeJsBoardObject[] = [];
+  private objects: BoardObject[] = [];
   private wallsGroup: ThreeJsWalls;
   private camera: GameCamera = new GameCamera();
   private addSecondPlayerBehavior: ControlBehavior<true> = new ControlBehavior([
@@ -302,7 +302,7 @@ export class ThreeJsBoard {
     this.camera.setAreasToShow(playersAreaToShow);
   }
 
-  private addObject(object: ThreeJsBoardObject) {
+  private addObject(object: BoardObject) {
     object.update(0);
     this.objects.push(object);
     const object3D = object.getObject();
@@ -310,7 +310,7 @@ export class ThreeJsBoard {
     object.setBoard(this);
   }
 
-  private removeObject(object: ThreeJsBoardObject) {
+  private removeObject(object: BoardObject) {
     this.objects = this.objects.filter((obj) => obj !== object);
     object.remove && object.remove();
     const object3D = object.getObject();

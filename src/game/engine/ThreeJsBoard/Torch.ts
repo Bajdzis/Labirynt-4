@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { Light } from "./Light";
 import { Tooltip } from "./Tooltip";
 import { boxParticles } from "../Particles/instances";
 import { resources } from "../Resources/Resources";
+import { BoardObject, Rectangle } from "../Board/BoardObject";
 
-export class Torch implements ThreeJsBoardObject {
+export class Torch extends BoardObject implements Rectangle {
   private group: THREE.Group;
   private light: Light;
   private tip: Tooltip;
@@ -17,6 +17,7 @@ export class Torch implements ThreeJsBoardObject {
   setBoard(): void {}
 
   constructor(x: number, y: number) {
+    super();
     this.x = x;
     this.y = y;
     this.width = 0.24;

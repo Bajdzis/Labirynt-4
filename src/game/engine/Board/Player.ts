@@ -1,8 +1,7 @@
 import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
 import { KeyboardCode } from "../IO/Keyboard";
 import { Key } from "../ThreeJsBoard/Key";
-import { ThreeJsBoard } from "../ThreeJsBoard/ThreeJsBoard";
-import { BoardObject } from "./BoardObject";
+import { BoardObject, Rectangle } from "./BoardObject";
 
 export interface PlayerKeys {
   top: KeyboardCode;
@@ -12,13 +11,12 @@ export interface PlayerKeys {
   action: KeyboardCode;
 }
 
-export class Player implements BoardObject {
+export class Player extends BoardObject implements Rectangle {
   public x: number;
   public y: number;
   public readonly width = 0.2;
   public readonly height = 0.2;
   public angle = 0.0;
-  protected board: ThreeJsBoard | null = null;
   protected numberOfTorches: number = 2;
   private doorKeys: string[] = [];
 
@@ -26,12 +24,9 @@ export class Player implements BoardObject {
     private moveBehavior: ControlBehavior<{ x: number; y: number }>,
     private actionBehavior: ControlBehavior<true>,
   ) {
+    super();
     this.x = 0.06;
     this.y = 0.06;
-  }
-
-  setBoard(board: ThreeJsBoard): void {
-    this.board = board;
   }
 
   setPosition(x: number, y: number) {

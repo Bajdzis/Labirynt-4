@@ -1,9 +1,8 @@
 import * as THREE from "three";
 import { Wall } from "../Board/Wall";
-import { ThreeJsBoardObject } from "./ThreeJsBoardObject";
 import { random } from "../Utils/math/random";
 
-export class ThreeJsWall extends Wall implements ThreeJsBoardObject {
+export class ThreeJsWall extends Wall {
   private matrix: THREE.Matrix4;
   private matrixOutline: THREE.Matrix4;
 

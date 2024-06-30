@@ -1,9 +1,6 @@
-import { BoardObject } from "../../Board/BoardObject";
+import { Rectangle } from "../../Board/BoardObject";
 
-export const objectContainsOther = (
-  object1: Omit<BoardObject, "update">,
-  object2: Omit<BoardObject, "update">,
-) => {
+export const objectContainsOther = (object1: Rectangle, object2: Rectangle) => {
   return (
     object1.x < object2.x + object2.width &&
     object1.x + object1.width > object2.x &&
