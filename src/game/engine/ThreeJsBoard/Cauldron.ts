@@ -2,11 +2,18 @@ import * as THREE from "three";
 import { resources } from "../Resources/Resources";
 import { Light } from "./Light";
 import { boxParticles } from "../Particles/instances";
-import { BoardObject, Rectangle } from "../Board/BoardObject";
+import {
+  BoardObject,
+  InteractiveObject,
+  Rectangle,
+} from "../Board/BoardObject";
 
-export class Cauldron extends BoardObject implements Rectangle {
+export class Cauldron
+  extends BoardObject
+  implements Rectangle, InteractiveObject
+{
   private group: THREE.Group;
-  private isActive: boolean = false;
+  private isActivated: boolean = false;
   height: number;
   width: number;
   x: number;
@@ -32,7 +39,14 @@ export class Cauldron extends BoardObject implements Rectangle {
   }
 
   activate() {
-    this.isActive = true;
+    if (this.isActivated) {
+      return;
+    }
+    if (this.light) {
+      this.light.remove();
+      this.light = null;
+    }
+    this.isActivated = true;
     if (this.light === null) {
       this.light = new Light(6, false);
       this.light.changeLightColor("lightblue", 0.75);
@@ -56,21 +70,41 @@ export class Cauldron extends BoardObject implements Rectangle {
   }
 
   deactivate() {
-    this.isActive = false;
+    if (this.isActivated === false) {
+      return;
+    }
+    this.isActivated = false;
     this.destroyParticles.forEach((destroy) => destroy());
-    if (this.light) {
-      this.light.remove();
-      this.light = null;
+  }
+
+  update(delta: number): void {
+    if (this.isActivated) {
+      this.light?.update(delta);
+    } else {
+      if (this.light) {
+        const currentLightSize = this.light?.getSize();
+        this.light.changeLightSize(currentLightSize - 0.002 * delta);
+        this.light.changeLightColor("lightblue", currentLightSize / 12);
+        if (currentLightSize < 0) {
+          this.light.remove();
+          this.light = null;
+        }
+      }
     }
   }
 
+  isActive() {
+    return this.isActivated;
+  }
+
   toggle() {
-    if (this.isActive) {
+    if (this.isActivated) {
       this.deactivate();
     } else {
       this.activate();
     }
   }
+
   getObject() {
     return this.group;
   }

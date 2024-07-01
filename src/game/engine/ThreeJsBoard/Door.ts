@@ -2,14 +2,18 @@ import * as THREE from "three";
 import { Tooltip } from "./Tooltip";
 import { resources } from "../Resources/Resources";
 import { objectContainsOther } from "../Utils/math/objectContainsOther";
-import { BoardObject, Rectangle } from "../Board/BoardObject";
+import {
+  BoardObject,
+  InteractiveObject,
+  Rectangle,
+} from "../Board/BoardObject";
 
-export class Door extends BoardObject implements Rectangle {
+export class Door extends BoardObject implements Rectangle, InteractiveObject {
   private group: THREE.Group;
   private left: THREE.Mesh;
   private right: THREE.Mesh;
   private tip: Tooltip;
-  private isOpen: boolean = false;
+  private isActivated: boolean = false;
   height: number;
   width: number;
   x: number;
@@ -38,7 +42,7 @@ export class Door extends BoardObject implements Rectangle {
   }
 
   canMoveThrough(rect: Rectangle): boolean {
-    if (this.isOpen) {
+    if (this.isActivated) {
       return true;
     }
     if (
@@ -58,19 +62,23 @@ export class Door extends BoardObject implements Rectangle {
     return true;
   }
 
-  open() {
-    this.isOpen = true;
+  activate() {
+    this.isActivated = true;
   }
 
-  close() {
-    this.isOpen = false;
+  deactivate() {
+    this.isActivated = false;
+  }
+
+  isActive() {
+    return this.isActivated;
   }
 
   toggle() {
-    if (this.isOpen) {
-      this.close();
+    if (this.isActivated) {
+      this.deactivate();
     } else {
-      this.open();
+      this.activate();
     }
   }
   getObject() {
@@ -81,10 +89,10 @@ export class Door extends BoardObject implements Rectangle {
     this.group.position.x = this.x;
     this.group.position.y = this.y;
     const speed = (0.001875 / 3) * delta;
-    if (this.isOpen && this.right.position.x !== 0.32) {
+    if (this.isActivated && this.right.position.x !== 0.32) {
       this.right.position.x = Math.min(0.32, this.right.position.x + speed);
       this.left.position.x = -this.right.position.x;
-    } else if (!this.isOpen && this.right.position.x !== 0.16) {
+    } else if (!this.isActivated && this.right.position.x !== 0.16) {
       this.right.position.x = Math.max(0.16, this.right.position.x - speed);
       this.left.position.x = -this.right.position.x;
     }

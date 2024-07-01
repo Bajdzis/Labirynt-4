@@ -20,6 +20,8 @@ import { Key } from "./Key";
 import { Door } from "./Door";
 import { Cauldron } from "./Cauldron";
 import { BoardObject } from "../Board/BoardObject";
+import { TimerControlTrigger } from "./Triggers/TimerControlTrigger";
+import { TransmitControlTrigger } from "./Triggers/TransmitControlTrigger";
 
 type GameEvent =
   | {
@@ -121,8 +123,6 @@ export class ThreeJsBoard {
         );
         if (somePlayerContains) {
           object.activate();
-        } else {
-          object.deactivate();
         }
       }
 
@@ -258,8 +258,17 @@ export class ThreeJsBoard {
     resources.data.levels[level].wallsPositions.forEach(([x, y]) => {
       this.addWall(x, y);
     });
+    let firstCaldron: Cauldron | null = null;
     resources.data.levels[level].slotsPositions.forEach(([x, y]) => {
-      this.addObject(new Cauldron(x * 0.32, y * 0.32));
+      const obj = new Cauldron(x * 0.32, y * 0.32);
+      if (firstCaldron === null) {
+        firstCaldron = obj;
+      } else {
+        this.addObject(new TransmitControlTrigger(firstCaldron, obj, "both"));
+      }
+
+      this.addObject(new TimerControlTrigger(obj, 20000));
+      this.addObject(obj);
     });
 
     this.addObject(

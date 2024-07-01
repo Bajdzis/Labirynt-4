@@ -14,6 +14,12 @@ export abstract class BoardObject {
   update(delta: number): void {}
 }
 
+export interface InteractiveObject {
+  isActive(): boolean;
+  activate(): void;
+  deactivate(): void;
+}
+
 export interface Rectangle {
   x: number;
   y: number;

@@ -5,11 +5,11 @@ import { lightsHelper } from "./LightsHelper";
 
 export class Light {
   private light: THREE.PointLight;
-
+  private size;
   private lightTimer: Timer;
   constructor(size: number, shadow = true) {
     this.light = this.createLight(size, shadow);
-
+    this.size = size;
     this.lightTimer = new Timer(150, () => {
       this.light.position.x = random(-0.01, 0.01);
       this.light.position.y = random(-0.01, 0.01);
@@ -26,6 +26,7 @@ export class Light {
   }
 
   createLight(size: number, shadow: boolean) {
+    this.size = size;
     const light = lightsHelper[
       shadow ? "getPointLightWithShadow" : "getPointLightWithoutShadow"
     ]("orange", 0.5, 0.32 * size);
@@ -43,8 +44,13 @@ export class Light {
   }
 
   changeLightSize(size: number) {
+    this.size = size;
     this.light.distance = 0.32 * size;
     this.light.shadow.camera.far = 0.32 * size - 1;
+  }
+
+  getSize() {
+    return this.size;
   }
 
   remove() {
