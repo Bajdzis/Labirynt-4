@@ -5,6 +5,7 @@ import { ThreeJsMaterialLoader } from "./ThreeJsMaterialLoader";
 import { Level, LevelLoader } from "./LevelLoader";
 import { AudioLoader, GameAudio } from "./AudioLoader";
 import { Material } from "three";
+import { XMLLoader } from "./XMLLoader";
 
 export class Resources {
   private threeJsTextureLoader = new ThreeJsTextureLoader();
@@ -14,7 +15,11 @@ export class Resources {
     textureLoader: this.threeJsTextureLoader,
     playerImageLoader: this.playerImageLoader,
   });
-  private levelLoader = new LevelLoader({ imageLoader: this.imageLoader });
+  private xmlLoader = new XMLLoader();
+  private levelLoader = new LevelLoader({
+    imageLoader: this.imageLoader,
+    xmlLoader: this.xmlLoader,
+  });
   private audioLoader = new AudioLoader();
 
   private _data:
@@ -92,8 +97,8 @@ export class Resources {
     counter: (promise: Promise<Level>) => Promise<Level>,
   ) {
     return Promise.all([
-      counter(this.levelLoader.load("resources/level1.png")),
-      counter(this.levelLoader.load("resources/level2.png")),
+      counter(this.levelLoader.load("resources/level1.xml")),
+      counter(this.levelLoader.load("resources/level2.xml")),
     ]);
   }
 

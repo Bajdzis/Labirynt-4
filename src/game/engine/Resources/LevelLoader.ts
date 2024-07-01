@@ -1,8 +1,10 @@
 import { ResourcesLoader } from "./ResourcesLoader";
 import { ImageLoader } from "./ImageLoader";
+import { XMLLoader } from "./XMLLoader";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
+  xmlLoader: XMLLoader;
 }
 
 export interface Level {
@@ -15,7 +17,15 @@ export interface Level {
 export class LevelLoader extends ResourcesLoader<Level> {
   constructor(private props: LevelLoaderProps) {
     const loader = async (url: string) => {
-      const levelImage = await props.imageLoader.load(url);
+      const boardDocument = await props.xmlLoader.load(url);
+      if (boardDocument.documentElement.nodeName !== "board") {
+        throw new Error("Invalid level format");
+      }
+      const levelImage = await props.imageLoader.load(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        boardDocument.documentElement.attributes.src.value,
+      );
 
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
