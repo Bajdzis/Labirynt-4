@@ -87,6 +87,10 @@ export class Player extends BoardObject implements Rectangle {
     this.doorKeys.push(key.name);
   }
 
+  haveKey(keyName: string) {
+    return this.doorKeys.includes(keyName);
+  }
+
   grabTorch() {
     this.numberOfTorches++;
   }

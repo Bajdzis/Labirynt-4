@@ -20,6 +20,15 @@ export interface InteractiveObject {
   deactivate(): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isInteractiveObject = (obj: any): obj is InteractiveObject => {
+  return (
+    typeof obj["isActive"] === "function" &&
+    typeof obj["activate"] === "function" &&
+    typeof obj["deactivate"] === "function"
+  );
+};
+
 export interface Rectangle {
   x: number;
   y: number;

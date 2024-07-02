@@ -21,7 +21,12 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
   keyName: string;
   setBoard(): void {}
 
-  constructor(x: number, y: number, keyName: string) {
+  constructor(
+    x: number,
+    y: number,
+    keyName: string,
+    private position: "vertical" | "horizontal" = "horizontal",
+  ) {
     super();
     this.x = x;
     this.y = y;
@@ -29,8 +34,11 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     this.width = 0.32;
     this.height = 0.32;
     this.group = new THREE.Group();
+    if (position === "vertical") {
+      this.group.rotation.z = Math.PI / 2;
+    }
 
-    this.tip = new Tooltip("Drzwi", 0, -0.16);
+    this.tip = new Tooltip("Drzwi", 0, -0.48);
     this.group.add(this.tip.getObject());
 
     this.left = this.createMesh();
@@ -46,6 +54,7 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
       return true;
     }
     if (
+      this.position === "horizontal" &&
       objectContainsOther(
         {
           height: 0.11,
@@ -57,17 +66,36 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
       )
     ) {
       return false;
+    } else if (
+      this.position === "vertical" &&
+      objectContainsOther(
+        {
+          height: this.height,
+          width: 0.11,
+          x: this.x + 0.05,
+          y: this.y,
+        },
+        rect,
+      )
+    ) {
+      return false;
     }
 
     return true;
   }
 
   activate() {
-    this.isActivated = true;
+    if (!this.isActivated) {
+      this.isActivated = true;
+      resources.data.sounds.door.play();
+    }
   }
 
   deactivate() {
-    this.isActivated = false;
+    if (this.isActivated) {
+      this.isActivated = false;
+      resources.data.sounds.door.play();
+    }
   }
 
   isActive() {

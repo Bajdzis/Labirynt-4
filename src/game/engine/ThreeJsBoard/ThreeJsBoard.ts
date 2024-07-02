@@ -84,6 +84,10 @@ export class ThreeJsBoard {
     this.loadLevel(0);
   }
 
+  eachObject(callback: (object: BoardObject) => void) {
+    this.objects.forEach(callback);
+  }
+
   update(delta: number) {
     if (!this.secondPlayerAlreadyAdded) {
       this.addSecondPlayerBehavior.update(delta);
@@ -235,8 +239,9 @@ export class ThreeJsBoard {
       event.player.pickKey(event.key);
       this.removeObject(event.key);
     } else if (event.name === "openDoor") {
-      resources.data.sounds.door.play();
-      event.door.toggle();
+      if (event.player.haveKey(event.door.keyName)) {
+        event.door.toggle();
+      }
     } else if (event.name === "useDestination") {
       resources.data.sounds.teleport.play();
       this.loadLevel(1);
@@ -258,18 +263,9 @@ export class ThreeJsBoard {
     resources.data.levels[level].wallsPositions.forEach(([x, y]) => {
       this.addWall(x, y);
     });
-    let firstCaldron: Cauldron | null = null;
-    resources.data.levels[level].slotsPositions.forEach(([x, y]) => {
-      const obj = new Cauldron(x * 0.32, y * 0.32);
-      if (firstCaldron === null) {
-        firstCaldron = obj;
-      } else {
-        this.addObject(new TransmitControlTrigger(firstCaldron, obj, "both"));
-      }
 
-      this.addObject(new TimerControlTrigger(obj, 20000));
-      this.addObject(obj);
-    });
+    const elements = resources.data.levels[level].createAdditionalElements();
+    elements.forEach((element) => this.addObject(element));
 
     this.addObject(
       new Destination(

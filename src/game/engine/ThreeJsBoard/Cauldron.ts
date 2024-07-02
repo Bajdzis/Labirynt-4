@@ -47,26 +47,6 @@ export class Cauldron
       this.light = null;
     }
     this.isActivated = true;
-    if (this.light === null) {
-      this.light = new Light(6, false);
-      this.light.changeLightColor("lightblue", 0.75);
-      this.group.add(this.light.getObject());
-      this.destroyParticles = [
-        boxParticles.addGroupOfParticles({
-          colorStart: new THREE.Color("lightblue"),
-          colorStop: new THREE.Color("blue"),
-          maxLife: 2000,
-          numberOfParticles: 100,
-          state: "active",
-          type: {
-            type: "circle",
-            radius: 0.08,
-            x: this.x,
-            y: this.y,
-          },
-        }),
-      ];
-    }
   }
 
   deactivate() {
@@ -79,6 +59,26 @@ export class Cauldron
 
   update(delta: number): void {
     if (this.isActivated) {
+      if (this.light === null) {
+        this.light = new Light(6, false);
+        this.light.changeLightColor("lightblue", 0.75);
+        this.group.add(this.light.getObject());
+        this.destroyParticles = [
+          boxParticles.addGroupOfParticles({
+            colorStart: new THREE.Color("lightblue"),
+            colorStop: new THREE.Color("blue"),
+            maxLife: 2000,
+            numberOfParticles: 100,
+            state: "active",
+            type: {
+              type: "circle",
+              radius: 0.08,
+              x: this.x,
+              y: this.y,
+            },
+          }),
+        ];
+      }
       this.light?.update(delta);
     } else {
       if (this.light) {

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <board src="resources/level1.png">
     <!-- group 1 -->
-    <cauldron id="cauldron1" slot="0" >
-        <timerControlTrigger objectId="cauldron1" time="20000" />
+    <!-- <cauldron id="cauldron1" slot="0" >
+        <timerControlTrigger objectId="cauldron1" time="2000" />
         <cauldron id="cauldron2" slot="1" >
-            <timerControlTrigger objectId="cauldron2" time="20000" />
-            <transmitControlTrigger sourceId="cauldron1" targetId="cauldron2" action="both" />
+            <timerControlTrigger objectId="cauldron2" time="4000" />
+            <transmitControlTrigger sourceId="cauldron1" targetId="cauldron2" action="activated" />
         </cauldron>
-    </cauldron>
+    </cauldron> -->
+    <key slot="0" name="key1"/>
+    <door slot="1" keyName="key1" position="vertical" />
 </board>

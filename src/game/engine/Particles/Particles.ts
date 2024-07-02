@@ -48,6 +48,9 @@ export class Particles {
     this.updateInstancedMesh();
 
     return () => {
+      if (groupWithParticles.state === "stop") {
+        return;
+      }
       groupWithParticles.state = "stop";
 
       setTimeout(() => {
