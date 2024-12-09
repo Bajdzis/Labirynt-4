@@ -6,11 +6,6 @@ class LightsHelper {
   constructor() {}
 
   createLights(quantity: number, castShadow = false) {
-    console.log({
-      pointLightsNum: this.pointLights.length,
-      quantity,
-      castShadow,
-    });
     for (let i = 0; i < quantity; i++) {
       const light = new THREE.PointLight("white", 0, 0);
       if (castShadow) {
@@ -21,15 +16,20 @@ class LightsHelper {
       this.pointLights.push(light);
       this.group.add(light);
     }
+    console.log({
+      pointLightsNum: this.pointLights.length,
+      quantity,
+      castShadow,
+    });
   }
 
   getObject(maxTexturesCapabilities: number) {
     if (this.pointLights.length === 0) {
       this.createLights(
-        Math.min(Math.floor(maxTexturesCapabilities / 2), 16),
+        Math.min(Math.floor(maxTexturesCapabilities / 2), 2),
         true,
       );
-      this.createLights(6, false);
+      this.createLights(5, false);
     }
 
     return this.group;

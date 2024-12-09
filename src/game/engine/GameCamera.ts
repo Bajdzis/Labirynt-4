@@ -54,10 +54,7 @@ export class GameCamera {
   }
 
   setAreasToShow(areas: THREE.Box2[]) {
-    const wholeArea = new THREE.Box2(
-      new THREE.Vector2(0, 0),
-      new THREE.Vector2(0, 0),
-    );
+    const wholeArea = areas[0].clone();
 
     areas.forEach((area) => {
       wholeArea.expandByPoint(area.min);

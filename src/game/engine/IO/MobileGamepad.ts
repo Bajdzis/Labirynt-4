@@ -62,33 +62,47 @@ class MobileGamepad {
     joystickBackground.style.pointerEvents = "none";
     joystickBackground.appendChild(joystickElement);
     const startPoint = { x: 0, y: 0 };
-    leftArea.addEventListener("touchstart", (e) => {
-      const touch = this.getFirstTouchInsideRect(e.touches, rect);
-      if (!touch) return;
-      startPoint.x = touch.clientX;
-      startPoint.y = touch.clientY;
-      joystickBackground.style.left = `${touch.clientX - 50}px`;
-      joystickBackground.style.top = `${touch.clientY - 50}px`;
-    });
-    leftArea.addEventListener("touchmove", (e) => {
-      const touch = this.getFirstTouchInsideRect(e.touches, rect);
-      if (!touch) return;
-      const currentPoint = { x: touch.clientX, y: touch.clientY };
-      const deltaX = currentPoint.x - startPoint.x;
-      const deltaY = currentPoint.y - startPoint.y;
-      const distance = Math.sqrt(Math.abs(deltaX) ** 2 + Math.abs(deltaY) ** 2);
-      this.axisX = Math.min(1, Math.max(-1, deltaX / 30));
-      this.axisY = Math.min(1, Math.max(-1, deltaY / 30)) * -1;
+    leftArea.addEventListener(
+      "touchstart",
+      (e) => {
+        const touch = this.getFirstTouchInsideRect(e.touches, rect);
+        if (!touch) return;
+        startPoint.x = touch.clientX;
+        startPoint.y = touch.clientY;
+        joystickBackground.style.left = `${touch.clientX - 50}px`;
+        joystickBackground.style.top = `${touch.clientY - 50}px`;
+      },
+      {
+        passive: true,
+      },
+    );
+    leftArea.addEventListener(
+      "touchmove",
+      (e) => {
+        const touch = this.getFirstTouchInsideRect(e.touches, rect);
+        if (!touch) return;
+        const currentPoint = { x: touch.clientX, y: touch.clientY };
+        const deltaX = currentPoint.x - startPoint.x;
+        const deltaY = currentPoint.y - startPoint.y;
+        const distance = Math.sqrt(
+          Math.abs(deltaX) ** 2 + Math.abs(deltaY) ** 2,
+        );
+        this.axisX = Math.min(1, Math.max(-1, deltaX / 30));
+        this.axisY = Math.min(1, Math.max(-1, deltaY / 30)) * -1;
 
-      if (distance > 30) {
-        const angle = Math.atan2(deltaY, deltaX);
-        joystickElement.style.left = `${Math.cos(angle) * 40}px`;
-        joystickElement.style.top = `${Math.sin(angle) * 40}px`;
-      } else {
-        joystickElement.style.left = `${deltaX}px`;
-        joystickElement.style.top = `${deltaY}px`;
-      }
-    });
+        if (distance > 30) {
+          const angle = Math.atan2(deltaY, deltaX);
+          joystickElement.style.left = `${Math.cos(angle) * 40}px`;
+          joystickElement.style.top = `${Math.sin(angle) * 40}px`;
+        } else {
+          joystickElement.style.left = `${deltaX}px`;
+          joystickElement.style.top = `${deltaY}px`;
+        }
+      },
+      {
+        passive: true,
+      },
+    );
     const stop = () => {
       joystickElement.style.left = "0px";
       joystickElement.style.top = "0px";
@@ -125,14 +139,20 @@ class MobileGamepad {
     button.style.backgroundColor = "rgba(255,255,255,0.5)";
     button.style.pointerEvents = "none";
 
-    rightArea.addEventListener("touchstart", (e) => {
-      const touch = this.getFirstTouchInsideRect(e.touches, rect);
-      if (!touch) return;
-      button.style.left = `${touch.clientX - 25}px`;
-      button.style.top = `${touch.clientY - 25}px`;
-      this.actionButtonState = true;
-      button.style.backgroundColor = "rgba(255,255,255,0.75)";
-    });
+    rightArea.addEventListener(
+      "touchstart",
+      (e) => {
+        const touch = this.getFirstTouchInsideRect(e.touches, rect);
+        if (!touch) return;
+        button.style.left = `${touch.clientX - 25}px`;
+        button.style.top = `${touch.clientY - 25}px`;
+        this.actionButtonState = true;
+        button.style.backgroundColor = "rgba(255,255,255,0.75)";
+      },
+      {
+        passive: true,
+      },
+    );
 
     const stop = () => {
       this.actionButtonState = false;

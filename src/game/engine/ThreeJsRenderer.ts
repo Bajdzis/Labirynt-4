@@ -23,7 +23,10 @@ export class ThreeJsRenderer {
       1000,
     );
 
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      alpha: false,
+      preserveDrawingBuffer: false,
+    });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setClearColor(0x000000);
     this.renderer.shadowMap.enabled = true;

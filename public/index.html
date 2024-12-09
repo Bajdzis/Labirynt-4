@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
     <title>Gra Labirynt 4</title>
     <style>
         body {
@@ -25,6 +25,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            color: #fff;
+            font-size: 32px;
+            font-family: sans-serif;
         }
         #splashScreen {
             --progress : 0%;
@@ -93,8 +96,14 @@
                 }
             }
 
+            window.showTextInsteadOfProgressBar = () => {
+                if(loader) {
+                    loader.innerHTML = '<span>Nacisnij dowolny klawisz / dotknij ekran</span>';
+                }
+            }
+
             window.disposeProgressBar = () => {
-                loader.remove();
+                loader && loader.remove();
                 loader = null;
                 splashScreen = null;
             }

@@ -8,6 +8,7 @@ declare global {
   interface Window {
     setProgressBar: (msg: string, value: number) => void;
     disposeProgressBar: () => void;
+    showTextInsteadOfProgressBar: () => void;
   }
 }
 
@@ -60,12 +61,48 @@ resources
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 90);
-    await waitForEnd(() => {
+    window.showTextInsteadOfProgressBar();
+
+    let isRunning = false;
+
+    const runMobile = async () => {
+      window.removeEventListener("touchend", runMobile);
+
+      try {
+        await document.documentElement.requestFullscreen();
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (screen.orientation.lock) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          screen.orientation.lock("landscape");
+        }
+      } catch (error) {
+        console.warn(error);
+      }
+
+      run();
+    };
+
+    const run = async () => {
+      if (isRunning) {
+        return;
+      }
+      isRunning = true;
+      window.removeEventListener("mousedown", run);
+      window.removeEventListener("keydown", run);
+      window.disposeProgressBar();
+
       const game = new MyGame(renderer);
 
       game.run();
+      resources.data.sounds.theme.play();
+    };
+    window.addEventListener("touchend", runMobile, {
+      passive: true,
     });
-    window.disposeProgressBar();
+    window.addEventListener("mousedown", run);
+    window.addEventListener("keydown", run);
   });
 
 function waitForEnd(callback: () => void) {

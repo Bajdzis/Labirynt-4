@@ -296,8 +296,15 @@ export class ThreeJsBoard {
       if (object instanceof ThreeJsPlayer) {
         acc.push(
           new THREE.Box2(
-            new THREE.Vector2(object.x - 0.64, object.y - 0.64),
-            new THREE.Vector2(object.x + 0.64, object.y + 0.64),
+            new THREE.Vector2(object.x - 1.28, object.y - 1.28),
+            new THREE.Vector2(object.x + 1.28, object.y + 1.28),
+          ),
+        );
+      } else if (object instanceof Destination) {
+        acc.push(
+          new THREE.Box2(
+            new THREE.Vector2(object.x - 0.32, object.y - 0.32),
+            new THREE.Vector2(object.x + 0.32, object.y + 0.32),
           ),
         );
       }

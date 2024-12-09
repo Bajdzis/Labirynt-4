@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<board src="resources/level4.png">
+    <cauldron slot="0" />
+    <cauldron slot="1" />
+    <cauldron slot="2" />
+    <cauldron slot="3" />
+    <cauldron slot="4" />
+    <cauldron slot="5" />
+    <cauldron slot="6" />
+</board>
