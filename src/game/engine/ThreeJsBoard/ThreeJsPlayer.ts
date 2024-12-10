@@ -8,6 +8,8 @@ import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
 import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
 import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
 
+const ROTATION_VECTOR = new THREE.Vector3(0, 0, 1);
+
 export abstract class ThreeJsPlayer extends Player {
   private group: THREE.Group;
 
@@ -41,14 +43,27 @@ export abstract class ThreeJsPlayer extends Player {
     if (this.numberOfTorches !== 0) {
       this.light.update(delta);
     }
+    this.group.setRotationFromAxisAngle(ROTATION_VECTOR, this.angle);
+    this.group.position.x = this.x - 0.05;
+    this.group.position.y = this.y - 0.05;
+  }
+
+  grabTorch() {
+    super.grabTorch();
+    this.updatePlayerLight();
+  }
+
+  throwTorch() {
+    super.throwTorch();
+    this.updatePlayerLight();
+  }
+
+  updatePlayerLight() {
     this.light.changeLightSize(this.numberOfTorches * 2 + 1.5);
     this.light.changeLightColor(
       this.numberOfTorches === 0 ? "#ccc" : "orange",
       this.numberOfTorches === 0 ? 0.15 : 0.5,
     );
-    this.group.setRotationFromAxisAngle(new THREE.Vector3(0, 0, 1), this.angle);
-    this.group.position.x = this.x - 0.05;
-    this.group.position.y = this.y - 0.05;
   }
 
   createPlayerBody(material: THREE.Material) {

@@ -12,7 +12,6 @@ import { TransmitControlTrigger } from "../ThreeJsBoard/Triggers/TransmitControl
 import { Key } from "../ThreeJsBoard/Key";
 import { Door } from "../ThreeJsBoard/Door";
 import { TransmitTouchTrigger } from "../ThreeJsBoard/Triggers/TransmitTouchTrigger";
-import { ThreeJsPlayer } from "../ThreeJsBoard/ThreeJsPlayer";
 import { Player } from "../Board/Player";
 import { Torch } from "../ThreeJsBoard/Torch";
 import { MergeControlTrigger } from "../ThreeJsBoard/Triggers/MergeControlTrigger";

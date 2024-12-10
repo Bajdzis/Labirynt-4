@@ -10,7 +10,7 @@ export class ThreeJsWalls {
 
   constructor(
     resources: Resources,
-    private walls: ThreeJsWall[],
+    public walls: ThreeJsWall[],
   ) {
     this.group = new THREE.Group();
 
@@ -26,7 +26,7 @@ export class ThreeJsWalls {
       resources.data.materials.wallOutline,
       walls.length,
     );
-    this.update();
+    this.updateMatrix();
     this.group.add(this.wall);
     this.group.add(this.outline);
   }
@@ -34,15 +34,12 @@ export class ThreeJsWalls {
   getObject() {
     return this.group;
   }
-  update(): void {
+  updateMatrix(): void {
     this.walls.forEach((wall, i) => {
       this.wall.setMatrixAt(i, wall.getMatrix());
       this.outline.setMatrixAt(i, wall.getMatrixOutline());
     });
     this.wall.instanceMatrix.needsUpdate = true;
     this.outline.instanceMatrix.needsUpdate = true;
-  }
-  setBoard(): void {
-    // do nothing
   }
 }

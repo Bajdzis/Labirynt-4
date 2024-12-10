@@ -20,8 +20,6 @@ import { Key } from "./Key";
 import { Door } from "./Door";
 import { Cauldron } from "./Cauldron";
 import { BoardObject } from "../Board/BoardObject";
-import { TimerControlTrigger } from "./Triggers/TimerControlTrigger";
-import { TransmitControlTrigger } from "./Triggers/TransmitControlTrigger";
 
 type GameEvent =
   | {
@@ -57,6 +55,32 @@ type GameEvent =
       door: Door;
       player: Player;
     };
+let performanceCheckerIsActive = false;
+
+let numberOfFrames = 0;
+const times: { [key: string]: number } = {};
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window.runBenchmark = () => {
+  performanceCheckerIsActive = true;
+  numberOfFrames = 0;
+  console.log(times);
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window.showAverageTime = () => {
+  console.table(
+    Object.entries(times).reduce<{ [key: string]: number }>(
+      (acc, [key, value]) => {
+        acc[key] = value / numberOfFrames;
+        return acc;
+      },
+      {},
+    ),
+  );
+};
 
 export class ThreeJsBoard {
   private scene: THREE.Scene;
@@ -102,7 +126,6 @@ export class ThreeJsBoard {
         this.secondPlayerAlreadyAdded = true;
       }
     }
-    this.wallsGroup.update();
     this.objects.forEach((object) => {
       if (
         object instanceof Torch ||
@@ -115,8 +138,17 @@ export class ThreeJsBoard {
     });
 
     boxParticles.update(delta);
+    numberOfFrames++;
     this.objects.forEach((object) => {
-      object.update(delta);
+      if (performanceCheckerIsActive) {
+        const start = performance.now();
+        object.update(delta);
+        const diff = performance.now() - start;
+        times[object.constructor.name] =
+          (times[object.constructor.name] || 0) + diff;
+      } else {
+        object.update(delta);
+      }
 
       if (object instanceof Cauldron) {
         const players = this.objects.filter(
@@ -205,16 +237,26 @@ export class ThreeJsBoard {
         height: event.player.height,
         width: event.player.width,
       };
-      for (const object of this.objects) {
-        if (object instanceof ThreeJsWall) {
-          if (objectContainsOther(object, newPlayerPosition)) {
-            playerCanMove = false;
-            break;
-          }
-        } else if (object instanceof Door) {
-          if (!object.canMoveThrough(newPlayerPosition)) {
-            playerCanMove = false;
-            break;
+
+      for (let i = 0; i < this.wallsGroup.walls.length; i++) {
+        const element = this.wallsGroup.walls[i];
+        if (objectContainsOther(element, newPlayerPosition)) {
+          playerCanMove = false;
+          break;
+        }
+      }
+      if (playerCanMove) {
+        for (const object of this.objects) {
+          if (object instanceof ThreeJsWall) {
+            if (objectContainsOther(object, newPlayerPosition)) {
+              playerCanMove = false;
+              break;
+            }
+          } else if (object instanceof Door) {
+            if (!object.canMoveThrough(newPlayerPosition)) {
+              playerCanMove = false;
+              break;
+            }
           }
         }
       }
@@ -260,10 +302,6 @@ export class ThreeJsBoard {
       }
     });
 
-    resources.data.levels[level].wallsPositions.forEach(([x, y]) => {
-      this.addWall(x, y);
-    });
-
     const elements = resources.data.levels[level].createAdditionalElements();
     elements.forEach((element) => this.addObject(element));
 
@@ -274,11 +312,13 @@ export class ThreeJsBoard {
       ),
     );
 
-    const walls = this.objects.filter(
-      (object) => object instanceof ThreeJsWall,
-    ) as ThreeJsWall[];
     this.scene.remove(this.wallsGroup.getObject());
-    this.wallsGroup = new ThreeJsWalls(resources, walls);
+    this.wallsGroup = new ThreeJsWalls(
+      resources,
+      resources.data.levels[level].wallsPositions.map(
+        ([x, y]) => new ThreeJsWall(x, y),
+      ),
+    );
 
     this.scene.add(this.wallsGroup.getObject());
   }
@@ -327,9 +367,5 @@ export class ThreeJsBoard {
     object.remove && object.remove();
     const object3D = object.getObject();
     object3D && this.scene.remove(object3D);
-  }
-
-  private addWall(x: number, y: number) {
-    this.addObject(new ThreeJsWall(x, y));
   }
 }
