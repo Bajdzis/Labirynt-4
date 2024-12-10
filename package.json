@@ -6,8 +6,9 @@
   "scripts": {
     "webpack": "webpack",
     "http-server": "http-server",
-    "dev": "concurrently \"npm run http-server\" \"npm run webpack -- --watch\"",
+    "dev": "concurrently \"npm run http-server\" \"npm run webpack -- --watch --mode development\"",
     "prod": "webpack --mode production && http-server",
+    "build": "webpack --mode production --profile --json stats.json",
     "lint": "eslint src",
     "check": "tsc --noEmit"
   },
@@ -24,7 +25,7 @@
     "prettier-eslint": "^16.3.0",
     "ts-loader": "^9.5.1",
     "typescript-eslint": "^7.11.0",
-    "webpack": "^5.91.0",
+    "webpack": "^5.97.1",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
