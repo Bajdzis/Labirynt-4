@@ -26,10 +26,10 @@ class LightsHelper {
   getObject(maxTexturesCapabilities: number) {
     if (this.pointLights.length === 0) {
       this.createLights(
-        Math.min(Math.floor(maxTexturesCapabilities / 2), 2),
+        Math.min(Math.floor(maxTexturesCapabilities / 2), 4),
         true,
       );
-      this.createLights(5, false);
+      this.createLights(8, false);
     }
 
     return this.group;

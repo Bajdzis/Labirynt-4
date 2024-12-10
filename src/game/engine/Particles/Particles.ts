@@ -72,7 +72,7 @@ export class Particles {
       this.particleMaterial,
       this.getTotalNumberOfParticles(),
     );
-    this.update(0);
+    this.instancedMesh.frustumCulled = false;
     if (parent) {
       parent.add(this.instancedMesh);
     }
