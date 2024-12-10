@@ -8,7 +8,9 @@ declare global {
   interface Window {
     setProgressBar: (msg: string, value: number) => void;
     disposeProgressBar: () => void;
-    showTextInsteadOfProgressBar: () => void;
+    showTextInsteadOfProgressBar: () => {
+      playButton: HTMLButtonElement;
+    };
   }
 }
 
@@ -61,7 +63,7 @@ resources
     });
 
     window.setProgressBar("Kompilowanie shaderów...", 90);
-    window.showTextInsteadOfProgressBar();
+    const { playButton } = window.showTextInsteadOfProgressBar();
 
     let isRunning = false;
 
@@ -89,8 +91,7 @@ resources
         return;
       }
       isRunning = true;
-      window.removeEventListener("mousedown", run);
-      window.removeEventListener("keydown", run);
+      playButton.removeEventListener("mouseup", run);
       window.disposeProgressBar();
 
       const game = new MyGame(renderer);
@@ -98,11 +99,10 @@ resources
       game.run();
       resources.data.sounds.theme.play();
     };
-    window.addEventListener("touchend", runMobile, {
+    playButton.addEventListener("touchend", runMobile, {
       passive: true,
     });
-    window.addEventListener("mousedown", run);
-    window.addEventListener("keydown", run);
+    playButton.addEventListener("mouseup", run);
   });
 
 function waitForEnd(callback: () => void) {
