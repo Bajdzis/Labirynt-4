@@ -72,6 +72,7 @@ export class Particles {
       this.particleMaterial,
       this.getTotalNumberOfParticles(),
     );
+    this.update(0);
     if (parent) {
       parent.add(this.instancedMesh);
     }
