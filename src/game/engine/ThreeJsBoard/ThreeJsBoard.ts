@@ -20,6 +20,8 @@ import { Key } from "./Key";
 import { Door } from "./Door";
 import { Cauldron } from "./Cauldron";
 import { BoardObject } from "../Board/BoardObject";
+import { gamepad1 } from "../IO/Gamepad";
+import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 
 type GameEvent =
   | {
@@ -93,6 +95,7 @@ export class ThreeJsBoard {
     new KeyboardTouchButton("ArrowDown"),
     new KeyboardTouchButton("ArrowRight"),
     new KeyboardTouchButton("Numpad0"),
+    new GamepadPressButton(gamepad1, "PsCrossButton"),
   ]);
   private secondPlayerAlreadyAdded = false;
 

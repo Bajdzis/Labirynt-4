@@ -7,6 +7,9 @@ import { KeyboardMovement } from "../IO/Behaviors/KeyboardMovement";
 import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
 import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
 import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
+import { GamepadAxisBehavior } from "../IO/Behaviors/GamepadAxisBehavior";
+import { gamepad0, gamepad1 } from "../IO/Gamepad";
+import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 
 const ROTATION_VECTOR = new THREE.Vector3(0, 0, 1);
 
@@ -85,11 +88,13 @@ export class FirstPlayerPrototype extends ThreeJsPlayer {
         right: "KeyD",
       }),
       new MobileGamePadMovement(),
+      new GamepadAxisBehavior(gamepad0, "left"),
     ]);
 
     const actionBehavior = new ControlBehavior([
       new KeyboardPressButton("KeyE"),
       new MobileGamepadPressButton(),
+      new GamepadPressButton(gamepad0, "PsCrossButton"),
     ]);
 
     super(resources.data.materials.player1, moveBehavior, actionBehavior);
@@ -105,10 +110,12 @@ export class SecondPlayerPrototype extends ThreeJsPlayer {
         bottom: "ArrowDown",
         right: "ArrowRight",
       }),
+      new GamepadAxisBehavior(gamepad1, "left"),
     ]);
 
     const actionBehavior = new ControlBehavior([
       new KeyboardPressButton("Numpad0"),
+      new GamepadPressButton(gamepad1, "PsCrossButton"),
     ]);
 
     super(resources.data.materials.player2, moveBehavior, actionBehavior);
