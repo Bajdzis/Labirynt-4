@@ -1,5 +1,8 @@
 import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
-import { KeyboardCode } from "../IO/Keyboard";
+import { ControlBehaviorGroup } from "../IO/Behaviors/ControlBehaviorGroup";
+import { Gamepad } from "../IO/Devices/Gamepad";
+import { KeyboardCode } from "../IO/Devices/Keyboard";
+import { MobileGamepad, mobileGamepad } from "../IO/Devices/MobileGamepad";
 import { Key } from "../ThreeJsBoard/Key";
 import { BoardObject, Rectangle } from "./BoardObject";
 
@@ -19,14 +22,25 @@ export class Player extends BoardObject implements Rectangle {
   public angle = 0.0;
   protected numberOfTorches: number = 2;
   private doorKeys: string[] = [];
+  private allBehavior: ControlBehaviorGroup;
 
   constructor(
     private moveBehavior: ControlBehavior<{ x: number; y: number }>,
     private actionBehavior: ControlBehavior<true>,
   ) {
     super();
+    this.allBehavior = new ControlBehaviorGroup([moveBehavior, actionBehavior]);
     this.x = 0.06;
     this.y = 0.06;
+  }
+
+  runVibration(duration: number, intensity: number) {
+    const device = this.allBehavior.getLastUsedDevice();
+    if (device instanceof MobileGamepad) {
+      device.runVibration(duration);
+    } else if (device instanceof Gamepad) {
+      device.runVibration(duration, Math.max(0.1, intensity - 0.3), intensity);
+    }
   }
 
   setPosition(x: number, y: number) {

@@ -1,4 +1,7 @@
 // https://immersive-web.github.io/webxr-gamepads-module/#example-mappings
+
+import { IODevice } from "./IODevice";
+
 // https://w3c.github.io/gamepad/#remapping
 const buttonNameToIndex = {
   XboxAButton: 0,
@@ -37,15 +40,21 @@ const buttonNameToIndex = {
 
 export type GamepadButtonCode = keyof typeof buttonNameToIndex;
 
-class Gamepad {
-  constructor(private index: number) {}
+let blockConstructor = false;
+export class Gamepad extends IODevice {
+  constructor(private index: number) {
+    if (blockConstructor) {
+      throw new Error("Gamepad constructor is blocked");
+    }
+    super();
+  }
 
-  getLayout(): "xbox" | "ps" {
+  getNameOfDevice(): "xbox-gamepad" | "ps-gamepad" {
     const gamepadId = this.getGamepad()?.id?.toLocaleLowerCase() || "";
     if (gamepadId.includes("xbox") || gamepadId.includes("xinput")) {
-      return "xbox";
+      return "xbox-gamepad";
     }
-    return "ps";
+    return "ps-gamepad";
   }
 
   isDown(buttonCode: GamepadButtonCode): boolean {
@@ -81,6 +90,34 @@ class Gamepad {
     return this.getAxis(3, false);
   }
 
+  async runVibration(
+    durationInMilliseconds: number,
+    weak: number = 0.1,
+    strong: number = 0.4,
+  ): Promise<void> {
+    try {
+      const gamepad = this.getGamepad();
+      if (gamepad?.vibrationActuator) {
+        await gamepad.vibrationActuator.playEffect("dual-rumble", {
+          duration: durationInMilliseconds,
+          weakMagnitude: weak,
+          strongMagnitude: strong,
+        });
+      }
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
+  }
+
+  cancelVibration(): void {
+    try {
+      const gamepad = this.getGamepad();
+      if (gamepad?.vibrationActuator) {
+        gamepad.vibrationActuator.reset();
+      }
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
+  }
+
   private getGamepad(): globalThis.Gamepad | null {
     return navigator.getGamepads()[this.index];
   }
@@ -90,5 +127,4 @@ export const gamepad0 = new Gamepad(0);
 export const gamepad1 = new Gamepad(1);
 // export const gamepad2 = new Gamepad(2);
 // export const gamepad3 = new Gamepad(3);
-
-export type GamepadInterface = typeof gamepad0;
+blockConstructor = true;

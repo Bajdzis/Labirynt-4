@@ -1,4 +1,4 @@
-import { mobileGamepad } from "../MobileGamepad";
+import { mobileGamepad } from "../Devices/MobileGamepad";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class MobileGamePadMovement extends SourceOfControlBehavior<{
@@ -6,7 +6,7 @@ export class MobileGamePadMovement extends SourceOfControlBehavior<{
   y: number;
 }> {
   constructor() {
-    super();
+    super(mobileGamepad);
   }
 
   update(): void {

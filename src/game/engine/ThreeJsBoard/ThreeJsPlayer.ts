@@ -8,7 +8,7 @@ import { KeyboardPressButton } from "../IO/Behaviors/KeyboardPressButton";
 import { MobileGamePadMovement } from "../IO/Behaviors/MobileGamePadMovement";
 import { MobileGamepadPressButton } from "../IO/Behaviors/MobileGamepadPressButton";
 import { GamepadAxisBehavior } from "../IO/Behaviors/GamepadAxisBehavior";
-import { gamepad0, gamepad1 } from "../IO/Gamepad";
+import { gamepad0, gamepad1 } from "../IO/Devices/Gamepad";
 import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 
 const ROTATION_VECTOR = new THREE.Vector3(0, 0, 1);

@@ -1,10 +1,10 @@
-import { KeyboardCode, keyboard } from "../Keyboard";
+import { KeyboardCode, keyboard } from "../Devices/Keyboard";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class KeyboardPressButton extends SourceOfControlBehavior<true> {
   private lastKeyState: boolean = false;
   constructor(private keyCode: KeyboardCode) {
-    super();
+    super(keyboard);
   }
 
   update(): void {

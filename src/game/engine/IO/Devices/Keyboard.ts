@@ -1,3 +1,5 @@
+import { IODevice } from "./IODevice";
+
 export type KeyboardCode =
   | "Unidentified"
   | "Escape"
@@ -160,12 +162,13 @@ export type KeyboardCode =
   | "LaunchApp1"
   | "MediaSelect";
 
-class Keyboard {
+class Keyboard extends IODevice {
   private keyState: {
     [key in string | KeyboardCode]?: boolean;
   } = {};
 
   constructor() {
+    super();
     window.addEventListener(
       "keydown",
       (e) => {
@@ -181,6 +184,10 @@ class Keyboard {
       },
       false,
     );
+  }
+
+  getNameOfDevice(): "keyboard" {
+    return "keyboard";
   }
 
   isDown(keyCode: KeyboardCode): boolean {

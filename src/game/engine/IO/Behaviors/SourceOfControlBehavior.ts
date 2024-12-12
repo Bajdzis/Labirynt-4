@@ -1,6 +1,8 @@
+import { IODevice } from "../Devices/IODevice";
+
 export class SourceOfControlBehavior<S> {
   state: S | null = null;
-  constructor() {
+  constructor(public readonly device: IODevice) {
     this.state = null;
   }
 

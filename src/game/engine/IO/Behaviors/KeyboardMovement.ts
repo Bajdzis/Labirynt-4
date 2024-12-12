@@ -1,4 +1,4 @@
-import { KeyboardCode, keyboard } from "../Keyboard";
+import { KeyboardCode, keyboard } from "../Devices/Keyboard";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export interface KeyboardMovementKeys {
@@ -13,7 +13,7 @@ export class KeyboardMovement extends SourceOfControlBehavior<{
   y: number;
 }> {
   constructor(private keyCodes: KeyboardMovementKeys) {
-    super();
+    super(keyboard);
   }
 
   update(): void {

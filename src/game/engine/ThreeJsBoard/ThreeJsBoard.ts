@@ -20,7 +20,7 @@ import { Key } from "./Key";
 import { Door } from "./Door";
 import { Cauldron } from "./Cauldron";
 import { BoardObject } from "../Board/BoardObject";
-import { gamepad1 } from "../IO/Gamepad";
+import { gamepad1 } from "../IO/Devices/Gamepad";
 import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 
 type GameEvent =
@@ -286,6 +286,7 @@ export class ThreeJsBoard {
     } else if (event.name === "openDoor") {
       if (event.player.haveKey(event.door.keyName)) {
         event.door.toggle();
+        event.player.runVibration(200, 0.5);
       }
     } else if (event.name === "useDestination") {
       resources.data.sounds.teleport.play();

@@ -1,9 +1,17 @@
-class MobileGamepad {
+import { IODevice } from "./IODevice";
+
+let blockConstructor = false;
+
+export class MobileGamepad extends IODevice {
   private isActiveValue: boolean = false;
   private actionButtonState: boolean = false;
   private axisX: number = 0;
   private axisY: number = 0;
   constructor() {
+    if (blockConstructor) {
+      throw new Error("This class can't create more instances");
+    }
+    super();
     const container = document.createElement("div");
     container.style.opacity = "0";
 
@@ -25,6 +33,11 @@ class MobileGamepad {
     };
     document.body.addEventListener("touchstart", showControls, false);
   }
+
+  getNameOfDevice(): "touchscreen" {
+    return "touchscreen";
+  }
+
   createLeftSide() {
     const leftArea = document.createElement("div");
     leftArea.style.position = "absolute";
@@ -147,6 +160,7 @@ class MobileGamepad {
         button.style.left = `${touch.clientX - 25}px`;
         button.style.top = `${touch.clientY - 25}px`;
         this.actionButtonState = true;
+
         button.style.backgroundColor = "rgba(255,255,255,0.75)";
       },
       {
@@ -194,6 +208,22 @@ class MobileGamepad {
   getAxisY(): number {
     return this.axisY;
   }
+
+  runVibration(durationInMilliseconds: number): void {
+    try {
+      navigator.vibrate([durationInMilliseconds]);
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
+  }
+
+  cancelVibration(): void {
+    try {
+      navigator.vibrate(0);
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
+  }
 }
 
 export const mobileGamepad = new MobileGamepad();
+
+blockConstructor = true;

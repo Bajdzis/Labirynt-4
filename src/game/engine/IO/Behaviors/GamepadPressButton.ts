@@ -1,13 +1,13 @@
-import { GamepadButtonCode, GamepadInterface } from "../Gamepad";
+import { GamepadButtonCode, Gamepad } from "../Devices/Gamepad";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class GamepadPressButton extends SourceOfControlBehavior<true> {
   private lastKeyState: boolean = false;
   constructor(
-    private gamepad: GamepadInterface,
+    private gamepad: Gamepad,
     private keyCode: GamepadButtonCode,
   ) {
-    super();
+    super(gamepad);
   }
 
   update(): void {

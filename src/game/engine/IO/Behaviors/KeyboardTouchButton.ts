@@ -1,9 +1,9 @@
-import { KeyboardCode, keyboard } from "../Keyboard";
+import { KeyboardCode, keyboard } from "../Devices/Keyboard";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class KeyboardTouchButton extends SourceOfControlBehavior<true> {
   constructor(private keyCode: KeyboardCode) {
-    super();
+    super(keyboard);
   }
 
   update(): void {

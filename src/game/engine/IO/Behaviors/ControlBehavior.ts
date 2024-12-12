@@ -1,6 +1,8 @@
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class ControlBehavior<S> {
+  private lastUsedSource: SourceOfControlBehavior<S> | null = null;
+  private lastUsedSourceTimestamp: number = 0;
   constructor(private sources: SourceOfControlBehavior<S>[]) {}
 
   update(delta: number): void {
@@ -16,10 +18,19 @@ export class ControlBehavior<S> {
   getState(): S | null {
     for (const source of this.sources) {
       const state = source.getState();
-      if (state) {
+      if (state !== null) {
+        this.lastUsedSource = source;
+        this.lastUsedSourceTimestamp = Date.now();
         return state;
       }
     }
     return null;
+  }
+
+  getLastUsedSource() {
+    return {
+      source: this.lastUsedSource,
+      timestamp: this.lastUsedSourceTimestamp,
+    };
   }
 }

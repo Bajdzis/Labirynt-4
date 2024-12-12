@@ -1,8 +1,8 @@
-import { GamepadInterface } from "../Gamepad";
+import { Gamepad } from "../Devices/Gamepad";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export interface GamepadAxisBehaviorSettings {
-  gamepad: GamepadInterface;
+  gamepad: Gamepad;
   axis: "left" | "right";
 }
 
@@ -11,10 +11,10 @@ export class GamepadAxisBehavior extends SourceOfControlBehavior<{
   y: number;
 }> {
   constructor(
-    private gamepad: GamepadInterface,
+    private gamepad: Gamepad,
     private axis: "left" | "right",
   ) {
-    super();
+    super(gamepad);
   }
 
   update(): void {
