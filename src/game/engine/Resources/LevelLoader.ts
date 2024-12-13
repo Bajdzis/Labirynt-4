@@ -44,14 +44,23 @@ export class LevelLoader extends ResourcesLoader<Level> {
 
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
-      canvas.width = levelImage.width;
-      canvas.height = levelImage.height;
+      canvas.width = levelImage.naturalWidth;
+      canvas.height = levelImage.naturalHeight;
 
       if (!context) {
         throw new Error("Context not found");
       }
+      context.imageSmoothingEnabled = false;
       context.drawImage(levelImage, 0, 0, canvas.width, canvas.height);
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const imageData = context.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+        {
+          colorSpace: "srgb",
+        },
+      );
       const wallsPositions: [number, number][] = [];
       const slotsPositions: [number, number][] = [];
       let startPosition: [number, number] = [0, 0];
@@ -64,15 +73,23 @@ export class LevelLoader extends ResourcesLoader<Level> {
           const green = imageData.data[index + 1];
           const blue = imageData.data[index + 2];
 
+          const sum = red + green + blue;
+
           // Check the color of the pixel and determine the position
-          if (red === 0 && green === 0 && blue === 0) {
+          if (sum < 20) {
+            // black
             wallsPositions.push([x, -y]);
-          } else if (red === 0 && green === 0 && blue === 255) {
+          } else if (sum < 330 && blue > 240) {
+            //blue
             slotsPositions.push([x, -y]);
-          } else if (red === 255 && green === 0 && blue === 0) {
+          } else if (sum < 330 && red > 240) {
+            //red
             startPosition = [x, -y];
-          } else if (red === 0 && green === 255 && blue === 0) {
+          } else if (sum < 330 && green > 240) {
+            //green
             endPosition = [x, -y];
+          } else {
+            console.log(red, green, blue);
           }
         }
       }
