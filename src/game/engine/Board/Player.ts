@@ -37,7 +37,7 @@ export class Player extends BoardObject implements Rectangle {
   runVibration(duration: number, intensity: number) {
     const device = this.allBehavior.getLastUsedDevice();
     if (device instanceof MobileGamepad) {
-      device.runVibration(duration);
+      device.runVibration(duration, intensity);
     } else if (device instanceof Gamepad) {
       device.runVibration(duration, Math.max(0.1, intensity - 0.3), intensity);
     }

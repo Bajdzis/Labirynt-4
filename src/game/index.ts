@@ -3,6 +3,11 @@ import { MyGame } from "./engine/MyGame";
 import { resources } from "./engine/Resources/Resources";
 import { ThreeJsRenderer } from "./engine/ThreeJsRenderer";
 import { wallOutlineGeometry } from "./engine/Resources/Geometries";
+import { ControlBehavior } from "./engine/IO/Behaviors/ControlBehavior";
+import { KeyboardPressButton } from "./engine/IO/Behaviors/KeyboardPressButton";
+import { GamepadPressButton } from "./engine/IO/Behaviors/GamepadPressButton";
+import { gamepad0, gamepad1 } from "./engine/IO/Devices/Gamepad";
+import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
 
 declare global {
   interface Window {
@@ -65,7 +70,28 @@ resources
     window.setProgressBar("Kompilowanie shaderów...", 90);
     const { playButton } = window.showTextInsteadOfProgressBar();
 
-    let isRunning = false;
+    let isGameRunning = false;
+    const startPlayBehavior = new ControlBehavior([
+      new KeyboardPressButton("Enter"),
+      new MouseClickElement(playButton),
+      new GamepadPressButton(gamepad0, "PsCrossButton"),
+      new GamepadPressButton(gamepad1, "PsCrossButton"),
+    ]);
+    let lastTime: number = 0;
+    function behaviorLoop(time: DOMHighResTimeStamp) {
+      const delta = time - lastTime;
+      lastTime = time;
+      startPlayBehavior.update(delta);
+
+      const shouldStart = startPlayBehavior.getState();
+      if (shouldStart) {
+        run();
+      } else if (!isGameRunning) {
+        window.requestAnimationFrame(behaviorLoop);
+      }
+    }
+
+    behaviorLoop(lastTime);
 
     const runMobile = async () => {
       window.removeEventListener("touchend", runMobile);
@@ -87,11 +113,10 @@ resources
     };
 
     const run = async () => {
-      if (isRunning) {
+      if (isGameRunning) {
         return;
       }
-      isRunning = true;
-      playButton.removeEventListener("mouseup", run);
+      isGameRunning = true;
       window.disposeProgressBar();
 
       const game = new MyGame(renderer);
@@ -102,7 +127,6 @@ resources
     playButton.addEventListener("touchend", runMobile, {
       passive: true,
     });
-    playButton.addEventListener("mouseup", run);
   });
 
 function waitForEnd(callback: () => void) {

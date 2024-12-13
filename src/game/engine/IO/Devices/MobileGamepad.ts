@@ -209,9 +209,19 @@ export class MobileGamepad extends IODevice {
     return this.axisY;
   }
 
-  runVibration(durationInMilliseconds: number): void {
+  runVibration(durationInMilliseconds: number, intensity: number): void {
+    if (intensity < 0) {
+      return;
+    }
+    const intensityInMilliseconds = (intensity / 2) * durationInMilliseconds;
+    const numberOfVibrations = Math.floor(
+      durationInMilliseconds / intensityInMilliseconds,
+    );
+
     try {
-      navigator.vibrate([durationInMilliseconds]);
+      navigator.vibrate(
+        new Array(numberOfVibrations).fill(intensityInMilliseconds),
+      );
       // eslint-disable-next-line no-empty
     } catch (error) {}
   }

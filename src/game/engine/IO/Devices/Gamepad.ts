@@ -87,7 +87,7 @@ export class Gamepad extends IODevice {
   }
 
   getRightAxisX(): number {
-    return this.getAxis(3, false);
+    return this.getAxis(2, false);
   }
 
   async runVibration(
@@ -119,12 +119,17 @@ export class Gamepad extends IODevice {
   }
 
   private getGamepad(): globalThis.Gamepad | null {
-    return navigator.getGamepads()[this.index];
+    const gamepad = navigator.getGamepads()[this.index];
+    if (gamepad?.mapping === "standard") {
+      return gamepad;
+    }
+
+    return null;
   }
 }
 
 export const gamepad0 = new Gamepad(0);
 export const gamepad1 = new Gamepad(1);
-// export const gamepad2 = new Gamepad(2);
-// export const gamepad3 = new Gamepad(3);
+export const gamepad2 = new Gamepad(2);
+export const gamepad3 = new Gamepad(3);
 blockConstructor = true;
