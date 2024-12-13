@@ -14,6 +14,7 @@ export class Light {
       this.light.position.x = random(-0.01, 0.01);
       this.light.position.y = random(-0.01, 0.01);
       this.light.intensity = random(0.45, 0.55);
+      this.light.shadow.needsUpdate = true;
     });
   }
 
@@ -23,6 +24,10 @@ export class Light {
 
   update(delta: number) {
     this.lightTimer.update(delta);
+  }
+
+  updateShadow() {
+    this.light.shadow.needsUpdate = true;
   }
 
   createLight(size: number, shadow: boolean) {

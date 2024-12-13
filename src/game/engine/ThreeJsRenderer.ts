@@ -2,26 +2,21 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
 import { lightsHelper } from "./ThreeJsBoard/LightsHelper";
+import { GameCamera } from "./GameCamera";
 
 export class ThreeJsRenderer {
   private renderer: THREE.WebGLRenderer;
   private labelRenderer: CSS2DRenderer;
-  private perspectiveCamera: THREE.PerspectiveCamera;
-  private orbitControls: OrbitControls;
+  private perspectiveCamera: THREE.PerspectiveCamera | null = null;
+  private orbitControls: OrbitControls | null = null;
   private scene: THREE.Scene;
+  private gameCamera: GameCamera = new GameCamera();
 
   constructor() {
     this.scene = new THREE.Scene();
     const main = document.getElementById("main");
     if (!main)
       throw new Error(`No element with id 'main' found in the document`);
-
-    this.perspectiveCamera = new THREE.PerspectiveCamera(
-      45,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000,
-    );
 
     this.renderer = new THREE.WebGLRenderer({
       alpha: false,
@@ -44,9 +39,7 @@ export class ThreeJsRenderer {
     window.addEventListener("resize", () => {
       const width = window.visualViewport?.width || window.innerWidth;
       const height = window.visualViewport?.height || window.innerHeight;
-      this.perspectiveCamera.aspect = width / height;
 
-      this.perspectiveCamera.updateProjectionMatrix();
       this.renderer.setSize(width, height);
       this.labelRenderer.setSize(width, height);
     });
@@ -58,22 +51,49 @@ export class ThreeJsRenderer {
     this.labelRenderer.setSize(width, height);
     main.appendChild(this.renderer.domElement);
     main.appendChild(this.labelRenderer.domElement);
-    this.perspectiveCamera.position.z += 6;
-
-    this.orbitControls = new OrbitControls(
-      this.perspectiveCamera,
-      this.renderer.domElement,
-    );
   }
 
   update(delta: number) {
-    this.orbitControls.update(delta);
+    if (this.orbitControls) {
+      this.orbitControls.update(delta);
+    }
   }
 
-  render(
-    object: THREE.Object3D,
-    camera: THREE.Camera = this.perspectiveCamera,
-  ) {
+  getGameCamera() {
+    return this.gameCamera;
+  }
+
+  // private createPerspectiveCamera() {
+  //   if (this.perspectiveCamera) {
+  //     return this.perspectiveCamera;
+  //   }
+
+  //   const perspectiveCamera = new THREE.PerspectiveCamera(
+  //     45,
+  //     window.innerWidth / window.innerHeight,
+  //     0.1,
+  //     1000,
+  //   );
+  //   perspectiveCamera.position.z += 6;
+
+  //   window.addEventListener("resize", () => {
+  //     const width = window.visualViewport?.width || window.innerWidth;
+  //     const height = window.visualViewport?.height || window.innerHeight;
+  //     perspectiveCamera.aspect = width / height;
+
+  //     perspectiveCamera.updateProjectionMatrix();
+  //   });
+
+  //   this.perspectiveCamera = perspectiveCamera;
+  //   this.orbitControls = new OrbitControls(
+  //     this.perspectiveCamera,
+  //     this.renderer.domElement,
+  //   );
+  // }
+
+  render(object: THREE.Object3D) {
+    const camera: THREE.Camera = this.gameCamera.getCamera();
+    // const camera: THREE.Camera = this.createPerspectiveCamera();
     this.scene.add(object);
     this.renderer.render(this.scene, camera);
     this.labelRenderer.render(this.scene, camera);

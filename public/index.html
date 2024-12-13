@@ -125,6 +125,8 @@
             }
 
             window.showTextInsteadOfProgressBar = () => {
+
+                splashScreen = null;
                 if(loader) {
                     loader.innerHTML = `<div id="menu">
                         <div id="menu-logo">
@@ -144,14 +146,10 @@
                         </button>
                     </div>`;
 
-                    return {
-                        playButton: loader.querySelector('.play-button'),
-                    }
+                    return loader.querySelector('.play-button');
                 }
 
-                return {
-                    playButton: document.createElement('button'),
-                }
+                return null;
             }
 
             window.disposeProgressBar = () => {

@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "concurrently": "^8.2.2",
-    "three": "^0.170.0",
+    "three": "^0.171.0",
     "typescript": "^5.4.5"
   }
 }

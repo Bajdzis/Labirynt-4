@@ -88,8 +88,6 @@ export class LevelLoader extends ResourcesLoader<Level> {
           } else if (sum < 330 && green > 240) {
             //green
             endPosition = [x, -y];
-          } else {
-            console.log(red, green, blue);
           }
         }
       }

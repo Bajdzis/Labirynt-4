@@ -40,6 +40,8 @@ const buttonNameToIndex = {
 
 export type GamepadButtonCode = keyof typeof buttonNameToIndex;
 
+let gamepadsStatus = navigator.getGamepads();
+
 let blockConstructor = false;
 export class Gamepad extends IODevice {
   constructor(private index: number) {
@@ -119,7 +121,7 @@ export class Gamepad extends IODevice {
   }
 
   private getGamepad(): globalThis.Gamepad | null {
-    const gamepad = navigator.getGamepads()[this.index];
+    const gamepad = gamepadsStatus[this.index];
     if (gamepad?.mapping === "standard") {
       return gamepad;
     }
@@ -127,6 +129,10 @@ export class Gamepad extends IODevice {
     return null;
   }
 }
+
+export const updateGamepads = () => {
+  gamepadsStatus = navigator.getGamepads();
+};
 
 export const gamepad0 = new Gamepad(0);
 export const gamepad1 = new Gamepad(1);

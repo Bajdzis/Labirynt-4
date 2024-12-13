@@ -6,16 +6,19 @@ import { wallOutlineGeometry } from "./engine/Resources/Geometries";
 import { ControlBehavior } from "./engine/IO/Behaviors/ControlBehavior";
 import { KeyboardPressButton } from "./engine/IO/Behaviors/KeyboardPressButton";
 import { GamepadPressButton } from "./engine/IO/Behaviors/GamepadPressButton";
-import { gamepad0, gamepad1 } from "./engine/IO/Devices/Gamepad";
+import {
+  gamepad0,
+  gamepad1,
+  updateGamepads,
+} from "./engine/IO/Devices/Gamepad";
 import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
+import { lightsHelper } from "./engine/ThreeJsBoard/LightsHelper";
 
 declare global {
   interface Window {
     setProgressBar: (msg: string, value: number) => void;
     disposeProgressBar: () => void;
-    showTextInsteadOfProgressBar: () => {
-      playButton: HTMLButtonElement;
-    };
+    showTextInsteadOfProgressBar: () => HTMLButtonElement | null;
   }
 }
 
@@ -27,8 +30,13 @@ resources
   })
   .then(async () => {
     const renderer = new ThreeJsRenderer();
-    window.setProgressBar("Kompilowanie shaderów...", 50);
 
+    window.setProgressBar("Kompilowanie shaderów...", 50);
+    const tempLight = lightsHelper.getPointLightWithShadow(
+      "orange",
+      0.5,
+      0.32 * 1,
+    );
     await waitForEnd(() => {
       renderer.render(
         new Mesh(wallOutlineGeometry, resources.data.materials.player1),
@@ -61,24 +69,36 @@ resources
       renderer.render(
         new InstancedMesh(
           wallOutlineGeometry,
+          resources.data.materials.player1,
+          1,
+        ),
+      );
+    });
+    lightsHelper.hidePointLight(tempLight);
+    window.setProgressBar("Kompilowanie shaderów...", 85);
+    await waitForEnd(() => {
+      renderer.render(
+        new InstancedMesh(
+          wallOutlineGeometry,
           resources.data.materials.wall,
           1,
         ),
       );
     });
-
     window.setProgressBar("Kompilowanie shaderów...", 90);
-    const { playButton } = window.showTextInsteadOfProgressBar();
+
+    let playButton = window.showTextInsteadOfProgressBar();
 
     let isGameRunning = false;
     const startPlayBehavior = new ControlBehavior([
       new KeyboardPressButton("Enter"),
-      new MouseClickElement(playButton),
+      new MouseClickElement(playButton || document.body),
       new GamepadPressButton(gamepad0, "PsCrossButton"),
       new GamepadPressButton(gamepad1, "PsCrossButton"),
     ]);
     let lastTime: number = 0;
     function behaviorLoop(time: DOMHighResTimeStamp) {
+      updateGamepads();
       const delta = time - lastTime;
       lastTime = time;
       startPlayBehavior.update(delta);
@@ -94,8 +114,6 @@ resources
     behaviorLoop(lastTime);
 
     const runMobile = async () => {
-      window.removeEventListener("touchend", runMobile);
-
       try {
         await document.documentElement.requestFullscreen();
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -116,6 +134,9 @@ resources
       if (isGameRunning) {
         return;
       }
+
+      playButton && playButton.removeEventListener("touchend", runMobile);
+      playButton = null;
       isGameRunning = true;
       window.disposeProgressBar();
 
@@ -124,9 +145,10 @@ resources
       game.run();
       resources.data.sounds.theme.play();
     };
-    playButton.addEventListener("touchend", runMobile, {
-      passive: true,
-    });
+    playButton &&
+      playButton.addEventListener("touchend", runMobile, {
+        passive: true,
+      });
   });
 
 function waitForEnd(callback: () => void) {

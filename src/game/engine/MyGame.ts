@@ -7,7 +7,7 @@ export class MyGame extends BrowserGame {
 
   constructor(private renderer: ThreeJsRenderer) {
     super();
-    this.board = new ThreeJsBoard();
+    this.board = new ThreeJsBoard(renderer.getGameCamera());
   }
 
   protected update(delta: number) {
@@ -16,6 +16,6 @@ export class MyGame extends BrowserGame {
   }
 
   protected render() {
-    this.renderer.render(this.board.getScene(), this.board.getCamera());
+    this.renderer.render(this.board.getScene());
   }
 }

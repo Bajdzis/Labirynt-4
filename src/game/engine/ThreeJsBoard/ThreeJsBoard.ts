@@ -85,10 +85,9 @@ window.showAverageTime = () => {
 };
 
 export class ThreeJsBoard {
-  private scene: THREE.Scene;
+  private scene: THREE.Group;
   private objects: BoardObject[] = [];
   private wallsGroup: ThreeJsWalls;
-  private camera: GameCamera = new GameCamera();
   private addSecondPlayerBehavior: ControlBehavior<true> = new ControlBehavior([
     new KeyboardTouchButton("ArrowUp"),
     new KeyboardTouchButton("ArrowLeft"),
@@ -99,9 +98,9 @@ export class ThreeJsBoard {
   ]);
   private secondPlayerAlreadyAdded = false;
 
-  constructor() {
+  constructor(private camera: GameCamera) {
     this.wallsGroup = new ThreeJsWalls(resources, []);
-    this.scene = new THREE.Scene();
+    this.scene = new THREE.Group();
     // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
     this.scene.add(boxParticles.getObject());
@@ -329,10 +328,6 @@ export class ThreeJsBoard {
 
   getScene() {
     return this.scene;
-  }
-
-  getCamera() {
-    return this.camera.getCamera();
   }
 
   updateCameraPosition() {

@@ -29,15 +29,15 @@ export class Particles {
   addGroupOfParticles(groupOfParticles: GroupOfParticles) {
     const particles = [];
     for (let i = 0; i < groupOfParticles.numberOfParticles; i++) {
-      const life = groupOfParticles.maxLife;
+      const maxLife = groupOfParticles.maxLife;
       const colorStart = groupOfParticles.colorStart;
       const colorStop = groupOfParticles.colorStop;
-      const velocity = new THREE.Vector3(0, 0, 0.15 / life);
+      const velocity = new THREE.Vector3(0, 0, 0.15 / maxLife);
       particles.push(
         new Particle(
-          this.getNewPosition(groupOfParticles.type),
+          new THREE.Vector3(...this.getNewPosition(groupOfParticles.type)),
           velocity,
-          life,
+          maxLife,
           colorStart,
           colorStop,
         ),
@@ -85,47 +85,55 @@ export class Particles {
     );
   }
 
-  getNewPosition(type: GroupOfParticles["type"]) {
+  getNewPosition(type: GroupOfParticles["type"]): [number, number, number] {
     if (type.type === "circle-center") {
       const angle = random(0, Math.PI * 2);
       const radius = random(0, type.radius);
-      return new THREE.Vector3(
+      return [
         Math.cos(angle) * radius + type.x,
         Math.sin(angle) * radius + type.y,
         0.02,
-      );
+      ];
     } else if (type.type === "circle") {
       const r = type.radius * Math.sqrt(Math.random());
       const theta = random(0, Math.PI * 2);
-      return new THREE.Vector3(
-        r * Math.cos(theta) + type.x,
-        r * Math.sin(theta) + type.y,
-        0.02,
-      );
+      return [r * Math.cos(theta) + type.x, r * Math.sin(theta) + type.y, 0.02];
     } else if (type.type === "rectangle") {
-      return new THREE.Vector3(
+      return [
         random(-type.width, type.width) + type.x,
         random(-type.height, type.height) + type.y,
         0.02,
-      );
+      ];
     }
 
-    return new THREE.Vector3();
+    return [0, 0, 0];
   }
 
   update(delta: number) {
     let i = 0;
-    this.groupOfParticles.forEach(({ particles, type, maxLife, state }) => {
-      particles.forEach((particle) => {
+    for (
+      let groupOfParticlesIndex = 0,
+        groupOfParticlesLength = this.groupOfParticles.length;
+      groupOfParticlesIndex < groupOfParticlesLength;
+      ++groupOfParticlesIndex
+    ) {
+      const group = this.groupOfParticles[groupOfParticlesIndex];
+      const particlesLength = group.particles.length;
+      for (
+        let particleIndex = 0;
+        particleIndex < particlesLength;
+        ++particleIndex
+      ) {
+        const particle = group.particles[particleIndex];
         particle.update(delta);
         this.instancedMesh.setMatrixAt(i, particle.matrix);
-        this.instancedMesh.setColorAt(i, particle.getColor());
-        if (particle.life < 0 && state === "active") {
-          particle.setNewPosition(this.getNewPosition(type), maxLife);
+        this.instancedMesh.setColorAt(i, particle.color);
+        if (particle.life < 0 && group.state === "active") {
+          particle.setNewPosition(...this.getNewPosition(group.type));
         }
         i++;
-      });
-    });
+      }
+    }
 
     this.instancedMesh.instanceMatrix.needsUpdate = true;
     if (this.instancedMesh.instanceColor) {

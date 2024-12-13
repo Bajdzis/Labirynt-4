@@ -39,6 +39,16 @@ export abstract class ThreeJsPlayer extends Player {
     this.group.add(obj);
   }
 
+  setPosition(x: number, y: number) {
+    super.setPosition(x, y);
+    this.light.updateShadow();
+  }
+
+  changePosition(x: number, y: number) {
+    super.changePosition(x, y);
+    this.light.updateShadow();
+  }
+
   getObject() {
     return this.group;
   }

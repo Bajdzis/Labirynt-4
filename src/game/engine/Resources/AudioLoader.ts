@@ -6,15 +6,21 @@ export class AudioLoader extends ResourcesLoader<GameAudio> {
       return new Promise<GameAudio>((resolve) => {
         const audio = new Audio(url);
 
-        audio.addEventListener("canplay", () => {
+        const resolveHandler = () => {
+          audio.removeEventListener("canplay", resolveHandler);
+          audio.removeEventListener("error", errorHandler);
           resolve(new GameAudio(audio, parseFloat(volume)));
-        });
-        audio.onerror = (err) => {
+        };
+        const errorHandler = (err: ErrorEvent) => {
           console.warn(err);
+          audio.removeEventListener("canplay", resolveHandler);
+          audio.removeEventListener("error", errorHandler);
           setTimeout(() => {
             loader(url, volume).then(resolve);
           }, 2000);
         };
+        audio.addEventListener("canplay", resolveHandler);
+        audio.addEventListener("error", errorHandler);
       });
     };
     super(loader);

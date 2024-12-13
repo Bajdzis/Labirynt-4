@@ -12,15 +12,12 @@ class LightsHelper {
         light.castShadow = true;
         light.shadow.mapSize.width = 128;
         light.shadow.mapSize.height = 128;
+        light.shadow.autoUpdate = false;
+        light.shadow.needsUpdate = true;
       }
       this.pointLights.push(light);
       this.group.add(light);
     }
-    console.log({
-      pointLightsNum: this.pointLights.length,
-      quantity,
-      castShadow,
-    });
   }
 
   getObject(maxTexturesCapabilities: number) {

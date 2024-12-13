@@ -1,4 +1,5 @@
 import { IODevice } from "./IODevice";
+import { TouchPoint, touchScreen } from "./TouchScreen";
 
 let blockConstructor = false;
 
@@ -12,26 +13,19 @@ export class MobileGamepad extends IODevice {
       throw new Error("This class can't create more instances");
     }
     super();
-    const container = document.createElement("div");
-    container.style.opacity = "0";
 
-    document.body.appendChild(container);
-
-    const showControls = (e: TouchEvent) => {
-      e.preventDefault();
-
-      if (!this.isActiveValue) {
-        container.style.opacity = "1";
-        this.isActiveValue = true;
-        this.createRightSide().forEach((element) =>
-          container.appendChild(element),
-        );
-        this.createLeftSide().forEach((element) =>
-          container.appendChild(element),
-        );
-      }
+    const showControls = () => {
+      touchScreen.removeUpdateListener(showControls);
+      this.isActiveValue = true;
+      this.createRightSide().forEach((element) =>
+        document.body.appendChild(element),
+      );
+      this.createLeftSide().forEach((element) =>
+        document.body.appendChild(element),
+      );
     };
-    document.body.addEventListener("touchstart", showControls, false);
+
+    touchScreen.addUpdateListener(showControls);
   }
 
   getNameOfDevice(): "touchscreen" {
@@ -39,25 +33,12 @@ export class MobileGamepad extends IODevice {
   }
 
   createLeftSide() {
-    const leftArea = document.createElement("div");
-    leftArea.style.position = "absolute";
-    leftArea.style.left = "0";
-    leftArea.style.top = "0";
-    leftArea.style.bottom = "0";
-    leftArea.style.width = "45%";
-
-    document.body.appendChild(leftArea);
-
-    let rect = leftArea.getBoundingClientRect();
-
-    window.addEventListener("resize", () => {
-      rect = leftArea.getBoundingClientRect();
-    });
-
     const joystickBackground = document.createElement("div");
     joystickBackground.style.position = "absolute";
-    joystickBackground.style.left = "100px";
-    joystickBackground.style.top = "calc(100% - 200px)";
+    joystickBackground.style.left = "0";
+    joystickBackground.style.top = "0";
+    joystickBackground.style.transform =
+      "translate(100px, calc(100vh - 200px))";
     joystickBackground.style.width = "100px";
     joystickBackground.style.height = "100px";
     joystickBackground.style.borderRadius = "50%";
@@ -65,36 +46,36 @@ export class MobileGamepad extends IODevice {
 
     const joystickElement = document.createElement("div");
     joystickElement.style.position = "absolute";
-    joystickElement.style.left = "0px";
-    joystickElement.style.top = "0px";
+    joystickElement.style.left = "10px";
+    joystickElement.style.top = "10px";
     joystickElement.style.width = "80px";
     joystickElement.style.height = "80px";
-    joystickElement.style.transform = "translate(10px, 10px)";
+    joystickElement.style.transform = "translate(0px, 0px)";
     joystickElement.style.borderRadius = "50%";
     joystickElement.style.backgroundColor = "rgba(255,255,255,0.5)";
     joystickBackground.style.pointerEvents = "none";
     joystickBackground.appendChild(joystickElement);
-    const startPoint = { x: 0, y: 0 };
-    leftArea.addEventListener(
-      "touchstart",
-      (e) => {
-        const touch = this.getFirstTouchInsideRect(e.touches, rect);
-        if (!touch) return;
-        startPoint.x = touch.clientX;
-        startPoint.y = touch.clientY;
-        joystickBackground.style.left = `${touch.clientX - 50}px`;
-        joystickBackground.style.top = `${touch.clientY - 50}px`;
-      },
-      {
-        passive: true,
-      },
-    );
-    leftArea.addEventListener(
-      "touchmove",
-      (e) => {
-        const touch = this.getFirstTouchInsideRect(e.touches, rect);
-        if (!touch) return;
-        const currentPoint = { x: touch.clientX, y: touch.clientY };
+    let startPoint: TouchPoint | null = null;
+
+    touchScreen.addUpdateListener(() => {
+      const status = touchScreen.leftAreaTouchPoint;
+
+      // start
+      if (status !== null && startPoint === null) {
+        startPoint = status;
+
+        startPoint.x = status.x;
+        startPoint.y = status.y;
+        joystickBackground.style.transform = `translate(${status.x - 50}px, ${status.y - 50}px)`;
+        // end
+      } else if (status === null && startPoint !== null) {
+        joystickElement.style.transform = "translate(0px, 0px)";
+        this.axisX = 0;
+        this.axisY = 0;
+        startPoint = null;
+        // move
+      } else if (status !== null && startPoint !== null) {
+        const currentPoint = status;
         const deltaX = currentPoint.x - startPoint.x;
         const deltaY = currentPoint.y - startPoint.y;
         const distance = Math.sqrt(
@@ -105,92 +86,43 @@ export class MobileGamepad extends IODevice {
 
         if (distance > 30) {
           const angle = Math.atan2(deltaY, deltaX);
-          joystickElement.style.left = `${Math.cos(angle) * 40}px`;
-          joystickElement.style.top = `${Math.sin(angle) * 40}px`;
+          joystickElement.style.transform = `translate(${Math.cos(angle) * 40}px, ${Math.sin(angle) * 40}px)`;
         } else {
-          joystickElement.style.left = `${deltaX}px`;
-          joystickElement.style.top = `${deltaY}px`;
+          joystickElement.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
         }
-      },
-      {
-        passive: true,
-      },
-    );
-    const stop = () => {
-      joystickElement.style.left = "0px";
-      joystickElement.style.top = "0px";
-      this.axisX = 0;
-      this.axisY = 0;
-    };
-    leftArea.addEventListener("touchend", stop);
-    leftArea.addEventListener("touchcancel", stop);
+      }
+    });
 
     return [joystickBackground];
   }
   createRightSide() {
-    const rightArea = document.createElement("div");
-    rightArea.style.position = "absolute";
-    rightArea.style.right = "0";
-    rightArea.style.top = "0";
-    rightArea.style.bottom = "0";
-    rightArea.style.width = "45%";
-
-    document.body.appendChild(rightArea);
-
-    let rect = rightArea.getBoundingClientRect();
-    window.addEventListener("resize", () => {
-      rect = rightArea.getBoundingClientRect();
-    });
-
     const button = document.createElement("div");
     button.style.position = "absolute";
-    button.style.left = "calc(100% - 100px)";
-    button.style.top = "calc(100% - 175px)";
+    button.style.left = "0";
+    button.style.top = "0";
+    button.style.transform =
+      "translate(calc(100vw - 150px), calc(100vh - 175px))";
     button.style.width = "50px";
     button.style.height = "50px";
     button.style.borderRadius = "50%";
     button.style.backgroundColor = "rgba(255,255,255,0.5)";
     button.style.pointerEvents = "none";
 
-    rightArea.addEventListener(
-      "touchstart",
-      (e) => {
-        const touch = this.getFirstTouchInsideRect(e.touches, rect);
-        if (!touch) return;
-        button.style.left = `${touch.clientX - 25}px`;
-        button.style.top = `${touch.clientY - 25}px`;
-        this.actionButtonState = true;
+    touchScreen.addUpdateListener(() => {
+      const status = touchScreen.rightAreaTouchPoint;
+      this.actionButtonState = status !== null;
 
+      if (status === null) {
+        button.style.backgroundColor = "rgba(255,255,255,0.5)";
+      } else {
+        const { x, y } = status;
+
+        button.style.transform = `translate(${x - 25}px, ${y - 25}px)`;
         button.style.backgroundColor = "rgba(255,255,255,0.75)";
-      },
-      {
-        passive: true,
-      },
-    );
-
-    const stop = () => {
-      this.actionButtonState = false;
-      button.style.backgroundColor = "rgba(255,255,255,0.5)";
-    };
-    rightArea.addEventListener("touchend", stop);
-    rightArea.addEventListener("touchcancel", stop);
+      }
+    });
 
     return [button];
-  }
-
-  getFirstTouchInsideRect(touches: TouchList, rect: DOMRect) {
-    for (let i = 0; i < touches.length; i++) {
-      const touch = touches[i];
-      if (
-        touch.clientX > rect.left &&
-        touch.clientX < rect.right &&
-        touch.clientY > rect.top &&
-        touch.clientY < rect.bottom
-      ) {
-        return touch;
-      }
-    }
-    return null;
   }
 
   isActive(): boolean {
