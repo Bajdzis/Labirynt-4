@@ -114,6 +114,7 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
   }
 
   update(delta: number) {
+    this.tip.update(delta);
     this.group.position.x = this.x;
     this.group.position.y = this.y;
     const speed = (0.001875 / 3) * delta;
@@ -136,11 +137,11 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
   }
 
   showTip() {
-    this.tip.element.style.opacity = "1";
+    this.tip.showTip();
   }
 
   hideTip() {
-    this.tip.element.style.opacity = "0";
+    this.tip.hideTip();
   }
 
   remove() {

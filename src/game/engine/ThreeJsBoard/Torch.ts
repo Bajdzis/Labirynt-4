@@ -94,6 +94,7 @@ export class Torch extends BoardObject implements Rectangle {
   }
 
   update(delta: number) {
+    this.tip.update(delta);
     this.light.update(delta);
     this.group.position.x = this.x;
     this.group.position.y = this.y;
@@ -111,11 +112,11 @@ export class Torch extends BoardObject implements Rectangle {
   }
 
   showTip() {
-    this.tip.element.style.opacity = "1";
+    this.tip.showTip();
   }
 
   hideTip() {
-    this.tip.element.style.opacity = "0";
+    this.tip.hideTip();
   }
 
   remove() {

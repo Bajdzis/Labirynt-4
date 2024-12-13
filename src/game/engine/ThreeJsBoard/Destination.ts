@@ -61,11 +61,15 @@ export class Destination extends BoardObject implements Rectangle {
   }
 
   showTip() {
-    this.tip.element.style.opacity = "1";
+    this.tip.showTip();
   }
 
   hideTip() {
-    this.tip.element.style.opacity = "0";
+    this.tip.hideTip();
+  }
+
+  update(delta: number): void {
+    this.tip.update(delta);
   }
 
   remove() {
