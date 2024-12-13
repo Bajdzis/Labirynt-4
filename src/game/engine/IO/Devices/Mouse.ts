@@ -1,4 +1,5 @@
 import { IODevice } from "./IODevice";
+import { screen } from "./Screen";
 
 export type MouseButtonCode =
   | "leftButton"
@@ -17,8 +18,9 @@ const mouseButtonCodeToNumber: Record<MouseButtonCode, number> = {
 
 class Mouse extends IODevice {
   private buttonsState: number = 0;
-  private htmlElementsState: WeakMap<HTMLElement | ParentNode, boolean> =
-    new WeakMap();
+  private currentEventTarget: EventTarget | null = null;
+  private pointX: number = 0;
+  private pointY: number = 0;
 
   constructor() {
     super();
@@ -26,7 +28,7 @@ class Mouse extends IODevice {
       "mousedown",
       (e) => {
         e.preventDefault();
-        this.setElementState(e.target, true);
+        this.currentEventTarget = e.target;
         this.buttonsState = e.buttons;
       },
       false,
@@ -36,23 +38,61 @@ class Mouse extends IODevice {
       "mouseup",
       (e) => {
         e.preventDefault();
-        this.htmlElementsState = new WeakMap();
+        this.currentEventTarget = null;
         this.buttonsState = e.buttons;
       },
       false,
     );
+    window.addEventListener(
+      "mousemove",
+      (e) => {
+        this.pointX = e.clientX;
+        this.pointY = e.clientY;
+      },
+      {
+        passive: true,
+      },
+    );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private setElementState(element: any, isDown: boolean) {
-    if (element instanceof HTMLElement) {
-      let target: HTMLElement | ParentNode = element;
-      this.htmlElementsState.set(target, isDown);
-      while (target.parentNode) {
-        target = target.parentNode;
-        this.htmlElementsState.set(target, isDown);
-      }
+  getPoint(): { x: number; y: number } {
+    return { x: this.pointX, y: this.pointY };
+  }
+
+  getPercentagePoint(): { x: number; y: number } {
+    const { x, y } = screen.getSize();
+    return {
+      x: this.pointX / x,
+      y: this.pointY / y,
+    };
+  }
+
+  getAxisX(): number {
+    const { x, y } = screen.getSize();
+    const maximumArea = Math.min(x, y) / 4;
+    const value = this.pointX - x / 2;
+
+    if (value > maximumArea) {
+      return 1;
+    } else if (value < -maximumArea) {
+      return -1;
     }
+    const final = value / maximumArea;
+    return Math.abs(final) > 0.15 ? final : 0;
+  }
+
+  getAxisY(): number {
+    const { x, y } = screen.getSize();
+    const maximumArea = Math.min(x, y) / 4;
+    const value = this.pointY - y / 2;
+
+    if (value > maximumArea) {
+      return -1;
+    } else if (value < -maximumArea) {
+      return 1;
+    }
+    const final = (value / maximumArea) * -1;
+    return Math.abs(final) > 0.15 ? final : 0;
   }
 
   getNameOfDevice(): "mouse" {
@@ -60,7 +100,15 @@ class Mouse extends IODevice {
   }
 
   isDownElement(buttonCode: HTMLElement): boolean {
-    return this.htmlElementsState.get(buttonCode) || false;
+    if (!this.currentEventTarget) {
+      return false;
+    }
+    return (
+      buttonCode === this.currentEventTarget ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      buttonCode.contains(this.currentEventTarget as any) ||
+      false
+    );
   }
 
   isDown(buttonCode: MouseButtonCode): boolean {

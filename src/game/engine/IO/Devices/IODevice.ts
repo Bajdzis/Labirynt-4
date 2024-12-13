@@ -5,5 +5,6 @@ export abstract class IODevice {
     | "vr-gamepad"
     | "xbox-gamepad"
     | "touchscreen"
-    | "mouse";
+    | "mouse"
+    | "screen";
 }
