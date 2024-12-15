@@ -11,7 +11,7 @@ export class ThreeJsRenderer {
   private orbitControls: OrbitControls | null = null;
   private scene: THREE.Scene;
   private gameCamera: GameCamera = new GameCamera();
-  private scale = 1
+  private scale = 1;
 
   constructor() {
     this.scene = new THREE.Scene();
@@ -28,9 +28,9 @@ export class ThreeJsRenderer {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.shadowMap.autoUpdate = true;
-    this.renderer.domElement.style.imageRendering = 'pixelated';
-    this.renderer.domElement.style.width = '100%';
-
+    this.renderer.domElement.style.imageRendering = "pixelated";
+    this.renderer.domElement.style.width = "100%";
+    // this.scene.add(new THREE.AmbientLight());
     this.scene.add(
       lightsHelper.getObject(this.renderer.capabilities.maxTextures),
     );
@@ -40,7 +40,6 @@ export class ThreeJsRenderer {
     this.labelRenderer.domElement.style.pointerEvents = "none";
 
     window.addEventListener("resize", () => {
-
       this.refreshResolutionAndSetScale(this.scale);
     });
 
@@ -49,25 +48,26 @@ export class ThreeJsRenderer {
     main.appendChild(this.labelRenderer.domElement);
   }
 
-  private refreshResolutionAndSetScale(scale:number){
+  private refreshResolutionAndSetScale(scale: number) {
     this.scale = scale;
 
     const width = window.visualViewport?.width || window.innerWidth;
     const height = window.visualViewport?.height || window.innerHeight;
 
-    this.renderer.setSize(width*this.scale, height*this.scale,false);
+    this.renderer.setSize(width * this.scale, height * this.scale, false);
     this.labelRenderer.setSize(width, height);
   }
 
-  private last15DeltaTime:number[] = [];
+  private last15DeltaTime: number[] = [];
   update(delta: number) {
     this.last15DeltaTime.unshift(delta);
-    if(this.last15DeltaTime.length > 15){
+    if (this.last15DeltaTime.length > 15) {
       this.last15DeltaTime.pop();
-      if(this.scale > 0.25) {
-        if(this.last15DeltaTime.every(time => time > 24)){
+      if (this.scale > 0.25) {
+        if (this.last15DeltaTime.every((time) => time > 24)) {
           this.renderer.shadowMap.enabled = false;
-          this.refreshResolutionAndSetScale(this.scale - 0.05)
+          this.refreshResolutionAndSetScale(this.scale - 0.05);
+          console.log("Scale down", this.scale);
           this.last15DeltaTime = [];
         }
       }
@@ -107,6 +107,8 @@ export class ThreeJsRenderer {
   //     this.perspectiveCamera,
   //     this.renderer.domElement,
   //   );
+
+  //   return perspectiveCamera;
   // }
 
   render(object: THREE.Object3D) {

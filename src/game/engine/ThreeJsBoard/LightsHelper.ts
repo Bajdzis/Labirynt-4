@@ -20,6 +20,12 @@ class LightsHelper {
     }
   }
 
+  updateShadows() {
+    this.pointLights.forEach((light) => {
+      light.shadow.needsUpdate = true;
+    });
+  }
+
   getObject(maxTexturesCapabilities: number) {
     if (this.pointLights.length === 0) {
       this.createLights(

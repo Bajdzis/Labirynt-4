@@ -1,4 +1,4 @@
-import { InstancedMesh, Mesh } from "three";
+import { Mesh } from "three";
 import { MyGame } from "./engine/MyGame";
 import { resources } from "./engine/Resources/Resources";
 import { ThreeJsRenderer } from "./engine/ThreeJsRenderer";
@@ -12,7 +12,6 @@ import {
   updateGamepads,
 } from "./engine/IO/Devices/Gamepad";
 import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
-import { lightsHelper } from "./engine/ThreeJsBoard/LightsHelper";
 
 declare global {
   interface Window {
@@ -32,60 +31,49 @@ resources
     const renderer = new ThreeJsRenderer();
 
     window.setProgressBar("Kompilowanie shaderów...", 50);
-    const tempLight = lightsHelper.getPointLightWithShadow(
-      "orange",
-      0.5,
-      0.32 * 1,
-    );
+
     await waitForEnd(() => {
       renderer.render(
         new Mesh(wallOutlineGeometry, resources.data.materials.player1),
       );
     });
 
-    window.setProgressBar("Kompilowanie shaderów...", 60);
+    window.setProgressBar("Kompilowanie shaderów...", 55);
     await waitForEnd(() => {
       renderer.render(
         new Mesh(wallOutlineGeometry, resources.data.materials.floor),
       );
     });
 
-    window.setProgressBar("Kompilowanie shaderów...", 70);
+    window.setProgressBar("Kompilowanie shaderów...", 65);
     await waitForEnd(() => {
       renderer.render(
         new Mesh(wallOutlineGeometry, resources.data.materials.floorShadow),
       );
     });
 
-    window.setProgressBar("Kompilowanie shaderów...", 75);
+    window.setProgressBar("Kompilowanie shaderów...", 70);
     await waitForEnd(() => {
       renderer.render(
         new Mesh(wallOutlineGeometry, resources.data.materials.torch),
       );
     });
 
+    window.setProgressBar("Kompilowanie shaderów...", 75);
+    await waitForEnd(() => {
+      renderer.render(
+        new Mesh(wallOutlineGeometry, resources.data.materials.door),
+      );
+    });
+
     window.setProgressBar("Kompilowanie shaderów...", 80);
+
+    const game = new MyGame(renderer);
+
     await waitForEnd(() => {
-      renderer.render(
-        new InstancedMesh(
-          wallOutlineGeometry,
-          resources.data.materials.player1,
-          1,
-        ),
-      );
+      renderer.render(game.getScene());
     });
-    lightsHelper.hidePointLight(tempLight);
     window.setProgressBar("Kompilowanie shaderów...", 85);
-    await waitForEnd(() => {
-      renderer.render(
-        new InstancedMesh(
-          wallOutlineGeometry,
-          resources.data.materials.wall,
-          1,
-        ),
-      );
-    });
-    window.setProgressBar("Kompilowanie shaderów...", 90);
 
     let playButton = window.showTextInsteadOfProgressBar();
 
@@ -139,8 +127,6 @@ resources
       playButton = null;
       isGameRunning = true;
       window.disposeProgressBar();
-
-      const game = new MyGame(renderer);
 
       game.run();
       resources.data.sounds.theme.play();

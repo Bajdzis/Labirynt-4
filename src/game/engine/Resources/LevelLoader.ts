@@ -15,6 +15,7 @@ import { TransmitTouchTrigger } from "../ThreeJsBoard/Triggers/TransmitTouchTrig
 import { Player } from "../Board/Player";
 import { Torch } from "../ThreeJsBoard/Torch";
 import { MergeControlTrigger } from "../ThreeJsBoard/Triggers/MergeControlTrigger";
+import { PushActivatedSwitch } from "../ThreeJsBoard/PushActivatedSwitch";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
@@ -114,7 +115,29 @@ export class LevelLoader extends ResourcesLoader<Level> {
           };
 
           boardDocument.traverse((type, attributes) => {
-            if (type === "cauldron") {
+            if (type === "pushActivatedSwitch") {
+              const [x, y] = attributes.pickArrValueByAttr(
+                "slot",
+                slotsPositions,
+              );
+              const activeTimeMs = attributes.getInt("activeTimeMs");
+              const directionToPush = attributes.getEnum("direction", [
+                "toTop",
+                "toBottom",
+                "toRight",
+                "toLeft",
+              ]);
+
+              push(
+                new PushActivatedSwitch(
+                  x * 0.32,
+                  y * 0.32,
+                  activeTimeMs,
+                  directionToPush,
+                ),
+                attributes,
+              );
+            } else if (type === "cauldron") {
               const [x, y] = attributes.pickArrValueByAttr(
                 "slot",
                 slotsPositions,
@@ -229,6 +252,8 @@ export class LevelLoader extends ResourcesLoader<Level> {
                   attributes,
                 );
               }
+            } else {
+              console.warn("unknown type :", type, attributes);
             }
           });
           return result;

@@ -18,4 +18,9 @@ export class MyGame extends BrowserGame {
   protected render() {
     this.renderer.render(this.board.getScene());
   }
+
+  getScene() {
+    this.board.update(0);
+    return this.board.getScene();
+  }
 }

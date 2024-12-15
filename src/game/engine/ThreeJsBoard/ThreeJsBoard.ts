@@ -22,6 +22,8 @@ import { Cauldron } from "./Cauldron";
 import { BoardObject } from "../Board/BoardObject";
 import { gamepad1 } from "../IO/Devices/Gamepad";
 import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
+import { PushActivatedSwitch } from "./PushActivatedSwitch";
+import { getCenterOfRectangle } from "../Utils/math/getCenterOfRectangle";
 
 type GameEvent =
   | {
@@ -152,10 +154,10 @@ export class ThreeJsBoard {
         object.update(delta);
       }
 
+      const players = this.objects.filter(
+        (object) => object instanceof ThreeJsPlayer,
+      ) as ThreeJsPlayer[];
       if (object instanceof Cauldron) {
-        const players = this.objects.filter(
-          (object) => object instanceof ThreeJsPlayer,
-        ) as ThreeJsPlayer[];
         const somePlayerContains = players.some((player) =>
           objectContainsOther(object, player),
         );
@@ -163,12 +165,36 @@ export class ThreeJsBoard {
           object.activate();
         }
       }
+      if (object instanceof PushActivatedSwitch) {
+        players.forEach((player) => {
+          object.interact(player);
+        });
+      }
 
       if (object instanceof ThreeJsPlayer) {
         const action = this.getActionForPlayer(object);
         if (action?.name === "grabTorch") {
           action.torch.showTip();
         }
+      }
+
+      if (object instanceof Door) {
+        const step = (0.001875 / 3) * delta;
+
+        players.forEach((player) => {
+          const block = object.getBlockingRect();
+          if (block && objectContainsOther(block, player)) {
+            const c1 = getCenterOfRectangle(player);
+            const c2 = getCenterOfRectangle(block);
+            if (object.getPosition() === "vertical") {
+              const direction = c1.x > c2.x ? 1 : -1;
+              player.changePosition(step * direction, 0);
+            } else {
+              const direction = c1.y > c2.y ? 1 : -1;
+              player.changePosition(0, step * direction);
+            }
+          }
+        });
       }
     });
     this.updateCameraPosition();

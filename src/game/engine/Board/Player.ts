@@ -2,7 +2,7 @@ import { ControlBehavior } from "../IO/Behaviors/ControlBehavior";
 import { ControlBehaviorGroup } from "../IO/Behaviors/ControlBehaviorGroup";
 import { Gamepad } from "../IO/Devices/Gamepad";
 import { KeyboardCode } from "../IO/Devices/Keyboard";
-import { MobileGamepad, mobileGamepad } from "../IO/Devices/MobileGamepad";
+import { MobileGamepad } from "../IO/Devices/MobileGamepad";
 import { Key } from "../ThreeJsBoard/Key";
 import { BoardObject, Rectangle } from "./BoardObject";
 

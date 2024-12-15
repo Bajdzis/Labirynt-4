@@ -8,6 +8,11 @@
             <transmitControlTrigger sourceId="cauldron1" targetId="cauldron2" action="activated" />
         </cauldron>
     </cauldron> -->
-    <key slot="0" name="key1"/>
-    <door slot="1" keyName="key1" position="vertical" />
+    <key slot="1" name="key1"/>
+    <door slot="0" keyName="key1" position="vertical" />
+    <!-- <pushActivatedSwitch id="push" slot="1" direction="toLeft" activeTimeMs="30000">
+        <door id="door" slot="0" keyName="key1" position="vertical">
+            <transmitControlTrigger sourceId="push" targetId="door" action="both" />
+        </door>
+    </pushActivatedSwitch> -->
 </board>

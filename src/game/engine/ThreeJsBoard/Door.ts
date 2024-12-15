@@ -7,11 +7,12 @@ import {
   InteractiveObject,
   Rectangle,
 } from "../Board/BoardObject";
+import { lightsHelper } from "./LightsHelper";
 
 export class Door extends BoardObject implements Rectangle, InteractiveObject {
   private group: THREE.Group;
-  private left: THREE.Mesh;
-  private right: THREE.Mesh;
+  private left: THREE.Group;
+  private right: THREE.Group;
   private tip: Tooltip;
   private isActivated: boolean = false;
   height: number;
@@ -49,35 +50,30 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     this.group.add(this.right);
   }
 
-  canMoveThrough(rect: Rectangle): boolean {
+  getBlockingRect(): Rectangle | null {
     if (this.isActivated) {
-      return true;
+      return null;
     }
-    if (
-      this.position === "horizontal" &&
-      objectContainsOther(
-        {
-          height: 0.11,
-          width: this.width,
-          x: this.x,
-          y: this.y + 0.05,
-        },
-        rect,
-      )
-    ) {
-      return false;
-    } else if (
-      this.position === "vertical" &&
-      objectContainsOther(
-        {
-          height: this.height,
-          width: 0.11,
-          x: this.x + 0.05,
-          y: this.y,
-        },
-        rect,
-      )
-    ) {
+    if (this.position === "horizontal") {
+      return {
+        height: 0.11,
+        width: this.width,
+        x: this.x,
+        y: this.y + 0.105,
+      };
+    } else {
+      return {
+        height: this.height,
+        width: 0.11,
+        x: this.x + 0.105,
+        y: this.y,
+      };
+    }
+  }
+
+  canMoveThrough(rect: Rectangle): boolean {
+    const blockingRect = this.getBlockingRect();
+    if (blockingRect && objectContainsOther(blockingRect, rect)) {
       return false;
     }
 
@@ -121,19 +117,38 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     if (this.isActivated && this.right.position.x !== 0.32) {
       this.right.position.x = Math.min(0.32, this.right.position.x + speed);
       this.left.position.x = -this.right.position.x;
+      lightsHelper.updateShadows();
     } else if (!this.isActivated && this.right.position.x !== 0.16) {
       this.right.position.x = Math.max(0.16, this.right.position.x - speed);
       this.left.position.x = -this.right.position.x;
+      lightsHelper.updateShadows();
     }
   }
 
   createMesh() {
     const keyGeometry = new THREE.BoxGeometry(0.32, 0.11, 0.3);
 
-    const body = new THREE.Mesh(keyGeometry, resources.data.materials.door);
-    body.castShadow = true;
-    body.position.z = 0.15;
-    return body;
+    const doorPart = new THREE.Mesh(keyGeometry, resources.data.materials.door);
+    doorPart.position.z = 0.15;
+    doorPart.castShadow = true;
+
+    const doorPartShadow = new THREE.Mesh(
+      keyGeometry,
+      new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        transparent: true,
+        opacity: 0,
+      }),
+    );
+    doorPartShadow.castShadow = true;
+    doorPartShadow.position.z = 0.3;
+    const group = new THREE.Group();
+
+    group.add(doorPart);
+
+    group.add(doorPartShadow);
+
+    return group;
   }
 
   showTip() {
@@ -147,5 +162,9 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
   remove() {
     this.group.parent?.remove(this.group);
     this.tip.remove();
+  }
+
+  getPosition(): "vertical" | "horizontal" {
+    return this.position;
   }
 }

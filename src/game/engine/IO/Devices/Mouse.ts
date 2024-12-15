@@ -24,6 +24,9 @@ class Mouse extends IODevice {
 
   constructor() {
     super();
+    window.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
     window.addEventListener(
       "mousedown",
       (e) => {
