@@ -3,6 +3,9 @@ import { TouchPoint, touchScreen } from "./TouchScreen";
 
 let blockConstructor = false;
 
+export type MobileGamepadInputsNames =
+  `touchscreen.${"left-joystick" | "right-button"}`;
+
 export class MobileGamepad extends IODevice {
   private isActiveValue: boolean = false;
   private actionButtonState: boolean = false;

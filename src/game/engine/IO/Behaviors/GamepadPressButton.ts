@@ -1,4 +1,5 @@
 import { GamepadButtonCode, Gamepad } from "../Devices/Gamepad";
+import { InputsNames } from "../Templates/InputTemplate";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class GamepadPressButton extends SourceOfControlBehavior<true> {
@@ -20,5 +21,9 @@ export class GamepadPressButton extends SourceOfControlBehavior<true> {
     }
 
     this.lastKeyState = keyState;
+  }
+
+  getIconsIds(): InputsNames[] {
+    return [this.gamepad.getInputName(this.keyCode)];
   }
 }

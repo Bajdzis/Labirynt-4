@@ -38,6 +38,13 @@ const buttonNameToIndex = {
   center4: 17,
 } as const;
 
+export type GamepadInputsNames =
+  | `${"xbox-gamepad" | "ps-gamepad"}.${(typeof buttonNameToIndex)[keyof typeof buttonNameToIndex]}`
+  | GamepadAxisNames;
+
+export type GamepadAxisNames =
+  `${"xbox-gamepad" | "ps-gamepad"}.${"left" | "right"}`;
+
 export type GamepadButtonCode = keyof typeof buttonNameToIndex;
 
 let gamepadsStatus = navigator.getGamepads();
@@ -49,6 +56,28 @@ export class Gamepad extends IODevice {
       throw new Error("Gamepad constructor is blocked");
     }
     super();
+  }
+
+  static getInputName(
+    pad: "xbox-gamepad" | "ps-gamepad",
+    buttonCode: GamepadButtonCode,
+  ): GamepadInputsNames {
+    return `${pad}.${buttonNameToIndex[buttonCode]}`;
+  }
+
+  static getAxisName(
+    pad: "xbox-gamepad" | "ps-gamepad",
+    axis: "left" | "right",
+  ): GamepadAxisNames {
+    return `${pad}.${axis}`;
+  }
+
+  getInputName(buttonCode: GamepadButtonCode): GamepadInputsNames {
+    return Gamepad.getInputName(this.getNameOfDevice(), buttonCode);
+  }
+
+  getAxisName(axis: "left" | "right"): GamepadAxisNames {
+    return Gamepad.getAxisName(this.getNameOfDevice(), axis);
   }
 
   getNameOfDevice(): "xbox-gamepad" | "ps-gamepad" {

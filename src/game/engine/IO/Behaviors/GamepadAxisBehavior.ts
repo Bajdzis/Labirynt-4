@@ -1,4 +1,5 @@
 import { Gamepad } from "../Devices/Gamepad";
+import { InputsNames } from "../Templates/InputTemplate";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export interface GamepadAxisBehaviorSettings {
@@ -35,5 +36,9 @@ export class GamepadAxisBehavior extends SourceOfControlBehavior<{
         this.state = null;
       }
     }
+  }
+
+  getIconsIds(): InputsNames[] {
+    return [this.gamepad.getAxisName(this.axis)];
   }
 }

@@ -1,4 +1,5 @@
 import { KeyboardCode, keyboard } from "../Devices/Keyboard";
+import { InputsNames } from "../Templates/InputTemplate";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export interface KeyboardMovementKeys {
@@ -29,5 +30,14 @@ export class KeyboardMovement extends SourceOfControlBehavior<{
     } else {
       this.state = null;
     }
+  }
+
+  getIconsIds(): InputsNames[] {
+    return [
+      keyboard.getInputName(this.keyCodes.top),
+      keyboard.getInputName(this.keyCodes.left),
+      keyboard.getInputName(this.keyCodes.bottom),
+      keyboard.getInputName(this.keyCodes.right),
+    ];
   }
 }

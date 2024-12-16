@@ -1,4 +1,5 @@
 import { KeyboardCode, keyboard } from "../Devices/Keyboard";
+import { InputsNames } from "../Templates/InputTemplate";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class KeyboardPressButton extends SourceOfControlBehavior<true> {
@@ -17,5 +18,9 @@ export class KeyboardPressButton extends SourceOfControlBehavior<true> {
     }
 
     this.lastKeyState = keyState;
+  }
+
+  getIconsIds(): InputsNames[] {
+    return [keyboard.getInputName(this.keyCode)];
   }
 }

@@ -162,6 +162,8 @@ export type KeyboardCode =
   | "LaunchApp1"
   | "MediaSelect";
 
+export type KeyboardInputsNames = `keyboard.${KeyboardCode}`;
+
 class Keyboard extends IODevice {
   private keyState: {
     [key in string | KeyboardCode]?: boolean;
@@ -184,6 +186,10 @@ class Keyboard extends IODevice {
       },
       false,
     );
+  }
+
+  getInputName(keyCode: KeyboardCode): KeyboardInputsNames {
+    return `${this.getNameOfDevice()}.${keyCode}`;
   }
 
   getNameOfDevice(): "keyboard" {

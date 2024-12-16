@@ -22,14 +22,21 @@ export class Player extends BoardObject implements Rectangle {
   public angle = 0.0;
   protected numberOfTorches: number = 2;
   private doorKeys: string[] = [];
-  private allBehavior: ControlBehaviorGroup;
+  private allBehavior: ControlBehaviorGroup<{
+    moveBehavior: ControlBehavior<{ x: number; y: number }>;
+    actionBehavior: ControlBehavior<true>;
+  }>;
 
   constructor(
     private moveBehavior: ControlBehavior<{ x: number; y: number }>,
     private actionBehavior: ControlBehavior<true>,
   ) {
     super();
-    this.allBehavior = new ControlBehaviorGroup([moveBehavior, actionBehavior]);
+    this.allBehavior = new ControlBehaviorGroup({
+      moveBehavior,
+      actionBehavior,
+    });
+
     this.x = 0.06;
     this.y = 0.06;
   }

@@ -1,4 +1,5 @@
 import { IODevice } from "../Devices/IODevice";
+import { InputsNames } from "../Templates/InputTemplate";
 
 export class SourceOfControlBehavior<S> {
   state: S | null = null;
@@ -11,4 +12,8 @@ export class SourceOfControlBehavior<S> {
   }
 
   update(delta: number): void {}
+
+  getIconsIds(): InputsNames[] {
+    return [];
+  }
 }

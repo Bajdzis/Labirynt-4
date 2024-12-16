@@ -1,3 +1,4 @@
+import { IODevice } from "../Devices/IODevice";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class ControlBehavior<S> {
@@ -32,5 +33,9 @@ export class ControlBehavior<S> {
       source: this.lastUsedSource,
       timestamp: this.lastUsedSourceTimestamp,
     };
+  }
+
+  getSourceByDevice(device: IODevice) {
+    return this.sources.find((source) => source.device === device) ?? null;
   }
 }

@@ -8,6 +8,8 @@ export type MouseButtonCode =
   | "forwardButton"
   | "backButton";
 
+export type MouseInputsNames = `mouse.${MouseButtonCode}`;
+
 const mouseButtonCodeToNumber: Record<MouseButtonCode, number> = {
   leftButton: 1,
   centerButton: 4,
@@ -116,6 +118,10 @@ class Mouse extends IODevice {
 
   isDown(buttonCode: MouseButtonCode): boolean {
     return (mouseButtonCodeToNumber[buttonCode] & this.buttonsState) !== 0;
+  }
+
+  getInputName(keyCode: MouseButtonCode): MouseInputsNames {
+    return `${this.getNameOfDevice()}.${keyCode}`;
   }
 }
 

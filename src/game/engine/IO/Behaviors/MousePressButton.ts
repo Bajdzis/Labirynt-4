@@ -1,4 +1,5 @@
 import { mouse, MouseButtonCode } from "../Devices/Mouse";
+import { InputsNames } from "../Templates/InputTemplate";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class MousePressButton extends SourceOfControlBehavior<true> {
@@ -17,5 +18,9 @@ export class MousePressButton extends SourceOfControlBehavior<true> {
     }
 
     this.lastKeyState = keyState;
+  }
+
+  getIconsIds(): InputsNames[] {
+    return [mouse.getInputName(this.keyCode)];
   }
 }

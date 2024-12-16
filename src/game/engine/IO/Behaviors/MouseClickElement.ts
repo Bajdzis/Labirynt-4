@@ -1,4 +1,5 @@
 import { mouse } from "../Devices/Mouse";
+import { InputsNames } from "../Templates/InputTemplate";
 import { SourceOfControlBehavior } from "./SourceOfControlBehavior";
 
 export class MouseClickElement extends SourceOfControlBehavior<true> {
@@ -17,5 +18,9 @@ export class MouseClickElement extends SourceOfControlBehavior<true> {
     }
 
     this.lastState = isDown;
+  }
+
+  getIconsIds(): InputsNames[] {
+    return [mouse.getInputName("leftButton")];
   }
 }
