@@ -18,6 +18,7 @@ import { MergeControlTrigger } from "../ThreeJsBoard/Triggers/MergeControlTrigge
 import { PushActivatedSwitch } from "../ThreeJsBoard/PushActivatedSwitch";
 import { InteractiveMessage } from "../ThreeJsBoard/InteractiveMessage";
 import { InvertTransmitTrigger } from "../ThreeJsBoard/Triggers/InvertTransmitTrigger";
+import { WayNetwork } from "../WayNetwork/WayNetwork";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
@@ -39,11 +40,10 @@ export class LevelLoader extends ResourcesLoader<Level> {
       if (boardDocument.getRoot().nodeName !== "board") {
         throw new Error("Invalid level format");
       }
-      const levelImage = await props.imageLoader.load(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        boardDocument.getRoot().attributes.src.value,
-      );
+      const rootAttr = boardDocument.getRootAttributes();
+      const src = rootAttr.getString("src");
+
+      const levelImage = await props.imageLoader.load(src);
 
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
@@ -105,13 +105,30 @@ export class LevelLoader extends ResourcesLoader<Level> {
           }
         }
       }
+
+      const waynet: WayNetwork | null = (() => {
+        const levelWithWayNet =
+          rootAttr.getString("wayNet", "false") === "true";
+        if (levelWithWayNet) {
+          const waynet = new WayNetwork(startPosition, wallsPositions);
+
+          // prepare cache
+          waynet.findPath(startPosition, endPosition);
+          slotsPositions.forEach((slot) => {
+            waynet.findPath(startPosition, slot);
+            waynet.findPath(endPosition, slot);
+          });
+        }
+        return null;
+      })();
+
       const levelData = {
         wallsPositions,
         slotsPositions,
         startPosition,
         endPosition,
         createAdditionalElements: () => {
-          const result: BoardObject[] = [];
+          const result: BoardObject[] = waynet ? [waynet] : [];
           const elementsById: {
             [id: string]: BoardObject;
           } = {};

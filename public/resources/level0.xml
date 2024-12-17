@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<board src="resources/level0.png">
+<board src="resources/level0.png" wayNet="true" >
     <!-- <pushActivatedSwitch id="push" slot="0" direction="toLeft" activeTimeMs="30000">
         <key slot="6" name="key1"/>
         <door id="door" slot="1" keyName="key1" position="vertical">
