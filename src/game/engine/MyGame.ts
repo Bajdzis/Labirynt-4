@@ -20,7 +20,9 @@ export class MyGame extends BrowserGame {
   }
 
   getScene() {
-    this.board.update(0);
-    return this.board.getScene();
+    const board = new ThreeJsBoard(this.renderer.getGameCamera());
+    board.loadLevel(2);
+    board.update(0);
+    return board.getScene();
   }
 }

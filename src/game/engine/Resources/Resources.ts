@@ -98,6 +98,8 @@ export class Resources {
   ) {
     return Promise.all([
       // counter(this.levelLoader.load("resources/level0.xml")),
+      counter(this.levelLoader.load("resources/onboarding1.xml")),
+      counter(this.levelLoader.load("resources/onboarding2.xml")),
       counter(this.levelLoader.load("resources/level1.xml")),
       counter(this.levelLoader.load("resources/level2.xml")),
       counter(this.levelLoader.load("resources/level4.xml")),

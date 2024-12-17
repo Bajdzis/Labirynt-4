@@ -99,6 +99,7 @@ export class ThreeJsBoard {
     new GamepadPressButton(gamepad1, "PsCrossButton"),
   ]);
   private secondPlayerAlreadyAdded = false;
+  private currentLevelId = 0;
 
   constructor(private camera: GameCamera) {
     this.wallsGroup = new ThreeJsWalls(resources, []);
@@ -109,11 +110,15 @@ export class ThreeJsBoard {
     const player1 = new FirstPlayerPrototype();
     this.addObject(player1);
     this.addObject(new Floor(resources));
-    this.loadLevel(0);
+    this.loadLevel(this.currentLevelId);
   }
 
   eachObject(callback: (object: BoardObject) => void) {
     this.objects.forEach(callback);
+  }
+
+  findObject(callback: (object: BoardObject) => boolean) {
+    return this.objects.find(callback);
   }
 
   update(delta: number) {
@@ -299,7 +304,7 @@ export class ThreeJsBoard {
     } else if (event.name === "throwTorch") {
       resources.data.sounds.torch.play();
       event.player.throwTorch();
-      this.addObject(new Torch(event.player.x, event.player.y));
+      this.addObject(new Torch(event.player.x - 0.04, event.player.y - 0.04));
     } else if (event.name === "grabTorch") {
       resources.data.sounds.torch.play();
       event.player.grabTorch();
@@ -315,11 +320,12 @@ export class ThreeJsBoard {
       }
     } else if (event.name === "useDestination") {
       resources.data.sounds.teleport.play();
-      this.loadLevel(1);
+      this.loadLevel(this.currentLevelId + 1);
     }
   }
 
   loadLevel(level: number) {
+    this.currentLevelId = level;
     this.objects.forEach((object) => {
       if (object instanceof ThreeJsPlayer) {
         object.setPosition(

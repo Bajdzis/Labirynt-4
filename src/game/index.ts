@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { Mesh } from "three";
 import { MyGame } from "./engine/MyGame";
 import { resources } from "./engine/Resources/Resources";
@@ -70,10 +71,16 @@ resources
 
     const game = new MyGame(renderer);
 
-    await waitForEnd(() => {
-      renderer.render(game.getScene());
-    });
+    // await waitForEnd(() => {
+    //   renderer.render(game.getScene());
+    // });
     window.setProgressBar("Kompilowanie shaderów...", 85);
+
+    await waitForEnd(() => {
+      // clean up
+      renderer.render(new THREE.Group());
+    });
+    window.setProgressBar("Kompilowanie shaderów...", 90);
 
     let playButton = window.showTextInsteadOfProgressBar();
 

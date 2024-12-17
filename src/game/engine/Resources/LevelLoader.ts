@@ -16,6 +16,8 @@ import { Player } from "../Board/Player";
 import { Torch } from "../ThreeJsBoard/Torch";
 import { MergeControlTrigger } from "../ThreeJsBoard/Triggers/MergeControlTrigger";
 import { PushActivatedSwitch } from "../ThreeJsBoard/PushActivatedSwitch";
+import { InteractiveMessage } from "../ThreeJsBoard/InteractiveMessage";
+import { InvertTransmitTrigger } from "../ThreeJsBoard/Triggers/InvertTransmitTrigger";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
@@ -76,17 +78,28 @@ export class LevelLoader extends ResourcesLoader<Level> {
 
           const sum = red + green + blue;
 
+          if (sum > 735) {
+            //white
+            continue;
+          }
+
           // Check the color of the pixel and determine the position
-          if (sum < 20) {
+          if (sum < 30) {
             // black
             wallsPositions.push([x, -y]);
-          } else if (sum < 330 && blue > 240) {
+
+            continue;
+          }
+
+          if (blue > 235) {
             //blue
             slotsPositions.push([x, -y]);
-          } else if (sum < 330 && red > 240) {
+          }
+          if (red > 235) {
             //red
             startPosition = [x, -y];
-          } else if (sum < 330 && green > 240) {
+          }
+          if (green > 235) {
             //green
             endPosition = [x, -y];
           }
@@ -114,8 +127,14 @@ export class LevelLoader extends ResourcesLoader<Level> {
             }
           };
 
-          boardDocument.traverse((type, attributes) => {
-            if (type === "pushActivatedSwitch") {
+          boardDocument.traverse((type, attributes, getChildren) => {
+            if (type === "interactiveMessage") {
+              const position = attributes.getEnum("position", [
+                "topScreen",
+                "bottomScreen",
+              ]);
+              push(new InteractiveMessage(getChildren(), position), attributes);
+            } else if (type === "pushActivatedSwitch") {
               const [x, y] = attributes.pickArrValueByAttr(
                 "slot",
                 slotsPositions,
@@ -164,6 +183,31 @@ export class LevelLoader extends ResourcesLoader<Level> {
               ]);
 
               push(new Door(x * 0.32, y * 0.32, keyName, position), attributes);
+            } else if (type === "invertTransmitTrigger") {
+              const initialStatus = attributes.getEnum("initialStatus", [
+                "true",
+                "false",
+              ]);
+              const target = attributes.pickObjValueByAttr(
+                "targetId",
+                elementsById,
+              );
+              const action = attributes.getEnum("action", [
+                "activated",
+                "deactivated",
+                "both",
+              ]);
+
+              if (isInteractiveObject(target)) {
+                push(
+                  new InvertTransmitTrigger(
+                    initialStatus === "true",
+                    target,
+                    action,
+                  ),
+                  attributes,
+                );
+              }
             } else if (type === "timerControlTrigger") {
               const time = attributes.getInt("time");
               const object = attributes.pickObjValueByAttr(

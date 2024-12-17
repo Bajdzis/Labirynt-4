@@ -26,7 +26,13 @@ class DocumentXML {
     return this.document;
   }
 
-  traverse(callback: (type: string, attributes: AttributesXML) => void) {
+  traverse(
+    callback: (
+      type: string,
+      attributes: AttributesXML,
+      getChildrenAsHTML: () => string,
+    ) => void,
+  ) {
     const root = this.getRoot();
 
     this.traverseChildren(root, callback);
@@ -34,10 +40,25 @@ class DocumentXML {
 
   private traverseChildren(
     node: Element,
-    callback: (type: string, attributes: AttributesXML) => void,
+    callback: (
+      type: string,
+      attributes: AttributesXML,
+      getChildrenAsHTML: () => string,
+    ) => void,
   ) {
-    callback(node.nodeName, new AttributesXML(node.attributes));
+    let iterateByChildren = true;
 
+    const getChildren = () => {
+      iterateByChildren = false;
+
+      return node.innerHTML;
+    };
+
+    callback(node.nodeName, new AttributesXML(node.attributes), getChildren);
+
+    if (!iterateByChildren) {
+      return;
+    }
     node.childNodes.forEach((child) => {
       if (this.isNodeElement(child)) {
         this.traverseChildren(child, callback);
@@ -78,7 +99,9 @@ export class AttributesXML {
     const value = this.getString(name);
 
     if (!values.includes(value as T)) {
-      throw new Error(`Attribute ${name} has invalid value`);
+      throw new Error(
+        `Attribute ${name} has invalid value. Correct values: ${values.join(", ")}`,
+      );
     }
 
     return value as T;

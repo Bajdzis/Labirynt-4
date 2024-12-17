@@ -4,13 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
     <title>Gra Labirynt 4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Atma&display=swap" rel="stylesheet">
     <style>
+        .atma-regular {
+            font-family: "Atma", system-ui;
+            font-weight: 400;
+            font-style: normal;
+        }
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
             touch-action : none;
             -ms-touch-action : none;
+            font-family: "Atma", system-ui;
+            font-weight: 400;
+            font-style: normal;
         }
         #menu {
             background-color: #002a3e;
@@ -96,14 +107,35 @@
         }
         .label {
             display: block !important;
-            padding: 4px 6px;
+            padding: 0 6px;
             border-radius: 2px;
             font-size: 16px;
             color: #fff;
             background-color: rgba(0, 0, 0, 0.5);
-            font-family: sans-serif;
             opacity: 0;
             transition: opacity 0.5s;
+        }
+        .interactive-message-container{
+            pointer-events: none;
+            user-select: none;
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            text-align: center;
+        }
+        .interactive-message-text {
+            color: #fff;
+            font-size: 42px;
+            text-shadow: 2px 0 0px rgba(0, 0, 0, 1), -2px 0 0px rgba(0, 0, 0, 1), 0 2px 0px rgba(0, 0, 0, 1), 0 -2px 0px rgba(0, 0, 0, 1);
+            display: inline-block;
+            padding: 16px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin: 0 auto;
+            line-height: 1;
+
         }
     </style>
 </head>

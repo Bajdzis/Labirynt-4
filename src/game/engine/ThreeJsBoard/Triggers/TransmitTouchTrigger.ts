@@ -52,15 +52,15 @@ export class TransmitTouchTrigger<T extends Rectangle>
   }
 
   update(): void {
-    this.board?.eachObject((obj) => {
-      if (obj instanceof this.source) {
-        if (objectContainsOther(this, obj)) {
-          this.activate();
-        } else {
-          this.deactivate();
-        }
-      }
-    });
+    if (
+      this.board?.findObject(
+        (obj) => obj instanceof this.source && objectContainsOther(this, obj),
+      )
+    ) {
+      this.activate();
+    } else {
+      this.deactivate();
+    }
   }
 
   isActive() {
