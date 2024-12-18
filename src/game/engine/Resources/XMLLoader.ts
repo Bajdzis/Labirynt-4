@@ -22,6 +22,10 @@ class DocumentXML {
     return this.document.documentElement;
   }
 
+  getRootAttributes() {
+    return new AttributesXML(this.getRoot().attributes);
+  }
+
   getDocument() {
     return this.document;
   }
@@ -74,20 +78,20 @@ class DocumentXML {
 export class AttributesXML {
   constructor(private attributes: NamedNodeMap) {}
 
-  getString(name: string) {
-    const value = this.get(name);
+  getString(name: string, defaultValue?: string) {
+    const value = this.get(name, defaultValue);
     if (!value) {
       throw new Error(`Attribute ${name} not found`);
     }
     return value || "";
   }
 
-  getArray(name: string) {
-    return this.getString(name).split(",");
+  getArray(name: string, defaultValue?: string) {
+    return this.getString(name, defaultValue).split(",");
   }
 
-  getInt(name: string) {
-    const value = parseInt(this.getString(name));
+  getInt(name: string, defaultValue?: string) {
+    const value = parseInt(this.getString(name, defaultValue));
 
     if (isNaN(value)) {
       throw new Error(`Attribute ${name} is not a number`);
@@ -141,7 +145,7 @@ export class AttributesXML {
     });
   }
 
-  get(name: string) {
-    return this.attributes.getNamedItem(name)?.value;
+  get(name: string, defaultValue?: string) {
+    return this.attributes.getNamedItem(name)?.value ?? defaultValue;
   }
 }

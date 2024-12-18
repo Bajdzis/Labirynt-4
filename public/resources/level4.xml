@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<board src="resources/level4.png">
+<board src="resources/level4.png" wayNet="true">
     <cauldron slot="0" />
     <cauldron slot="1" />
     <cauldron slot="2" />
