@@ -22,7 +22,8 @@ export class WayNetwork extends BoardObject {
     this.createNode(walls, somePositionInside[0], somePositionInside[1]);
 
     if (process.env.NODE_ENV === "development") {
-      this.wayNetworkView = new WayNetworkView(this.waypoints);
+      this.wayNetworkView = new WayNetworkView();
+      this.wayNetworkView.setWaypoints(this.waypoints);
     }
   }
 
@@ -105,6 +106,13 @@ export class WayNetwork extends BoardObject {
 
   findWaypointOnRect(rect: Rectangle): WayPoint | null {
     return this.waypoints.find((waypoint) => waypoint.contains(rect)) ?? null;
+  }
+
+  findWaypointAt(x: number, y: number): WayPoint | null {
+    return (
+      this.waypoints.find((waypoint) => waypoint.x === x && waypoint.y === y) ??
+      null
+    );
   }
 
   update(): void {

@@ -15,7 +15,7 @@ import { MousePressButton } from "../IO/Behaviors/MousePressButton";
 
 const ROTATION_VECTOR = new THREE.Vector3(0, 0, 1);
 
-export abstract class ThreeJsPlayer extends Player {
+export class ThreeJsPlayer extends Player {
   private group: THREE.Group;
 
   private light: Light;

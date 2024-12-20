@@ -8,3 +8,16 @@ export const objectContainsOther = (object1: Rectangle, object2: Rectangle) => {
     object1.y + object1.height > object2.y
   );
 };
+
+export const rectangleContainsPoint = (
+  rect: Rectangle,
+  x: number,
+  y: number,
+) => {
+  return (
+    rect.x < x &&
+    rect.x + rect.width > x &&
+    rect.y < y &&
+    rect.y + rect.height > y
+  );
+};

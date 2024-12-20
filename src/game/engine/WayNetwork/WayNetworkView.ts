@@ -11,7 +11,11 @@ export class WayNetworkView {
 
   private waypointMeshes = new Map<WayPoint, Mesh>();
   private showingPath: WayPoint[] = [];
-  constructor(private waypoints: WayPoint[]) {
+  private waypoints: WayPoint[] = [];
+
+  setWaypoints(waypoints: WayPoint[]) {
+    this.waypoints = waypoints;
+    this.group.clear();
     for (const waypoint of this.waypoints) {
       const mesh = new Mesh(
         this.geometry,

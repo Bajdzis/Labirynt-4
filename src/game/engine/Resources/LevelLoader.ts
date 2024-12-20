@@ -19,6 +19,9 @@ import { PushActivatedSwitch } from "../ThreeJsBoard/PushActivatedSwitch";
 import { InteractiveMessage } from "../ThreeJsBoard/InteractiveMessage";
 import { InvertTransmitTrigger } from "../ThreeJsBoard/Triggers/InvertTransmitTrigger";
 import { WayNetwork } from "../WayNetwork/WayNetwork";
+import { resources } from "./Resources";
+import { NPC } from "../ThreeJsBoard/NPC/NPC";
+import { WalkAround } from "../ThreeJsBoard/NPC/Routine/WalkArourd";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
@@ -146,7 +149,31 @@ export class LevelLoader extends ResourcesLoader<Level> {
           };
 
           boardDocument.traverse((type, attributes, getChildren) => {
-            if (type === "interactiveMessage") {
+            if (type === "ghost") {
+              const [x, y] = attributes.pickArrValueByAttr(
+                "slot",
+                slotsPositions,
+              );
+
+              if (!waynet) {
+                throw new Error("Waynet is required for ghosts");
+              }
+
+              const waypoint = waynet.findWaypointAt(x, y);
+
+              if (!waypoint) {
+                throw new Error(`Waypoint (${x},${y}) not found`);
+              }
+
+              push(
+                new NPC(
+                  waypoint,
+                  resources.data.materials.ghost,
+                  new WalkAround(),
+                ),
+                attributes,
+              );
+            } else if (type === "interactiveMessage") {
               const position = attributes.getEnum("position", [
                 "topScreen",
                 "bottomScreen",

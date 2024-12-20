@@ -117,6 +117,10 @@ export class ThreeJsBoard {
     this.objects.forEach(callback);
   }
 
+  getObjects() {
+    return this.objects;
+  }
+
   findObject(callback: (object: BoardObject) => boolean) {
     return this.objects.find(callback);
   }

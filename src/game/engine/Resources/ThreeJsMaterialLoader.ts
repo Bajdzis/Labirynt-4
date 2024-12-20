@@ -13,7 +13,9 @@ type MaterialName =
   | "floor"
   | "floorShadow"
   | "player1"
-  | "player2";
+  | "player2"
+  | "ghost"
+  | "mummy";
 
 interface MaterialLoaderProps {
   textureLoader: ThreeJsTextureLoader;
@@ -78,6 +80,26 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
           opacity: 1,
         });
       });
+  }
+
+  ghost({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+    return textureLoader.load("resources/npc/ghost.png").then((texture) => {
+      return new THREE.MeshStandardMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 1,
+      });
+    });
+  }
+
+  mummy({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+    return textureLoader.load("resources/npc/mummy.png").then((texture) => {
+      return new THREE.MeshStandardMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 1,
+      });
+    });
   }
 
   async torch(): Promise<THREE.Material> {

@@ -45,6 +45,8 @@ export class Resources {
     const floorShadow = counter(this.threeJsMaterialLoader.load("floorShadow"));
     const playerl = counter(this.threeJsMaterialLoader.load("player1"));
     const player2 = counter(this.threeJsMaterialLoader.load("player2"));
+    const ghost = counter(this.threeJsMaterialLoader.load("ghost"));
+    const mummy = counter(this.threeJsMaterialLoader.load("mummy"));
     const wallOutline = counter(this.threeJsMaterialLoader.load("wallOutline"));
 
     return {
@@ -57,6 +59,8 @@ export class Resources {
       floorShadow: await floorShadow,
       player1: await playerl,
       player2: await player2,
+      ghost: await ghost,
+      mummy: await mummy,
       wallOutline: await wallOutline,
     };
   }

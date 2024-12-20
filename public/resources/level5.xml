@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<board src="resources/level5.png">
+    <cauldron id="cauldron1" slot="8" >
+        <cauldron id="cauldron2" slot="9" >
+            <transmitTouchTrigger slot="7" source="player" targetId="cauldron1" action="activated" />
+            <transmitTouchTrigger slot="7" source="player" targetId="cauldron2" action="activated" />
+        </cauldron>
+    </cauldron>
+    <cauldron id="cauldron3" slot="1" >
+        <cauldron id="cauldron4" slot="2" >
+            <cauldron id="cauldron5" slot="3" >
+                <cauldron id="cauldron6" slot="4" >
+                    <door slot="0" id="door1" keyName="no-key-open-by-cauldron" position="vertical" >
+                        <mergeControlTrigger
+                            sourceIds="cauldron6,cauldron3,cauldron5,cauldron4"
+                            targetId="door1"
+                            action="activated"
+                        />
+                    </door>
+                </cauldron>
+            </cauldron>
+        </cauldron>
+    </cauldron>
+    <key slot="5" name="keyFor9"/>
+    <door slot="6" keyName="keyFor9" position="vertical" />
+</board>

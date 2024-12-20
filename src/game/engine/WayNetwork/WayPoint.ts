@@ -13,6 +13,14 @@ export class WayPoint {
     this.rect = { x: x * 0.32, y: y * 0.32, width: 0.32, height: 0.32 };
   }
 
+  getCenter() {
+    return { x: this.rect.x, y: this.rect.y };
+  }
+
+  countAngleTo(wayPoint: WayPoint) {
+    return Math.atan2(wayPoint.y - this.y, wayPoint.x - this.x);
+  }
+
   isActive() {
     return this.interactiveObjects.every((interactiveObject) =>
       interactiveObject.isActive(),
@@ -49,5 +57,9 @@ export class WayPoint {
 
   getConnectionsWithDistance() {
     return this.connectWaypointsAndDistance;
+  }
+
+  getConnectedWaypoints() {
+    return Array.from(this.connectWaypointsAndDistance.keys());
   }
 }

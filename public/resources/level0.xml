@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <board src="resources/level0.png" wayNet="true" >
-    <cauldron id="cauldron2" slot="7">
-        <interactiveMessage id="message1" position="topScreen">
-           hello world!
-        </interactiveMessage>
-        <transmitTouchTrigger slot="6" source="player" targetId="cauldron2" action="activated" />
-        <!-- <timerControlTrigger objectId="message1" time="5000" /> -->
-        <transmitTouchTrigger slot="6" source="player" targetId="message1" action="both" />
-    </cauldron>
-
+    <ghost slot="4" />
     <door slot="0" keyName="key1" position="horizontal" />
     <door slot="1" keyName="key1" position="vertical" />
     <door slot="2" keyName="key1" position="horizontal" />
     <door slot="3" keyName="key1" position="horizontal" />
     <key slot="5" name="key1"/>
-
+    <ghost slot="5" />
 </board>
