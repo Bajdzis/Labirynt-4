@@ -38,6 +38,7 @@ export class NPC extends BoardObject {
   private senseOfTouchTorch = new NPCSense(Torch, 0);
   private senseOfTouchKey = new NPCSense(Key, 0);
   private senseOfTouchPlayer = new NPCSense(ThreeJsPlayer, 0);
+  public beforeWaypoint: WayPoint | null = null;
 
   constructor(
     private currentWayPoint: WayPoint,
@@ -45,14 +46,17 @@ export class NPC extends BoardObject {
     private defaultRoutine: Routine,
   ) {
     super();
-    this.routine = defaultRoutine;
-    this.routine.start(this);
+
+    this.beforeWaypoint = this.currentWayPoint;
     this.mesh = new Mesh(new PlaneGeometry(0.2, 0.2), this.material);
     this.mesh.position.set(
       currentWayPoint.x * 0.32,
       currentWayPoint.y * 0.32,
       0.1,
     );
+
+    this.routine = defaultRoutine;
+    this.routine.start(this);
   }
 
   public startRoutine(routine: Routine) {
@@ -118,6 +122,14 @@ export class NPC extends BoardObject {
 
   public clearTasks() {
     this.queue = [];
+    this.currentTask = null;
+
+    this.beforeWaypoint = this.currentWayPoint;
+    this.currentWayPoint =
+      this.currentWayPoint.wayNet.findClosestWaypointToPoint(
+        this.mesh.position.x,
+        this.mesh.position.y,
+      ) || this.currentWayPoint;
   }
 
   public getCurrentAngle() {
@@ -132,6 +144,7 @@ export class NPC extends BoardObject {
     const newTask = this.queue.shift() || null;
     if (newTask === null && this.currentTask !== null) {
       this.emptyTaskListListeners.forEach((listener) => listener());
+      return this.queue.shift() || null;
     }
     return newTask;
   }
@@ -160,18 +173,49 @@ export class NPC extends BoardObject {
           this.mesh.rotation.z = targetAngle;
         }
         const targetRect = target.getCenter();
+
         const dx = targetRect.x - this.mesh.position.x;
         const dy = targetRect.y - this.mesh.position.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 0.001) {
+
+        const speed = 0.001875 * (this.currentTask.speed / 3) * delta;
+        let XisDone = dx === 0;
+        let YisDone = dy === 0;
+        if (!XisDone) {
+          if (dx < 0) {
+            this.mesh.position.x -= speed;
+            if (this.mesh.position.x < targetRect.x) {
+              XisDone = true;
+            }
+          } else {
+            this.mesh.position.x += speed;
+            if (this.mesh.position.x > targetRect.x) {
+              XisDone = true;
+            }
+          }
+        }
+        if (!YisDone) {
+          if (dy < 0) {
+            this.mesh.position.y -= speed;
+            if (this.mesh.position.y < targetRect.y) {
+              YisDone = true;
+            }
+          } else {
+            this.mesh.position.y += speed;
+            if (this.mesh.position.y > targetRect.y) {
+              YisDone = true;
+            }
+          }
+        }
+
+        if (XisDone && YisDone) {
+          this.beforeWaypoint = this.currentWayPoint;
           this.currentWayPoint = target;
+
           this.currentTask = this.startNextTask();
-        } else {
-          const speed = 0.0005 * delta;
-          const nx = (dx * 0.32) / distance;
-          const ny = (dy * 0.32) / distance;
-          this.mesh.position.x += nx * speed;
-          this.mesh.position.y += ny * speed;
+        } else if (XisDone) {
+          this.mesh.position.x = targetRect.x;
+        } else if (YisDone) {
+          this.mesh.position.y = targetRect.y;
         }
       } else if (this.currentTask.type === "lookAt") {
         const target = this.currentTask.waypoint;
@@ -180,21 +224,16 @@ export class NPC extends BoardObject {
           target.y - current.y,
           target.x - current.x,
         );
-        const currentAngle = this.mesh.rotation.z;
         const rotationSpeed = 0.001 * delta;
-        const diff = targetAngle - currentAngle;
-        if (diff > Math.PI) {
+        const diff = targetAngle - this.mesh.rotation.z;
+
+        if (diff % (2 * Math.PI) > 0) {
           this.mesh.rotation.z += rotationSpeed;
-        } else if (diff < -Math.PI) {
-          this.mesh.rotation.z -= rotationSpeed;
         } else {
-          if (diff > 0) {
-            this.mesh.rotation.z += rotationSpeed;
-          } else {
-            this.mesh.rotation.z -= rotationSpeed;
-          }
+          this.mesh.rotation.z -= rotationSpeed;
         }
-        if (Math.abs(diff) < 0.01) {
+        if (Math.abs(targetAngle - this.mesh.rotation.z) < 0.01) {
+          this.mesh.rotation.z = targetAngle;
           this.currentTask = this.startNextTask();
         }
       } else if (this.currentTask.type === "wait") {

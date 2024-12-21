@@ -22,6 +22,8 @@ import { WayNetwork } from "../WayNetwork/WayNetwork";
 import { resources } from "./Resources";
 import { NPC } from "../ThreeJsBoard/NPC/NPC";
 import { WalkAround } from "../ThreeJsBoard/NPC/Routine/WalkArourd";
+import { FollowPlayer } from "../ThreeJsBoard/NPC/Routine/FollowPlayer";
+import { WalkAroundGhost } from "../ThreeJsBoard/NPC/Routine/WalkArourdGhost";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
@@ -116,10 +118,10 @@ export class LevelLoader extends ResourcesLoader<Level> {
           const waynet = new WayNetwork(startPosition, wallsPositions);
 
           // prepare cache
-          waynet.findPath(startPosition, endPosition);
+          waynet.findPathByPosition(startPosition, endPosition);
           slotsPositions.forEach((slot) => {
-            waynet.findPath(startPosition, slot);
-            waynet.findPath(endPosition, slot);
+            waynet.findPathByPosition(startPosition, slot);
+            waynet.findPathByPosition(endPosition, slot);
           });
           return waynet;
         }
@@ -149,17 +151,17 @@ export class LevelLoader extends ResourcesLoader<Level> {
           };
 
           boardDocument.traverse((type, attributes, getChildren) => {
-            if (type === "ghost") {
+            if (type === "ghost" || type === "mummy") {
               const [x, y] = attributes.pickArrValueByAttr(
                 "slot",
                 slotsPositions,
               );
 
               if (!waynet) {
-                throw new Error("Waynet is required for ghosts");
+                throw new Error("Waynet is required for NPC");
               }
 
-              const waypoint = waynet.findWaypointAt(x, y);
+              const waypoint = waynet.findWaypointAtCoords(x, y);
 
               if (!waypoint) {
                 throw new Error(`Waypoint (${x},${y}) not found`);
@@ -168,8 +170,10 @@ export class LevelLoader extends ResourcesLoader<Level> {
               push(
                 new NPC(
                   waypoint,
-                  resources.data.materials.ghost,
-                  new WalkAround(),
+                  resources.data.materials[type],
+                  type === "ghost"
+                    ? new WalkAroundGhost()
+                    : new WalkAround(new FollowPlayer(waynet)),
                 ),
                 attributes,
               );

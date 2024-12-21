@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <board src="resources/level0.png" wayNet="true" >
-    <ghost slot="4" />
+    <mummy slot="4" />
     <door slot="0" keyName="key1" position="horizontal" />
     <door slot="1" keyName="key1" position="vertical" />
     <door slot="2" keyName="key1" position="horizontal" />

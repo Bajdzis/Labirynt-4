@@ -104,7 +104,6 @@ export class ThreeJsBoard {
   constructor(private camera: GameCamera) {
     this.wallsGroup = new ThreeJsWalls(resources, []);
     this.scene = new THREE.Group();
-    // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
     this.scene.add(boxParticles.getObject());
     const player1 = new FirstPlayerPrototype();

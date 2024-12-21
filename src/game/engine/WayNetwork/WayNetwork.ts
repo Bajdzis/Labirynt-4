@@ -40,7 +40,7 @@ export class WayNetwork extends BoardObject {
     if (currentWayPoint) {
       return currentWayPoint;
     }
-    const rootWayPoint = new WayPoint(x, y);
+    const rootWayPoint = new WayPoint(x, y, this);
 
     this.waypoints.push(rootWayPoint);
 
@@ -81,7 +81,10 @@ export class WayNetwork extends BoardObject {
     return rootWayPoint;
   }
 
-  findPath(start: [number, number], end: [number, number]): WayPoint[] | null {
+  findPathByPosition(
+    start: [number, number],
+    end: [number, number],
+  ): WayPoint[] | null {
     const startWaypoint = this.waypoints.find((w) =>
       w.isPointAt(start[0], start[1]),
     );
@@ -91,6 +94,17 @@ export class WayNetwork extends BoardObject {
     }
 
     return this.wayNetworkPathFinder.findPath(startWaypoint, endWaypoint);
+  }
+
+  findPathByWayPoint(
+    start: WayPoint | null,
+    end: WayPoint | null,
+  ): WayPoint[] | null {
+    if (!start || !end) {
+      return null;
+    }
+
+    return this.wayNetworkPathFinder.findPath(start, end);
   }
 
   private static createWallMatrix(
@@ -108,11 +122,25 @@ export class WayNetwork extends BoardObject {
     return this.waypoints.find((waypoint) => waypoint.contains(rect)) ?? null;
   }
 
-  findWaypointAt(x: number, y: number): WayPoint | null {
+  findWaypointAtCoords(x: number, y: number): WayPoint | null {
     return (
       this.waypoints.find((waypoint) => waypoint.x === x && waypoint.y === y) ??
       null
     );
+  }
+
+  findClosestWaypointToPoint(x: number, y: number): WayPoint | null {
+    const [theClosestWaypoint] = this.waypoints
+      .filter((waypoint) => waypoint.containsPoint(x, y))
+      .sort((a, b) => {
+        const aCenter = a.getCenter();
+        const bCenter = b.getCenter();
+        return (
+          Math.sqrt(Math.pow(aCenter.x - x, 2) + Math.pow(aCenter.y - y, 2)) -
+          Math.sqrt(Math.pow(bCenter.x - x, 2) + Math.pow(bCenter.y - y, 2))
+        );
+      });
+    return theClosestWaypoint ?? null;
   }
 
   update(): void {

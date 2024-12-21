@@ -1,7 +1,7 @@
 import { NPC } from "../NPC";
 import { Routine } from "./domain";
 
-export class WalkAround implements Routine {
+export class WalkAroundGhost implements Routine {
   constructor(private onSeePlayerRoutine?: Routine) {}
   start(npc: NPC) {
     npc.clearAll();
@@ -30,7 +30,7 @@ export class WalkAround implements Routine {
 
     const possibleDestinations = wp
       .getConnectedWaypoints()
-      .filter((wp) => wp.isActive() && wp !== npc.beforeWaypoint);
+      .filter((wp) => wp !== npc.beforeWaypoint);
 
     const nextDestination =
       possibleDestinations[
@@ -42,7 +42,7 @@ export class WalkAround implements Routine {
       const targetAngle = npc
         .getCurrentWayPoint()
         .countAngleTo(nextDestination);
-      if (Math.abs(currentAngle - targetAngle) < 0.01) {
+      if (Math.abs(currentAngle - targetAngle) < 0.1) {
         npc.gotoAndLookAt(nextDestination, 1);
       } else {
         npc.lookAt(nextDestination);

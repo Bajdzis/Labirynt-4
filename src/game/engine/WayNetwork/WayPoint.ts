@@ -1,5 +1,9 @@
 import { InteractiveObject, Rectangle } from "../Board/BoardObject";
-import { objectContainsOther } from "../Utils/math/objectContainsOther";
+import {
+  objectContainsOther,
+  rectangleContainsPoint,
+} from "../Utils/math/objectContainsOther";
+import { WayNetwork } from "./WayNetwork";
 
 export class WayPoint {
   private rect: Rectangle;
@@ -9,6 +13,7 @@ export class WayPoint {
   constructor(
     public x: number,
     public y: number,
+    public wayNet: WayNetwork,
   ) {
     this.rect = { x: x * 0.32, y: y * 0.32, width: 0.32, height: 0.32 };
   }
@@ -53,6 +58,10 @@ export class WayPoint {
 
   contains(rect: Rectangle) {
     return objectContainsOther(this.rect, rect);
+  }
+
+  containsPoint(x: number, y: number) {
+    return rectangleContainsPoint(this.rect, x, y);
   }
 
   getConnectionsWithDistance() {
