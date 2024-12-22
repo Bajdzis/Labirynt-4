@@ -29,14 +29,22 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     private position: "vertical" | "horizontal" = "horizontal",
   ) {
     super();
-    this.x = x;
-    this.y = y;
+
     this.keyName = keyName;
-    this.width = 0.32;
-    this.height = 0.32;
+
     this.group = new THREE.Group();
     if (position === "vertical") {
       this.group.rotation.z = Math.PI / 2;
+      this.x = x + 0.07;
+      this.y = y;
+      this.width = 0.18;
+      this.height = 0.32;
+    } else {
+      this.group.rotation.z = 0;
+      this.x = x;
+      this.y = y + 0.07;
+      this.width = 0.32;
+      this.height = 0.18;
     }
 
     this.tip = new Tooltip("Drzwi", 0, -0.48);
@@ -46,6 +54,13 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     this.right = this.createMesh();
     this.right.position.x = 0.16;
     this.left.position.x = -0.16;
+    if (position === "vertical") {
+      this.right.position.y = 0.07;
+      this.left.position.y = 0.07;
+    } else {
+      this.right.position.y = -0.07;
+      this.left.position.y = -0.07;
+    }
     this.group.add(this.left);
     this.group.add(this.right);
   }
@@ -54,19 +69,19 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     if (this.isActivated) {
       return null;
     }
-    if (this.position === "horizontal") {
+    if (this.position === "vertical") {
+      return {
+        height: this.height,
+        width: 0.11,
+        x: this.x + (this.width - 0.11) / 2,
+        y: this.y,
+      };
+    } else {
       return {
         height: 0.11,
         width: this.width,
         x: this.x,
-        y: this.y + 0.105,
-      };
-    } else {
-      return {
-        height: this.height,
-        width: 0.11,
-        x: this.x + 0.105,
-        y: this.y,
+        y: this.y + (this.height - 0.11) / 2,
       };
     }
   }
@@ -114,8 +129,8 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
     this.group.position.x = this.x;
     this.group.position.y = this.y;
     const speed = (0.001875 / 3) * delta;
-    if (this.isActivated && this.right.position.x !== 0.32) {
-      this.right.position.x = Math.min(0.32, this.right.position.x + speed);
+    if (this.isActivated && this.right.position.x !== 0.28) {
+      this.right.position.x = Math.min(0.28, this.right.position.x + speed);
       this.left.position.x = -this.right.position.x;
       lightsHelper.updateShadows();
     } else if (!this.isActivated && this.right.position.x !== 0.16) {
