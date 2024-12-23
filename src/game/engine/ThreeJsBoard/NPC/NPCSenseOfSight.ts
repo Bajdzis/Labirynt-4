@@ -9,9 +9,9 @@ export class NPCSenseOfSight<
   constructor(
     objectToSearch: new (...args: any) => T,
     range: number,
-    private npc: NPC,
+    npc: NPC,
   ) {
-    super(objectToSearch, range);
+    super([objectToSearch], range, npc, 250);
   }
 
   protected isValidObservationWaypoint(waypoint: WayPoint, distance: number) {

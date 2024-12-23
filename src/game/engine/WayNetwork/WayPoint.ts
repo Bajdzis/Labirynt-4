@@ -15,7 +15,12 @@ export class WayPoint {
     public y: number,
     public wayNet: WayNetwork,
   ) {
-    this.rect = { x: x * 0.32, y: y * 0.32, width: 0.32, height: 0.32 };
+    this.rect = {
+      x: x * 0.32 + 0.01,
+      y: y * 0.32 + 0.01,
+      width: 0.3,
+      height: 0.3,
+    };
   }
 
   getCenter() {
@@ -70,5 +75,9 @@ export class WayPoint {
 
   getConnectedWaypoints() {
     return Array.from(this.connectWaypointsAndDistance.keys());
+  }
+
+  findClosestNotConnectedWaypoints(distance = 3) {
+    return this.wayNet.findClosestNotConnectedWaypoints(this, distance);
   }
 }

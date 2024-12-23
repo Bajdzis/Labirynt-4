@@ -1,33 +1,69 @@
 import { BoardObject, Rectangle } from "../../Board/BoardObject";
+import { Timer } from "../../Board/Timer";
 import { WayPoint } from "../../WayNetwork/WayPoint";
+import { NPC } from "./NPC";
 
 export class NPCSense<T extends BoardObject & Rectangle> {
   public readonly waypointsToObserve: Set<WayPoint> = new Set();
   protected rootWayPoint: WayPoint | null = null;
-  private listeners: ((object: T) => void)[] = [];
-
+  private listenersOnActive: ((object: T) => void)[] = [];
+  private listenersOnDeactivate: (() => void)[] = [];
+  private time: Timer;
+  private objects: BoardObject[] = [];
+  private isActivated = false;
   constructor(
-    private objectToSearch: new (...args: any) => T,
+    private objectsToSearch: (new (...args: any) => T)[],
     private range: number,
-  ) {}
-
-  searchObjectInSenseRange(objects: BoardObject[]) {
-    if (this.listeners.length === 0) {
-      return;
-    }
-    for (const object of objects) {
-      if (object instanceof this.objectToSearch) {
-        for (const waypoint of this.waypointsToObserve) {
-          if (waypoint.contains(object)) {
-            this.listeners.forEach((listener) => listener(object));
-          }
-        }
-      }
-    }
+    protected npc: NPC,
+    refreshTime = 100,
+  ) {
+    this.time = new Timer(
+      refreshTime,
+      () => {
+        this.refreshWaypointsToObserve(npc.getCurrentWayPoint());
+        this.searchObjectInSenseRange(this.objects);
+      },
+      true,
+    );
   }
 
-  public refreshWaypointsToObserve(rootWayPoint: WayPoint) {
-    if (this.listeners.length === 0) {
+  private filterObject(objects: BoardObject[]): T[] {
+    return objects.filter((object) =>
+      this.objectsToSearch.some((construct) => object instanceof construct),
+    ) as T[];
+  }
+
+  searchObjectInSenseRange(objects: BoardObject[]) {
+    if (this.listenersOnActive.length === 0) {
+      return;
+    }
+    let activated = false;
+
+    const f = this.filterObject(objects);
+    // console.log(f);
+    f.forEach((object) => {
+      for (const waypoint of this.waypointsToObserve) {
+        if (waypoint.contains(object)) {
+          activated = true;
+          this.listenersOnActive.forEach((listener) => listener(object));
+        }
+      }
+    });
+    if (activated === false && this.isActivated === true) {
+      if (!activated) {
+        this.listenersOnDeactivate.forEach((listener) => listener());
+      }
+    }
+    this.isActivated = activated;
+  }
+
+  update(delta: number, objects: BoardObject[]) {
+    this.objects = objects;
+    this.time.update(delta);
+  }
+
+  private refreshWaypointsToObserve(rootWayPoint: WayPoint) {
+    if (this.listenersOnActive.length === 0) {
       return;
     }
     this.rootWayPoint = rootWayPoint;
@@ -56,15 +92,29 @@ export class NPCSense<T extends BoardObject & Rectangle> {
     return distance <= this.range && !this.waypointsToObserve.has(waypoint);
   }
 
-  public addListener(listener: (object: T) => void) {
-    this.listeners.push(listener);
+  public addListener(
+    listenerOnActive: (object: T) => void,
+    listenerOnDeActive?: () => void,
+  ) {
+    this.listenersOnActive.push(listenerOnActive);
+    if (listenerOnDeActive) {
+      this.listenersOnDeactivate.push(listenerOnDeActive);
+    }
 
     return () => {
-      this.listeners = this.listeners.filter((l) => l !== listener);
+      this.listenersOnActive = this.listenersOnActive.filter(
+        (l) => l !== listenerOnActive,
+      );
+      if (listenerOnDeActive) {
+        this.listenersOnDeactivate = this.listenersOnDeactivate.filter(
+          (l) => l !== listenerOnDeActive,
+        );
+      }
     };
   }
 
   public clear() {
-    this.listeners = [];
+    this.listenersOnActive = [];
+    this.listenersOnDeactivate = [];
   }
 }

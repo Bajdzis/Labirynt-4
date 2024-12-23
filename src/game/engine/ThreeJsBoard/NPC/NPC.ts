@@ -1,5 +1,5 @@
 import { Material, Mesh, Object3D, PlaneGeometry } from "three";
-import { BoardObject } from "../../Board/BoardObject";
+import { BoardObject, Rectangle } from "../../Board/BoardObject";
 import { WayPoint } from "../../WayNetwork/WayPoint";
 import { Routine } from "./Routine/domain";
 import { NPCSenseOfSight } from "./NPCSenseOfSight";
@@ -7,8 +7,19 @@ import { ThreeJsPlayer } from "../ThreeJsPlayer";
 import { NPCSense } from "./NPCSense";
 import { Torch } from "../Torch";
 import { Key } from "../Key";
+import { Door } from "../Door";
+import { ThreeJsWall } from "../ThreeJsWall";
+import { NPCTouchSense } from "./NPCTouchSense";
 
 type Task =
+  | {
+      type: "pickItem";
+      item: BoardObject & Rectangle;
+    }
+  | {
+      type: "throwItem";
+      item: BoardObject & Rectangle;
+    }
   | {
       type: "goto";
       waypoint: WayPoint;
@@ -28,16 +39,46 @@ type Task =
       time: number;
     };
 
-export class NPC extends BoardObject {
+const PI_DOUBLE = Math.PI * 2;
+
+function normalizeAngle(angle: number) {
+  return ((angle % PI_DOUBLE) + PI_DOUBLE) % PI_DOUBLE;
+}
+function calculateAngleDistance(current: number, target: number) {
+  const normalizedCurrent = normalizeAngle(current);
+  const normalizedTarget = normalizeAngle(target);
+
+  let difference = normalizedTarget - normalizedCurrent;
+
+  // Normalize for range [-π, π]
+  if (difference > Math.PI) {
+    difference -= PI_DOUBLE;
+  } else if (difference < -Math.PI) {
+    difference += PI_DOUBLE;
+  }
+
+  return difference;
+}
+
+export class NPC extends BoardObject implements Rectangle {
+  public x: number = 0;
+  public y: number = 0;
+  public width: number = 0.2;
+  public height: number = 0.2;
   private routine: Routine;
   private mesh: Mesh;
   private queue: Task[] = [];
+  private inventory: (BoardObject & Rectangle)[] = [];
   private currentTask: Task | null = null;
 
   private senseOfSightPlayer = new NPCSenseOfSight(ThreeJsPlayer, 4, this);
-  private senseOfTouchTorch = new NPCSense(Torch, 0);
-  private senseOfTouchKey = new NPCSense(Key, 0);
-  private senseOfTouchPlayer = new NPCSense(ThreeJsPlayer, 0);
+  private senseOfTouchTorch = new NPCSense([Torch], 0, this);
+  private senseOfTouchKey = new NPCSense([Key], 0, this);
+  private senseOfTouchWall = new NPCTouchSense<Door | ThreeJsWall>(
+    [Door, ThreeJsWall],
+    this,
+  );
+  private senseOfTouchPlayer = new NPCSense([ThreeJsPlayer], 0, this);
   public beforeWaypoint: WayPoint | null = null;
 
   constructor(
@@ -48,7 +89,10 @@ export class NPC extends BoardObject {
     super();
 
     this.beforeWaypoint = this.currentWayPoint;
-    this.mesh = new Mesh(new PlaneGeometry(0.2, 0.2), this.material);
+    this.mesh = new Mesh(
+      new PlaneGeometry(this.width, this.height),
+      this.material,
+    );
     this.mesh.position.set(
       currentWayPoint.x * 0.32,
       currentWayPoint.y * 0.32,
@@ -69,16 +113,36 @@ export class NPC extends BoardObject {
     this.startRoutine(this.defaultRoutine);
   }
 
-  public onSeePlayer(callback: (player: ThreeJsPlayer) => void) {
-    this.senseOfSightPlayer.addListener(callback);
+  public onSeePlayer(
+    callback: (player: ThreeJsPlayer) => void,
+    deactivateCallback?: () => void,
+  ) {
+    this.senseOfSightPlayer.addListener(callback, deactivateCallback);
   }
 
-  public onTouchTorch(callback: (torch: Torch) => void) {
-    this.senseOfTouchTorch.addListener(callback);
+  public onTouchTorch(
+    callback: (torch: Torch) => void,
+    deactivateCallback?: () => void,
+  ) {
+    this.senseOfTouchTorch.addListener(callback, deactivateCallback);
   }
 
-  public onTouchKey(callback: (key: Key) => void) {
-    this.senseOfTouchKey.addListener(callback);
+  public onTouchKey(
+    callback: (key: Key) => void,
+    deactivateCallback?: () => void,
+  ) {
+    this.senseOfTouchKey.addListener((object) => {
+      if (!this.inventory.includes(object)) {
+        callback(object);
+      }
+    }, deactivateCallback);
+  }
+
+  public onTouchWall(
+    callback: (wall: Door | ThreeJsWall) => void,
+    deactivateCallback?: () => void,
+  ) {
+    this.senseOfTouchWall.addListener(callback, deactivateCallback);
   }
 
   public onTouchPlayer(callback: (player: ThreeJsPlayer) => void) {
@@ -102,6 +166,18 @@ export class NPC extends BoardObject {
     this.senseOfTouchTorch.clear();
     this.senseOfTouchKey.clear();
     this.senseOfTouchPlayer.clear();
+  }
+
+  public pickItem(item: Rectangle & BoardObject) {
+    this.queue.push({ type: "pickItem", item });
+  }
+
+  public throwItem(item: Rectangle & BoardObject) {
+    this.queue.push({ type: "throwItem", item });
+  }
+
+  public throwAllItemImmediately() {
+    this.inventory = [];
   }
 
   public goTo(wayPoint: WayPoint, speed: 1 | 2 | 3 = 2) {
@@ -142,7 +218,7 @@ export class NPC extends BoardObject {
 
   private startNextTask() {
     const newTask = this.queue.shift() || null;
-    if (newTask === null && this.currentTask !== null) {
+    if (newTask === null) {
       this.emptyTaskListListeners.forEach((listener) => listener());
       return this.queue.shift() || null;
     }
@@ -151,15 +227,36 @@ export class NPC extends BoardObject {
 
   public update(delta: number) {
     if (this.board) {
-      this.senseOfSightPlayer.refreshWaypointsToObserve(this.currentWayPoint);
-      this.senseOfSightPlayer.searchObjectInSenseRange(this.board.getObjects());
+      const object = this.board.getObjects();
+
+      this.senseOfSightPlayer.update(delta, object);
+      this.senseOfTouchTorch.update(delta, object);
+      this.senseOfTouchKey.update(delta, object);
+      this.senseOfTouchPlayer.update(delta, object);
+      this.senseOfTouchWall.update(delta, object);
     }
+    this.x = this.mesh.position.x;
+    this.y = this.mesh.position.y;
+    this.inventory.forEach((item) => {
+      item.x = this.mesh.position.x;
+      item.y = this.mesh.position.y;
+    });
     this.routine.update(this, delta);
     if (this.currentTask === null) {
       this.currentTask = this.startNextTask();
     }
     if (this.currentTask !== null) {
-      if (
+      if (this.currentTask.type === "pickItem") {
+        this.inventory.push(this.currentTask.item);
+        this.currentTask = this.startNextTask();
+      } else if (this.currentTask.type === "throwItem") {
+        const item = this.currentTask.item;
+        const index = this.inventory.indexOf(item);
+        if (index !== -1) {
+          this.inventory.splice(index, 1);
+        }
+        this.currentTask = this.startNextTask();
+      } else if (
         this.currentTask.type === "goto" ||
         this.currentTask.type === "gotoAndLookAt"
       ) {
@@ -224,15 +321,20 @@ export class NPC extends BoardObject {
           target.y - current.y,
           target.x - current.x,
         );
-        const rotationSpeed = 0.001 * delta;
-        const diff = targetAngle - this.mesh.rotation.z;
 
-        if (diff % (2 * Math.PI) > 0) {
+        const rotationSpeed = 0.001 * delta;
+
+        const distance = calculateAngleDistance(
+          targetAngle,
+          this.mesh.rotation.z,
+        );
+
+        if (distance < 0) {
           this.mesh.rotation.z += rotationSpeed;
         } else {
           this.mesh.rotation.z -= rotationSpeed;
         }
-        if (Math.abs(targetAngle - this.mesh.rotation.z) < 0.01) {
+        if (Math.abs(distance) < 0.01) {
           this.mesh.rotation.z = targetAngle;
           this.currentTask = this.startNextTask();
         }

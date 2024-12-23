@@ -30,7 +30,6 @@ export class ThreeJsRenderer {
     this.renderer.shadowMap.autoUpdate = true;
     this.renderer.domElement.style.imageRendering = "pixelated";
     this.renderer.domElement.style.width = "100%";
-    // this.scene.add(new THREE.AmbientLight());
     this.scene.add(
       lightsHelper.getObject(this.renderer.capabilities.maxTextures),
     );

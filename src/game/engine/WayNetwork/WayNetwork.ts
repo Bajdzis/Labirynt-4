@@ -143,6 +143,30 @@ export class WayNetwork extends BoardObject {
     return theClosestWaypoint ?? null;
   }
 
+  findClosestNotConnectedWaypoints(
+    wp: WayPoint,
+    maxDistance = 2.9,
+  ): { wp: WayPoint; distance: number }[] {
+    const wps = wp.getConnectedWaypoints();
+
+    return this.waypoints.reduce<{ wp: WayPoint; distance: number }[]>(
+      (acc, waypoint) => {
+        if (waypoint === wp) {
+          return acc;
+        }
+        if (wps.includes(waypoint)) {
+          return acc;
+        }
+        const distance = WayPoint.distance(wp, waypoint);
+        if (distance <= maxDistance) {
+          acc.push({ wp: waypoint, distance });
+        }
+        return acc;
+      },
+      [],
+    );
+  }
+
   update(): void {
     if (this.wayNetworkView !== null) {
       this.wayNetworkView.update();

@@ -351,12 +351,11 @@ export class ThreeJsBoard {
     );
 
     this.scene.remove(this.wallsGroup.getObject());
-    this.wallsGroup = new ThreeJsWalls(
-      resources,
-      resources.data.levels[level].wallsPositions.map(
-        ([x, y]) => new ThreeJsWall(x, y),
-      ),
+    const walls = resources.data.levels[level].wallsPositions.map(
+      ([x, y]) => new ThreeJsWall(x, y),
     );
+    walls.forEach((element) => this.addObject(element));
+    this.wallsGroup = new ThreeJsWalls(resources, walls);
 
     this.scene.add(this.wallsGroup.getObject());
   }

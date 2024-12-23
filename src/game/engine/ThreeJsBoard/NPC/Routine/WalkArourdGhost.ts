@@ -10,7 +10,30 @@ export class WalkAroundGhost implements Routine {
     npc.onTaskListIsEmpty(() => {
       this.gotoRandomWaypoint(npc);
     });
+    let walkingThroughWall = false;
 
+    npc.onTouchWall(
+      () => {
+        walkingThroughWall = true;
+        npc.throwAllItemImmediately();
+      },
+      () => {
+        walkingThroughWall = false;
+      },
+    );
+
+    npc.onTouchKey((key) => {
+      if (!walkingThroughWall) {
+        npc.clearTasks();
+        npc.pickItem(key);
+      }
+    });
+    npc.onTouchTorch((torch) => {
+      if (!walkingThroughWall) {
+        npc.clearTasks();
+        npc.pickItem(torch);
+      }
+    });
     const onSeePlayerRoutine = this.onSeePlayerRoutine;
 
     if (onSeePlayerRoutine) {

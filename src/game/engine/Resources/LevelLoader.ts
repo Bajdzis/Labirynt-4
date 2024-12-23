@@ -24,6 +24,7 @@ import { NPC } from "../ThreeJsBoard/NPC/NPC";
 import { WalkAround } from "../ThreeJsBoard/NPC/Routine/WalkArourd";
 import { FollowPlayer } from "../ThreeJsBoard/NPC/Routine/FollowPlayer";
 import { WalkAroundGhost } from "../ThreeJsBoard/NPC/Routine/WalkArourdGhost";
+import { RunAwayFromPlayer } from "../ThreeJsBoard/NPC/Routine/RunAwayFromPlayer";
 
 interface LevelLoaderProps {
   imageLoader: ImageLoader;
@@ -172,7 +173,7 @@ export class LevelLoader extends ResourcesLoader<Level> {
                   waypoint,
                   resources.data.materials[type],
                   type === "ghost"
-                    ? new WalkAroundGhost()
+                    ? new WalkAroundGhost(new RunAwayFromPlayer(waynet))
                     : new WalkAround(new FollowPlayer(waynet)),
                 ),
                 attributes,

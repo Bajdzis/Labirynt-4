@@ -3,11 +3,13 @@ import { Tooltip } from "./Tooltip";
 import { boxParticles } from "../Particles/instances";
 import { resources } from "../Resources/Resources";
 import { BoardObject, Rectangle } from "../Board/BoardObject";
+import { GroupOfParticles } from "../Particles/domain";
 
 export class Key extends BoardObject implements Rectangle {
   private group: THREE.Group;
   private tip: Tooltip;
-  private destroyParticles: (() => void)[];
+  private groupOfParticles: GroupOfParticles;
+  private destroyParticles: () => void;
   height: number;
   width: number;
   x: number;
@@ -31,22 +33,24 @@ export class Key extends BoardObject implements Rectangle {
 
     this.group.add(this.createMesh());
 
-    this.destroyParticles = [
-      boxParticles.addGroupOfParticles({
-        colorStart: new THREE.Color("yellow"),
-        colorStop: new THREE.Color("white"),
-        maxLife: 5000,
-        numberOfParticles: 12,
-        state: "active",
-        type: {
-          type: "rectangle",
-          height: 0.1,
-          width: 0.1,
-          x: x,
-          y: y,
-        },
-      }),
-    ];
+    this.groupOfParticles = {
+      colorStart: new THREE.Color("yellow"),
+      colorStop: new THREE.Color("white"),
+      maxLife: 5000,
+      numberOfParticles: 12,
+      state: "active",
+      type: {
+        type: "rectangle",
+        height: 0.1,
+        width: 0.1,
+        x: x,
+        y: y,
+      },
+    };
+
+    this.destroyParticles = boxParticles.addGroupOfParticles(
+      this.groupOfParticles,
+    );
   }
 
   getObject() {
@@ -72,10 +76,14 @@ export class Key extends BoardObject implements Rectangle {
 
   update(delta: number): void {
     this.tip.update(delta);
+    this.group.position.x = this.x;
+    this.group.position.y = this.y;
+    this.groupOfParticles.type.x = this.x;
+    this.groupOfParticles.type.y = this.y;
   }
 
   remove() {
-    this.destroyParticles.forEach((destroy) => destroy());
+    this.destroyParticles();
     this.group.parent?.remove(this.group);
     this.tip.remove();
   }
