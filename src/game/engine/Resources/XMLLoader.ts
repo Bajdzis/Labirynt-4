@@ -99,8 +99,8 @@ export class AttributesXML {
     return value;
   }
 
-  getEnum<T extends string>(name: string, values: T[]): T {
-    const value = this.getString(name);
+  getEnum<T extends string>(name: string, values: T[], defaultValue?: T): T {
+    const value = this.getString(name, defaultValue);
 
     if (!values.includes(value as T)) {
       throw new Error(

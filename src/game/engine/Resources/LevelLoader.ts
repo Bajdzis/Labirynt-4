@@ -335,6 +335,12 @@ export class LevelLoader extends ResourcesLoader<Level> {
                 "both",
               ]);
 
+              const ordered = attributes.getEnum(
+                "ordered",
+                ["true", "false"],
+                "true",
+              );
+
               if (
                 source.every((source) => isInteractiveObject(source)) &&
                 isInteractiveObject(target)
@@ -345,6 +351,7 @@ export class LevelLoader extends ResourcesLoader<Level> {
                     source as any[] as InteractiveObject[],
                     target,
                     action,
+                    ordered === "true",
                   ),
                   attributes,
                 );
