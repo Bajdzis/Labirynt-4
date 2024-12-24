@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<board src="resources/level8.png" wayNet="true" >
+
+    <door slot="2" keyName="key1-level8" position="horizontal" />
+    <door slot="3" keyName="key2-level8" position="horizontal" />
+    <door slot="4" keyName="key3-level8" position="horizontal" />
+
+    <key slot="5" name="key1-level8"/>
+
+    <ghost slot="0" />
+    <key slot="1" name="key2-level8"/>
+    <ghost slot="6" />
+    <key slot="7" name="key3-level8"/>
+</board>

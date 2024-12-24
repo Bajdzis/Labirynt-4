@@ -105,7 +105,9 @@ export class Resources {
       counter(this.levelLoader.load("resources/onboarding1.xml")),
       counter(this.levelLoader.load("resources/onboarding2.xml")),
       counter(this.levelLoader.load("resources/level1.xml")),
+      counter(this.levelLoader.load("resources/level8.xml")),
       counter(this.levelLoader.load("resources/level5.xml")),
+      counter(this.levelLoader.load("resources/level6.xml")),
       counter(this.levelLoader.load("resources/level7.xml")),
       counter(this.levelLoader.load("resources/level4.xml")),
     ]);
