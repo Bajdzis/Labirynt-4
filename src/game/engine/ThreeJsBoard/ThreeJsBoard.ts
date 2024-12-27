@@ -130,8 +130,8 @@ export class ThreeJsBoard {
       if (this.addSecondPlayerBehavior.getState()) {
         const player = new SecondPlayerPrototype();
         player.changePosition(
-          resources.data.levels[0].startPosition[0] * 0.32,
-          resources.data.levels[0].startPosition[1] * 0.32,
+          resources.data.levels[this.currentLevelId].startPosition[0] * 0.32,
+          resources.data.levels[this.currentLevelId].startPosition[1] * 0.32,
         );
 
         this.addObject(player);
@@ -151,6 +151,9 @@ export class ThreeJsBoard {
 
     boxParticles.update(delta);
     numberOfFrames++;
+    const players = this.objects.filter(
+      (object) => object instanceof ThreeJsPlayer,
+    ) as ThreeJsPlayer[];
     this.objects.forEach((object) => {
       if (performanceCheckerIsActive) {
         const start = performance.now();
@@ -162,9 +165,6 @@ export class ThreeJsBoard {
         object.update(delta);
       }
 
-      const players = this.objects.filter(
-        (object) => object instanceof ThreeJsPlayer,
-      ) as ThreeJsPlayer[];
       if (object instanceof Cauldron) {
         const somePlayerContains = players.some((player) =>
           objectContainsOther(object, player),
@@ -209,6 +209,7 @@ export class ThreeJsBoard {
   }
 
   getActionForPlayer(player: Player): GameEvent | null {
+    let touchedDoor: Door | null = null;
     for (const object of this.objects) {
       if (object instanceof Destination) {
         if (objectContainsOther(object, player)) {
@@ -244,14 +245,27 @@ export class ThreeJsBoard {
       }
       if (object instanceof Door) {
         if (objectContainsOther(object, player)) {
-          object.showTip();
-          return {
-            name: "openDoor",
-            door: object,
-            player: player,
-          };
+          if (!player.haveKey(object.keyName)) {
+            touchedDoor = object;
+          } else {
+            object.showTip();
+            return {
+              name: "openDoor",
+              door: object,
+              player: player,
+            };
+          }
         }
       }
+    }
+
+    if (touchedDoor) {
+      touchedDoor.showTip();
+      return {
+        name: "openDoor",
+        door: touchedDoor,
+        player: player,
+      };
     }
 
     if (player.canPlayerThrowTorch()) {
