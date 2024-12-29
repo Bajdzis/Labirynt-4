@@ -72,8 +72,8 @@ export class NPC extends BoardObject implements Rectangle {
   private currentTask: Task | null = null;
 
   private senseOfSightPlayer = new NPCSenseOfSight(ThreeJsPlayer, 4, this);
-  private senseOfTouchTorch = new NPCSense([Torch], 0, this);
-  private senseOfTouchKey = new NPCSense([Key], 0, this);
+  private senseOfTouchTorch = new NPCTouchSense([Torch], this);
+  private senseOfTouchKey = new NPCTouchSense([Key], this);
   private senseOfTouchWall = new NPCTouchSense<Door | ThreeJsWall>(
     [Door, ThreeJsWall],
     this,
@@ -124,7 +124,18 @@ export class NPC extends BoardObject implements Rectangle {
     callback: (torch: Torch) => void,
     deactivateCallback?: () => void,
   ) {
-    this.senseOfTouchTorch.addListener(callback, deactivateCallback);
+    this.senseOfTouchTorch.addListener((object) => {
+      if (
+        !(
+          this.inventory.includes(object) ||
+          this.queue.some(
+            (task) => task.type === "pickItem" && task.item === object,
+          )
+        )
+      ) {
+        callback(object);
+      }
+    }, deactivateCallback);
   }
 
   public onTouchKey(
@@ -132,7 +143,14 @@ export class NPC extends BoardObject implements Rectangle {
     deactivateCallback?: () => void,
   ) {
     this.senseOfTouchKey.addListener((object) => {
-      if (!this.inventory.includes(object)) {
+      if (
+        !(
+          this.inventory.includes(object) ||
+          this.queue.some(
+            (task) => task.type === "pickItem" && task.item === object,
+          )
+        )
+      ) {
         callback(object);
       }
     }, deactivateCallback);
@@ -169,6 +187,13 @@ export class NPC extends BoardObject implements Rectangle {
   }
 
   public pickItem(item: Rectangle & BoardObject) {
+    const waypoint = this.currentWayPoint.wayNet.findClosestWaypointToPoint(
+      item.x + item.width / 2,
+      item.y + item.height / 2,
+    );
+    if (waypoint) {
+      this.queue.push({ type: "goto", waypoint, speed: 3 });
+    }
     this.queue.push({ type: "pickItem", item });
   }
 

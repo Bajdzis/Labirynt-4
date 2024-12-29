@@ -6,6 +6,7 @@ export class NPCTouchSense<T extends BoardObject & Rectangle> {
   private listenersOnActive: ((object: T) => void)[] = [];
   private listenersOnDeactivate: (() => void)[] = [];
   private isActivated = false;
+  private lastObjects: BoardObject[] = [];
   constructor(
     private objectsToSearch: (new (...args: any) => T)[],
     protected npc: NPC,
@@ -38,6 +39,7 @@ export class NPCTouchSense<T extends BoardObject & Rectangle> {
   }
 
   update(delta: number, objects: BoardObject[]) {
+    this.lastObjects = objects;
     this.searchObjectInSenseRange(objects);
   }
 
@@ -50,6 +52,7 @@ export class NPCTouchSense<T extends BoardObject & Rectangle> {
       this.listenersOnDeactivate.push(listenerOnDeActive);
     }
 
+    this.searchObjectInSenseRange(this.lastObjects);
     return () => {
       this.listenersOnActive = this.listenersOnActive.filter(
         (l) => l !== listenerOnActive,

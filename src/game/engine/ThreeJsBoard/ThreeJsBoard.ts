@@ -349,6 +349,7 @@ export class ThreeJsBoard {
           resources.data.levels[level].startPosition[0] * 0.32,
           resources.data.levels[level].startPosition[1] * 0.32,
         );
+        object.clearKeys();
       } else if (!(object instanceof Floor)) {
         this.removeObject(object);
       }

@@ -10,29 +10,35 @@ export class RunAwayFromPlayer implements Routine {
     npc.clearAll();
 
     let trackingPlayer: ThreeJsPlayer | null = null;
-
+    let freezeTime: DOMHighResTimeStamp | null = null;
     const refreshState = () => {
       if (!trackingPlayer) {
+        if (freezeTime === null) {
+          freezeTime = performance.now();
+        }
+
+        if (performance.now() - freezeTime > 500) {
+          npc.startDefaultRoutine();
+        }
         return;
       }
       const playerWp = this.wayNet.findWaypointOnRect(trackingPlayer);
       if (!playerWp) {
         return;
       }
+      freezeTime = null;
       const npcWp = npc.getCurrentWayPoint();
 
-      const pathToPlayer = WayPoint.distance(npcWp, playerWp);
-
-      // TODO use path distance instead of point distance
+      const pathToPlayer =
+        this.wayNet.findPathByWayPoint(npcWp, playerWp)?.length ?? Infinity;
       if (pathToPlayer > 5) {
         npc.startDefaultRoutine();
         return;
       }
 
-      const points = this.findEscapePathForGhost(npcWp, playerWp, 50) || [];
+      const points = this.findEscapePathForGhost(npcWp, playerWp, 25) || [];
 
       points.forEach((wp) => {
-        console.log(wp.x, wp.y);
         npc.gotoAndLookAt(wp, 3);
       });
     };
@@ -50,11 +56,10 @@ export class RunAwayFromPlayer implements Routine {
       if (!playerPosition) {
         return;
       }
-      const distancePlayerPathToWaypoints = this.getAllWpByDistance(
-        playerPosition,
-        10,
-        (wp) => wp.isActive(),
-      );
+      const distancePlayerPathToWaypoints =
+        RunAwayFromPlayer.getAllWpByDistance(playerPosition, 10, (wp) =>
+          wp.isActive(),
+        );
       const ghostPosition = npc.getCurrentWayPoint();
       const bestChoose = this.getBestWaypointThroughWall(
         ghostPosition,
@@ -81,12 +86,7 @@ export class RunAwayFromPlayer implements Routine {
     playerPosition: WayPoint,
     minDistance: number,
   ): WayPoint[] | null {
-    // const allWp = this.getAllWpByDistance(
-    //   ghostPosition,
-    //   minDistance,
-    //   () => true,
-    // );
-    const distancePlayerPathToWaypoints = this.getAllWpByDistance(
+    const distancePlayerPathToWaypoints = RunAwayFromPlayer.getAllWpByDistance(
       playerPosition,
       minDistance,
       (wp) => wp.isActive(),
@@ -172,63 +172,71 @@ export class RunAwayFromPlayer implements Routine {
     );
   }
 
-  getAllWpByDistance(
+  static getAllWpByDistance(
     wp: WayPoint,
     maxDistance: number,
     checkAvailable: (wp: WayPoint) => boolean,
   ) {
-    const points = this.getAllWpByDistanceRevers(
+    const distanceFromStart = new Map<WayPoint, number>();
+
+    distanceFromStart.set(wp, 0.1);
+
+    RunAwayFromPlayer.getAllWpByDistanceRevers(
       wp,
       maxDistance,
       checkAvailable,
-    )
-      .map(({ wp, distanceLeft }) => ({
+      distanceFromStart,
+    );
+
+    return Array.from(distanceFromStart.keys())
+      .map((wp) => ({
         wp,
-        distance: Math.abs(distanceLeft - maxDistance) + 1,
+        distance: distanceFromStart.get(wp) ?? 0,
       }))
       .sort((a, b) => b.distance - a.distance);
-
-    points.push({ wp, distance: 0 });
-    return points;
   }
 
-  private getAllWpByDistanceRevers(
-    wp: WayPoint,
-    distanceLeft: number,
+  private static getAllWpByDistanceRevers(
+    currentWaypoint: WayPoint,
+    maxDistance: number,
     checkAvailable: (wp: WayPoint) => boolean,
-    visited: WayPoint[] = [],
-  ): { wp: WayPoint; distanceLeft: number }[] {
-    const arr = Array.from(wp.getConnectionsWithDistance());
+    distanceFromStart: Map<WayPoint, number>,
+  ): void {
+    const currentDistance = distanceFromStart.get(currentWaypoint) ?? 0;
+    if (currentDistance > maxDistance) {
+      return;
+    }
 
-    const newPoints = arr.reduce<{ neighbor: WayPoint; distance: number }[]>(
-      (acc, [neighbor, distance]) => {
-        if (visited.includes(neighbor)) {
-          return acc;
-        }
-        acc.push({ neighbor, distance });
-        visited.push(neighbor);
+    const arr = Array.from(currentWaypoint.getConnectionsWithDistance());
 
-        return acc;
-      },
-      [],
-    );
+    arr.forEach(([neighbor, distance]) => {
+      if (!checkAvailable(neighbor)) {
+        return;
+      }
+      const arr = Array.from(neighbor.getConnectionsWithDistance())
+        .filter(([wp]) => distanceFromStart.has(wp))
+        .sort(
+          ([w1], [w2]) =>
+            (distanceFromStart.get(w1) ?? 0) - (distanceFromStart.get(w2) ?? 0),
+        );
 
-    return newPoints.reduce<{ wp: WayPoint; distanceLeft: number }[]>(
-      (acc, { neighbor, distance }) => {
-        acc.push({ wp: neighbor, distanceLeft });
-        if (distanceLeft > 0 && checkAvailable(neighbor)) {
-          const data = this.getAllWpByDistanceRevers(
-            neighbor,
-            distanceLeft - distance,
-            checkAvailable,
-            visited,
-          );
-          acc.push(...data);
-        }
+      const wp = arr[0]?.[0] ?? null;
+      const theSmallDistance = distanceFromStart.get(wp) ?? currentDistance;
+      const finalValue = (wp ? theSmallDistance : currentDistance) + distance;
+      if (
+        distanceFromStart.has(neighbor) &&
+        distanceFromStart.get(neighbor)! <= finalValue
+      ) {
+        return;
+      }
 
-        return acc;
-      },
-      [],
-    );
+      distanceFromStart.set(neighbor, finalValue);
+      RunAwayFromPlayer.getAllWpByDistanceRevers(
+        neighbor,
+        maxDistance,
+        checkAvailable,
+        distanceFromStart,
+      );
+    });
   }
 }

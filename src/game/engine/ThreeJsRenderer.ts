@@ -15,6 +15,7 @@ export class ThreeJsRenderer {
 
   constructor() {
     this.scene = new THREE.Scene();
+    // this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     const main = document.getElementById("main");
     if (!main)
       throw new Error(`No element with id 'main' found in the document`);

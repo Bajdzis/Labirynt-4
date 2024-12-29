@@ -181,6 +181,16 @@ export class WayNetwork extends BoardObject {
         }
       });
 
+      // if (startWaypoint) {
+      //   const data = RunAwayFromPlayer.getAllWpByDistance(
+      //     startWaypoint,
+      //     25,
+      //     (wp) => wp.isActive(),
+      //   );
+      //   this.wayNetworkView.showValues(
+      //     data.map((data) => ({ wp: data.wp, value: data.distance })),
+      //   );
+      // }
       if (startWaypoint && endWaypoint) {
         const path = this.wayNetworkPathFinder.findPath(
           startWaypoint,

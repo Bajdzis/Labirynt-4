@@ -5,7 +5,6 @@ export class WalkAroundGhost implements Routine {
   constructor(private onSeePlayerRoutine?: Routine) {}
   start(npc: NPC) {
     npc.clearAll();
-    this.gotoRandomWaypoint(npc);
 
     npc.onTaskListIsEmpty(() => {
       this.gotoRandomWaypoint(npc);
@@ -24,13 +23,11 @@ export class WalkAroundGhost implements Routine {
 
     npc.onTouchKey((key) => {
       if (!walkingThroughWall) {
-        npc.clearTasks();
         npc.pickItem(key);
       }
     });
     npc.onTouchTorch((torch) => {
       if (!walkingThroughWall) {
-        npc.clearTasks();
         npc.pickItem(torch);
       }
     });
@@ -42,6 +39,9 @@ export class WalkAroundGhost implements Routine {
         npc.startRoutine(onSeePlayerRoutine);
       });
     }
+
+    npc.clearTasks();
+    this.gotoRandomWaypoint(npc);
   }
 
   update() {}
