@@ -10,7 +10,7 @@
         <cauldron id="cauldron4" slot="2" >
             <cauldron id="cauldron5" slot="3" >
                 <cauldron id="cauldron6" slot="4" >
-                    <door slot="0" id="door1" keyName="no-key-open-by-cauldron" position="vertical" >
+                    <door slot="0" id="door1" keyName="null" position="vertical" >
                         <mergeControlTrigger
                             sourceIds="cauldron6,cauldron3,cauldron5,cauldron4"
                             targetId="door1"

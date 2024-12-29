@@ -24,6 +24,7 @@ import { gamepad1 } from "../IO/Devices/Gamepad";
 import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 import { PushActivatedSwitch } from "./PushActivatedSwitch";
 import { getCenterOfRectangle } from "../Utils/math/getCenterOfRectangle";
+import { random } from "../Utils/math/random";
 
 type GameEvent =
   | {
@@ -331,9 +332,17 @@ export class ThreeJsBoard {
       event.player.pickKey(event.key);
       this.removeObject(event.key);
     } else if (event.name === "openDoor") {
-      if (event.player.haveKey(event.door.keyName)) {
+      if (event.door.keyName === null) {
+        resources.data.sounds.doorWithoutConnectedKey[
+          Math.round(random(0, 1))
+        ].play();
+      } else if (event.player.haveKey(event.door.keyName)) {
         event.door.toggle();
         event.player.runVibration(200, 0.5);
+      } else {
+        resources.data.sounds.youDoNotHaveACorrectKey[
+          Math.round(random(0, 1))
+        ].play();
       }
     } else if (event.name === "useDestination") {
       resources.data.sounds.teleport.play();

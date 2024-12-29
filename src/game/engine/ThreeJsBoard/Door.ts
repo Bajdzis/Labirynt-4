@@ -19,13 +19,13 @@ export class Door extends BoardObject implements Rectangle, InteractiveObject {
   width: number;
   x: number;
   y: number;
-  keyName: string;
+  keyName: string | null = null;
   setBoard(): void {}
 
   constructor(
     x: number,
     y: number,
-    keyName: string,
+    keyName: string | null = null,
     private position: "vertical" | "horizontal" = "horizontal",
   ) {
     super();

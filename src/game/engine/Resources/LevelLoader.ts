@@ -226,12 +226,17 @@ export class LevelLoader extends ResourcesLoader<Level> {
                 "slot",
                 slotsPositions,
               );
-              const keyName = attributes.get("keyName") || "";
+              const keyName = attributes.get("keyName", "null");
               const position = attributes.getEnum("position", [
                 "vertical",
                 "horizontal",
               ]);
-              const door = new Door(x * 0.32, y * 0.32, keyName, position);
+              const door = new Door(
+                x * 0.32,
+                y * 0.32,
+                keyName === "null" ? null : keyName,
+                position,
+              );
               push(door, attributes);
               if (waynet) {
                 waynet.assignToObject(door);

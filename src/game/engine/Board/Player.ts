@@ -101,7 +101,10 @@ export class Player extends BoardObject implements Rectangle {
     this.doorKeys.push(key.name);
   }
 
-  haveKey(keyName: string) {
+  haveKey(keyName: string | null) {
+    if (keyName === null) {
+      return false;
+    }
     return this.doorKeys.includes(keyName);
   }
 

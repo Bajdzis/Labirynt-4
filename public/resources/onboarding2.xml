@@ -43,13 +43,13 @@
         aby wyrzucić pochdnie w dowolnym miejscu.
     </interactiveMessage>
     <transmitTouchTrigger slot="1" source="player" targetId="message1" action="both" />
-    <door slot="0" id="topDoor" keyName="no-key" position="horizontal">
+    <door slot="0" id="topDoor" keyName="null" position="horizontal">
         <transmitTouchTrigger slot="1" source="torch" targetId="topDoor" action="activated" />
     </door>
-    <door slot="2" id="bottomDoor" keyName="no-key" position="horizontal">
+    <door slot="2" id="bottomDoor" keyName="null" position="horizontal">
         <transmitTouchTrigger slot="1" source="torch" targetId="bottomDoor" action="activated" />
     </door>
-    <door slot="3" id="teleportDoor" keyName="no-key" position="horizontal">
+    <door slot="3" id="teleportDoor" keyName="null" position="horizontal">
         <invertTransmitTrigger id="touchTorch" initialStatus="true" targetId="teleportDoor" action="activated">
             <transmitTouchTrigger slot="1" source="torch" targetId="touchTorch" action="both" />
         </invertTransmitTrigger>

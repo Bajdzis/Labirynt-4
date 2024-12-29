@@ -74,6 +74,34 @@ export class Resources {
     const door = counter(
       this.audioLoader.load("resources/sounds/interactions/door.mp3", "1"),
     );
+    const doorWithoutConnectedKey = Promise.all([
+      counter(
+        this.audioLoader.load(
+          "resources/sounds/interactions/doorMessages/doorWithoutConnectedKey_1.mp3",
+          "0.8",
+        ),
+      ),
+      counter(
+        this.audioLoader.load(
+          "resources/sounds/interactions/doorMessages/doorWithoutConnectedKey_2.mp3",
+          "0.8",
+        ),
+      ),
+    ]);
+    const youDoNotHaveACorrectKey = Promise.all([
+      counter(
+        this.audioLoader.load(
+          "resources/sounds/interactions/doorMessages/youDontHaveACorrectKey_1.mp3",
+          "0.8",
+        ),
+      ),
+      counter(
+        this.audioLoader.load(
+          "resources/sounds/interactions/doorMessages/youDontHaveACorrectKey_2.mp3",
+          "0.8",
+        ),
+      ),
+    ]);
     const switchAudio = counter(
       this.audioLoader.load("resources/sounds/interactions/switch.mp3", "1"),
     );
@@ -90,6 +118,8 @@ export class Resources {
     return {
       theme: await theme,
       door: await door,
+      doorWithoutConnectedKey: await doorWithoutConnectedKey,
+      youDoNotHaveACorrectKey: await youDoNotHaveACorrectKey,
       switch: await switchAudio,
       teleport: await teleport,
       torch: await torch,
