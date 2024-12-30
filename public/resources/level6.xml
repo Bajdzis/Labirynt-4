@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <board src="resources/level6.png">
-    <key slot="0" name="keyFor9"/>
-    <door slot="3" keyName="keyFor9" position="vertical" />
-    <door slot="1" keyName="keyFor5" position="vertical" />
-    <key slot="2" name="keyFor5"/>
+    <door slot="0" keyName="keyFor1" position="vertical" />
+    <key slot="1" name="keyFor1"/>
+
+    <door slot="2" keyName="keyFor2" position="vertical" />
+    <key slot="3" name="keyFor2"/>
 </board>
