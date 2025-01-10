@@ -45,6 +45,7 @@ export class Resources {
     const floorShadow = counter(this.threeJsMaterialLoader.load("floorShadow"));
     const playerl = counter(this.threeJsMaterialLoader.load("player1"));
     const player2 = counter(this.threeJsMaterialLoader.load("player2"));
+    const playerDead = counter(this.threeJsMaterialLoader.load("playerDead"));
     const ghost = counter(this.threeJsMaterialLoader.load("ghost"));
     const mummy = counter(this.threeJsMaterialLoader.load("mummy"));
     const wallOutline = counter(this.threeJsMaterialLoader.load("wallOutline"));
@@ -59,6 +60,7 @@ export class Resources {
       floorShadow: await floorShadow,
       player1: await playerl,
       player2: await player2,
+      playerDead: await playerDead,
       ghost: await ghost,
       mummy: await mummy,
       wallOutline: await wallOutline,
@@ -131,7 +133,7 @@ export class Resources {
     counter: (promise: Promise<Level>) => Promise<Level>,
   ) {
     return Promise.all([
-      // counter(this.levelLoader.load("resources/level0.xml")),
+      counter(this.levelLoader.load("resources/level0.xml")),
       counter(this.levelLoader.load("resources/onboarding1.xml")),
       counter(this.levelLoader.load("resources/onboarding2.xml")),
       counter(this.levelLoader.load("resources/level1.xml")),

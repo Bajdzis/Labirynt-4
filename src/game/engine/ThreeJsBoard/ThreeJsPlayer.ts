@@ -53,7 +53,28 @@ export class ThreeJsPlayer extends Player {
     return this.group;
   }
 
+  kill(): void {
+    if (this.isDead) {
+      return;
+    }
+    super.kill();
+
+    this.light.remove();
+    this.group.clear();
+    const playerGeometry = new THREE.PlaneGeometry(0.32, 0.32);
+
+    const body = new THREE.Mesh(
+      playerGeometry,
+      resources.data.materials.playerDead,
+    );
+    body.position.z = 0.16;
+    this.group.add(body);
+  }
+
   update(delta: number) {
+    if (this.isDead) {
+      return;
+    }
     super.update(delta);
     if (this.numberOfTorches !== 0) {
       this.light.update(delta);

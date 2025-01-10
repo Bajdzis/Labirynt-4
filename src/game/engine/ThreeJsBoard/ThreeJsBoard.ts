@@ -25,6 +25,7 @@ import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 import { PushActivatedSwitch } from "./PushActivatedSwitch";
 import { getCenterOfRectangle } from "../Utils/math/getCenterOfRectangle";
 import { random } from "../Utils/math/random";
+import { WayNetwork } from "../WayNetwork/WayNetwork";
 
 type GameEvent =
   | {
@@ -90,6 +91,7 @@ window.showAverageTime = () => {
 export class ThreeJsBoard {
   private scene: THREE.Group;
   private objects: BoardObject[] = [];
+  private waynet: WayNetwork | null = null;
   private wallsGroup: ThreeJsWalls;
   private addSecondPlayerBehavior: ControlBehavior<true> = new ControlBehavior([
     new KeyboardTouchButton("ArrowUp"),
@@ -153,8 +155,9 @@ export class ThreeJsBoard {
     boxParticles.update(delta);
     numberOfFrames++;
     const players = this.objects.filter(
-      (object) => object instanceof ThreeJsPlayer,
+      (object) => object instanceof ThreeJsPlayer && object.isAlive(),
     ) as ThreeJsPlayer[];
+
     this.objects.forEach((object) => {
       if (performanceCheckerIsActive) {
         const start = performance.now();
@@ -180,7 +183,7 @@ export class ThreeJsBoard {
         });
       }
 
-      if (object instanceof ThreeJsPlayer) {
+      if (object instanceof ThreeJsPlayer && object.isAlive()) {
         const action = this.getActionForPlayer(object);
         if (action?.name === "grabTorch") {
           action.torch.showTip();
@@ -281,7 +284,7 @@ export class ThreeJsBoard {
 
   sendEvent(event: GameEvent) {
     if (event.name === "changePlayerPosition") {
-      let playerCanMove = true;
+      const playerCanMove = true;
       const newPlayerPosition = {
         x: event.player.x + event.x,
         y: event.player.y + event.y,
@@ -289,28 +292,28 @@ export class ThreeJsBoard {
         width: event.player.width,
       };
 
-      for (let i = 0; i < this.wallsGroup.walls.length; i++) {
-        const element = this.wallsGroup.walls[i];
-        if (objectContainsOther(element, newPlayerPosition)) {
-          playerCanMove = false;
-          break;
-        }
-      }
-      if (playerCanMove) {
-        for (const object of this.objects) {
-          if (object instanceof ThreeJsWall) {
-            if (objectContainsOther(object, newPlayerPosition)) {
-              playerCanMove = false;
-              break;
-            }
-          } else if (object instanceof Door) {
-            if (!object.canMoveThrough(newPlayerPosition)) {
-              playerCanMove = false;
-              break;
-            }
-          }
-        }
-      }
+      // for (let i = 0; i < this.wallsGroup.walls.length; i++) {
+      //   const element = this.wallsGroup.walls[i];
+      //   if (objectContainsOther(element, newPlayerPosition)) {
+      //     playerCanMove = false;
+      //     break;
+      //   }
+      // }
+      // if (playerCanMove) {
+      //   for (const object of this.objects) {
+      //     if (object instanceof ThreeJsWall) {
+      //       if (objectContainsOther(object, newPlayerPosition)) {
+      //         playerCanMove = false;
+      //         break;
+      //       }
+      //     } else if (object instanceof Door) {
+      //       if (!object.canMoveThrough(newPlayerPosition)) {
+      //         playerCanMove = false;
+      //         break;
+      //       }
+      //     }
+      //   }
+      // }
       if (playerCanMove) {
         event.player.changePosition(event.x, event.y);
       }
@@ -322,11 +325,15 @@ export class ThreeJsBoard {
     } else if (event.name === "throwTorch") {
       resources.data.sounds.torch.play();
       event.player.throwTorch();
-      this.addObject(new Torch(event.player.x - 0.04, event.player.y - 0.04));
+      const torch = new Torch(event.player.x - 0.04, event.player.y - 0.04);
+      this.addObject(torch);
+
+      this.waynet?.assignToObject(torch);
     } else if (event.name === "grabTorch") {
       resources.data.sounds.torch.play();
       event.player.grabTorch();
       this.removeObject(event.torch);
+      this.waynet?.unassignFromObject(event.torch);
     } else if (event.name === "pickKey") {
       resources.data.sounds.key.play();
       event.player.pickKey(event.key);
@@ -363,7 +370,7 @@ export class ThreeJsBoard {
         this.removeObject(object);
       }
     });
-
+    this.waynet = resources.data.levels[level].waynet;
     const elements = resources.data.levels[level].createAdditionalElements();
     elements.forEach((element) => this.addObject(element));
 

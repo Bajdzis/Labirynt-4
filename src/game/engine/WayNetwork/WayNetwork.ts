@@ -35,6 +35,12 @@ export class WayNetwork extends BoardObject {
     });
   }
 
+  unassignFromObject(object: InteractiveObject & Rectangle): void {
+    this.waypoints.forEach((waypoint) => {
+      waypoint.unassignFromObject(object);
+    });
+  }
+
   private createNode(walls: boolean[][], x: number, y: number): WayPoint {
     const currentWayPoint = this.waypoints.find((w) => w.isPointAt(x, y));
     if (currentWayPoint) {

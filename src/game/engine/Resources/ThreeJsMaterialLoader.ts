@@ -14,6 +14,7 @@ type MaterialName =
   | "floorShadow"
   | "player1"
   | "player2"
+  | "playerDead"
   | "ghost"
   | "mummy";
 
@@ -94,6 +95,16 @@ export class ThreeJsMaterialLoader extends ResourcesLoader<
 
   mummy({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
     return textureLoader.load("resources/npc/mummy.png").then((texture) => {
+      return new THREE.MeshStandardMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 1,
+      });
+    });
+  }
+
+  playerDead({ textureLoader }: MaterialLoaderProps): Promise<THREE.Material> {
+    return textureLoader.load("resources/player/dead.png").then((texture) => {
       return new THREE.MeshStandardMaterial({
         map: texture,
         transparent: true,

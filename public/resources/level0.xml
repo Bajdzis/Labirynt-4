@@ -7,5 +7,5 @@
     <door slot="2" keyName="key1" position="horizontal" />
     <door slot="3" keyName="key1" position="horizontal" />
     <key slot="5" name="key1"/>
-    <ghost slot="5" />
+    <!-- <ghost slot="5" /> -->
 </board>

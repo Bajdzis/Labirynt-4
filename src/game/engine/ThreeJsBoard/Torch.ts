@@ -3,9 +3,13 @@ import { Light } from "./Light";
 import { Tooltip } from "./Tooltip";
 import { boxParticles } from "../Particles/instances";
 import { resources } from "../Resources/Resources";
-import { BoardObject, Rectangle } from "../Board/BoardObject";
+import {
+  BoardObject,
+  InteractiveObject,
+  Rectangle,
+} from "../Board/BoardObject";
 
-export class Torch extends BoardObject implements Rectangle {
+export class Torch extends BoardObject implements Rectangle, InteractiveObject {
   private group: THREE.Group;
   private light: Light;
   private tip: Tooltip;
@@ -125,4 +129,11 @@ export class Torch extends BoardObject implements Rectangle {
     this.group.parent?.remove(this.group);
     this.tip.remove();
   }
+
+  isActive() {
+    // for WayNet to disable path for mummy
+    return false;
+  }
+  activate() {}
+  deactivate() {}
 }
