@@ -81,9 +81,7 @@ class LightsHelper {
   hidePointLight(light: THREE.PointLight) {
     light.intensity = 0;
     light.parent?.remove(light);
-    this.pointLights = this.pointLights.filter((l) => l !== light);
-    light.dispose();
-    this.createLights(1, light.castShadow);
+    this.group.add(light);
   }
 }
 

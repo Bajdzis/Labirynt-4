@@ -36,6 +36,7 @@ export interface Level {
   slotsPositions: [number, number][];
   startPosition: [number, number];
   endPosition: [number, number];
+  waynet: WayNetwork | null;
   createAdditionalElements: () => BoardObject[];
 }
 
@@ -134,6 +135,7 @@ export class LevelLoader extends ResourcesLoader<Level> {
         slotsPositions,
         startPosition,
         endPosition,
+        waynet,
         createAdditionalElements: () => {
           const result: BoardObject[] = waynet ? [waynet] : [];
           const elementsById: {

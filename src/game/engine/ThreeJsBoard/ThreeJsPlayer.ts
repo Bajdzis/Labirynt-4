@@ -20,7 +20,7 @@ export class ThreeJsPlayer extends Player {
 
   private light: Light;
   constructor(
-    material: THREE.Material,
+    private material: THREE.Material,
     moveBehavior: ControlBehavior<{ x: number; y: number }>,
     actionBehavior: ControlBehavior<true>,
   ) {
@@ -28,15 +28,21 @@ export class ThreeJsPlayer extends Player {
 
     this.group = new THREE.Group();
 
-    const body = this.createPlayerBody(material);
+    this.light = this.generatePlayerBody();
+  }
+
+  private generatePlayerBody() {
+    const body = this.createPlayerBody(this.material);
 
     this.group.add(body);
 
-    this.light = new Light(this.numberOfTorches * 2 + 1.5);
-    const obj = this.light.getObject();
+    const light = new Light(this.numberOfTorches * 2 + 1.5);
+    const obj = light.getObject();
     obj.position.x = 0.1;
     obj.position.y = 0.1;
     this.group.add(obj);
+
+    return light;
   }
 
   setPosition(x: number, y: number) {
@@ -53,7 +59,38 @@ export class ThreeJsPlayer extends Player {
     return this.group;
   }
 
+  kill(): void {
+    if (this.isDead) {
+      return;
+    }
+    super.kill();
+
+    this.light.remove();
+    this.group.clear();
+    const playerGeometry = new THREE.PlaneGeometry(0.32, 0.32);
+
+    const body = new THREE.Mesh(
+      playerGeometry,
+      resources.data.materials.playerDead,
+    );
+    body.position.z = 0.16;
+    this.group.add(body);
+  }
+
+  resetKillStatus() {
+    if (this.isDead) {
+      this.numberOfTorches = 2;
+      this.light.remove();
+      this.group.clear();
+      this.light = this.generatePlayerBody();
+      this.isDead = false;
+    }
+  }
+
   update(delta: number) {
+    if (this.isDead) {
+      return;
+    }
     super.update(delta);
     if (this.numberOfTorches !== 0) {
       this.light.update(delta);

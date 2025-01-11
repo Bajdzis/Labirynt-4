@@ -42,6 +42,12 @@ export class FollowPlayer implements Routine {
       }
     });
 
+    npc.onTouchPlayer((player) => {
+      npc.clearTasks();
+      npc.clearSense();
+      npc.killPlayer(player);
+    });
+
     npc.onTaskListIsEmpty(() => {
       refreshState();
     });

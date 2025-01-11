@@ -47,6 +47,10 @@ export class WayPoint {
     );
   }
 
+  clear() {
+    this.interactiveObjects = [];
+  }
+
   isPointAt(x: number, y: number) {
     return this.x === x && this.y === y;
   }

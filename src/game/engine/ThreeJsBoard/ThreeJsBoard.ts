@@ -25,6 +25,8 @@ import { GamepadPressButton } from "../IO/Behaviors/GamepadPressButton";
 import { PushActivatedSwitch } from "./PushActivatedSwitch";
 import { getCenterOfRectangle } from "../Utils/math/getCenterOfRectangle";
 import { random } from "../Utils/math/random";
+import { WayNetwork } from "../WayNetwork/WayNetwork";
+import { fadeAnimation } from "../HTMLAnimation/Fade";
 
 type GameEvent =
   | {
@@ -43,6 +45,10 @@ type GameEvent =
     }
   | {
       name: "throwTorch";
+      player: Player;
+    }
+  | {
+      name: "killPlayer";
       player: Player;
     }
   | {
@@ -90,6 +96,7 @@ window.showAverageTime = () => {
 export class ThreeJsBoard {
   private scene: THREE.Group;
   private objects: BoardObject[] = [];
+  private waynet: WayNetwork | null = null;
   private wallsGroup: ThreeJsWalls;
   private addSecondPlayerBehavior: ControlBehavior<true> = new ControlBehavior([
     new KeyboardTouchButton("ArrowUp"),
@@ -153,8 +160,9 @@ export class ThreeJsBoard {
     boxParticles.update(delta);
     numberOfFrames++;
     const players = this.objects.filter(
-      (object) => object instanceof ThreeJsPlayer,
+      (object) => object instanceof ThreeJsPlayer && object.isAlive(),
     ) as ThreeJsPlayer[];
+
     this.objects.forEach((object) => {
       if (performanceCheckerIsActive) {
         const start = performance.now();
@@ -180,7 +188,7 @@ export class ThreeJsBoard {
         });
       }
 
-      if (object instanceof ThreeJsPlayer) {
+      if (object instanceof ThreeJsPlayer && object.isAlive()) {
         const action = this.getActionForPlayer(object);
         if (action?.name === "grabTorch") {
           action.torch.showTip();
@@ -279,8 +287,13 @@ export class ThreeJsBoard {
     return null;
   }
 
-  sendEvent(event: GameEvent) {
-    if (event.name === "changePlayerPosition") {
+  async sendEvent(event: GameEvent) {
+    if (event.name === "killPlayer" && event.player.isAlive()) {
+      event.player.kill();
+      await fadeAnimation.fadeOut("main");
+      this.loadLevel(this.currentLevelId);
+      await fadeAnimation.fadeIn("main");
+    } else if (event.name === "changePlayerPosition") {
       let playerCanMove = true;
       const newPlayerPosition = {
         x: event.player.x + event.x,
@@ -322,11 +335,15 @@ export class ThreeJsBoard {
     } else if (event.name === "throwTorch") {
       resources.data.sounds.torch.play();
       event.player.throwTorch();
-      this.addObject(new Torch(event.player.x - 0.04, event.player.y - 0.04));
+      const torch = new Torch(event.player.x - 0.04, event.player.y - 0.04);
+      this.addObject(torch);
+
+      this.waynet?.assignToObject(torch);
     } else if (event.name === "grabTorch") {
       resources.data.sounds.torch.play();
       event.player.grabTorch();
       this.removeObject(event.torch);
+      this.waynet?.unassignFromObject(event.torch);
     } else if (event.name === "pickKey") {
       resources.data.sounds.key.play();
       event.player.pickKey(event.key);
@@ -352,15 +369,25 @@ export class ThreeJsBoard {
 
   loadLevel(level: number) {
     this.currentLevelId = level;
+
+    // unload level
+    this.waynet = resources.data.levels[level].waynet;
+    this.waynet?.clear();
+    this.objects.forEach((object) => {
+      if (!(object instanceof Floor) && !(object instanceof ThreeJsPlayer)) {
+        this.removeObject(object);
+      }
+    });
+
+    // load level
     this.objects.forEach((object) => {
       if (object instanceof ThreeJsPlayer) {
+        object.resetKillStatus();
         object.setPosition(
           resources.data.levels[level].startPosition[0] * 0.32,
           resources.data.levels[level].startPosition[1] * 0.32,
         );
         object.clearKeys();
-      } else if (!(object instanceof Floor)) {
-        this.removeObject(object);
       }
     });
 

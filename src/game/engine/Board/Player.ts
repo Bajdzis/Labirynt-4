@@ -17,6 +17,7 @@ export interface PlayerKeys {
 export class Player extends BoardObject implements Rectangle {
   public x: number;
   public y: number;
+  protected isDead: boolean = false;
   public readonly width = 0.2;
   public readonly height = 0.2;
   public angle = 0.0;
@@ -32,6 +33,22 @@ export class Player extends BoardObject implements Rectangle {
     this.allBehavior = new ControlBehaviorGroup([moveBehavior, actionBehavior]);
     this.x = 0.06;
     this.y = 0.06;
+  }
+
+  isAlive() {
+    return !this.isDead;
+  }
+
+  kill() {
+    this.isDead = true;
+
+    for (let i = 0; i < this.numberOfTorches; i++) {
+      this.board?.sendEvent({
+        name: "throwTorch",
+        player: this,
+      });
+    }
+    this.numberOfTorches = 0;
   }
 
   runVibration(duration: number, intensity: number) {

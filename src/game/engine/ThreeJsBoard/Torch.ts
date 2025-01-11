@@ -3,13 +3,24 @@ import { Light } from "./Light";
 import { Tooltip } from "./Tooltip";
 import { boxParticles } from "../Particles/instances";
 import { resources } from "../Resources/Resources";
-import { BoardObject, Rectangle } from "../Board/BoardObject";
+import {
+  BoardObject,
+  InteractiveObject,
+  Rectangle,
+} from "../Board/BoardObject";
+import { GroupOfParticles } from "../Particles/domain";
 
-export class Torch extends BoardObject implements Rectangle {
+export class Torch extends BoardObject implements Rectangle, InteractiveObject {
   private group: THREE.Group;
   private light: Light;
   private tip: Tooltip;
   private destroyParticles: (() => void)[];
+  private groupsOfParticles: [
+    GroupOfParticles,
+    GroupOfParticles,
+    GroupOfParticles,
+    GroupOfParticles,
+  ];
   height: number;
   width: number;
   x: number;
@@ -31,8 +42,8 @@ export class Torch extends BoardObject implements Rectangle {
     this.light = new Light(3);
     this.group.add(this.light.getObject());
 
-    this.destroyParticles = [
-      boxParticles.addGroupOfParticles({
+    this.groupsOfParticles = [
+      {
         colorStart: new THREE.Color("orange"),
         colorStop: new THREE.Color("red"),
         maxLife: 500,
@@ -44,8 +55,8 @@ export class Torch extends BoardObject implements Rectangle {
           x: x - 0.08,
           y: y + 0.08,
         },
-      }),
-      boxParticles.addGroupOfParticles({
+      },
+      {
         colorStart: new THREE.Color("orange"),
         colorStop: new THREE.Color("red"),
         maxLife: 500,
@@ -57,9 +68,8 @@ export class Torch extends BoardObject implements Rectangle {
           x: x - 0.06,
           y: y + 0.06,
         },
-      }),
-
-      boxParticles.addGroupOfParticles({
+      },
+      {
         colorStart: new THREE.Color("orange"),
         colorStop: new THREE.Color("yellow"),
         maxLife: 500,
@@ -71,9 +81,8 @@ export class Torch extends BoardObject implements Rectangle {
           x: x - 0.08,
           y: y + 0.08,
         },
-      }),
-
-      boxParticles.addGroupOfParticles({
+      },
+      {
         colorStart: new THREE.Color("orange"),
         colorStop: new THREE.Color("yellow"),
         maxLife: 500,
@@ -85,8 +94,11 @@ export class Torch extends BoardObject implements Rectangle {
           x: x - 0.06,
           y: y + 0.06,
         },
-      }),
+      },
     ];
+    this.destroyParticles = this.groupsOfParticles.map((group) =>
+      boxParticles.addGroupOfParticles(group),
+    );
   }
 
   getObject() {
@@ -98,6 +110,17 @@ export class Torch extends BoardObject implements Rectangle {
     this.light.update(delta);
     this.group.position.x = this.x;
     this.group.position.y = this.y;
+    this.groupsOfParticles[0].type.x = this.x - 0.08;
+    this.groupsOfParticles[0].type.y = this.y + 0.08;
+
+    this.groupsOfParticles[1].type.x = this.x - 0.06;
+    this.groupsOfParticles[1].type.y = this.y + 0.06;
+
+    this.groupsOfParticles[2].type.x = this.x - 0.08;
+    this.groupsOfParticles[2].type.y = this.y + 0.08;
+
+    this.groupsOfParticles[3].type.x = this.x - 0.06;
+    this.groupsOfParticles[3].type.y = this.y + 0.06;
   }
 
   createTorchMesh() {
@@ -125,4 +148,11 @@ export class Torch extends BoardObject implements Rectangle {
     this.group.parent?.remove(this.group);
     this.tip.remove();
   }
+
+  isActive() {
+    // for WayNet to disable path for mummy
+    return false;
+  }
+  activate() {}
+  deactivate() {}
 }

@@ -21,6 +21,10 @@ type Task =
       item: BoardObject & Rectangle;
     }
   | {
+      type: "killPlayer";
+      player: ThreeJsPlayer;
+    }
+  | {
       type: "goto";
       waypoint: WayPoint;
       speed: 1 | 2 | 3;
@@ -96,7 +100,7 @@ export class NPC extends BoardObject implements Rectangle {
     this.mesh.position.set(
       currentWayPoint.x * 0.32,
       currentWayPoint.y * 0.32,
-      0.1,
+      0.2,
     );
 
     this.routine = defaultRoutine;
@@ -202,7 +206,16 @@ export class NPC extends BoardObject implements Rectangle {
   }
 
   public throwAllItemImmediately() {
+    this.inventory.forEach((item) => {
+      if (item instanceof Torch) {
+        this.currentWayPoint.wayNet.assignToObject(item);
+      }
+    });
     this.inventory = [];
+  }
+
+  public killPlayer(player: ThreeJsPlayer) {
+    this.queue.push({ type: "killPlayer", player });
   }
 
   public goTo(wayPoint: WayPoint, speed: 1 | 2 | 3 = 2) {
@@ -225,7 +238,6 @@ export class NPC extends BoardObject implements Rectangle {
     this.queue = [];
     this.currentTask = null;
 
-    this.beforeWaypoint = this.currentWayPoint;
     this.currentWayPoint =
       this.currentWayPoint.wayNet.findClosestWaypointToPoint(
         this.mesh.position.x,
@@ -271,7 +283,20 @@ export class NPC extends BoardObject implements Rectangle {
       this.currentTask = this.startNextTask();
     }
     if (this.currentTask !== null) {
-      if (this.currentTask.type === "pickItem") {
+      if (this.currentTask.type === "killPlayer") {
+        const player = this.currentTask.player;
+
+        this.board?.sendEvent({
+          name: "killPlayer",
+          player,
+        });
+
+        this.mesh.position.x = player.x;
+        this.mesh.position.y = player.y;
+      } else if (this.currentTask.type === "pickItem") {
+        if (this.currentTask.item instanceof Torch) {
+          this.currentWayPoint.wayNet.unassignFromObject(this.currentTask.item);
+        }
         this.inventory.push(this.currentTask.item);
         this.currentTask = this.startNextTask();
       } else if (this.currentTask.type === "throwItem") {

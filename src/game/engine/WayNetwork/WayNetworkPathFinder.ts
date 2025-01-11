@@ -41,7 +41,7 @@ export class WayNetworkPathFinder {
       if (startIdx > endIdx) {
         continue;
       }
-      return cachedPath.slice(startIdx, endIdx);
+      return cachedPath.slice(startIdx, endIdx + 1);
     }
 
     return null;
