@@ -14,6 +14,7 @@ import {
 } from "./engine/IO/Devices/Gamepad";
 import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
 import { fadeAnimation } from "./engine/HTMLAnimation/Fade";
+import { customCursor } from "./engine/HTMLAnimation/CustomCursor";
 
 declare global {
   interface Window {
@@ -23,6 +24,11 @@ declare global {
   }
 }
 
+// initialize customCursor
+customCursor.then((cursor) => {
+  cursor.showCursor("waiting");
+});
+
 window.setProgressBar("Pobieranie zasobów...", 2);
 
 resources
@@ -30,6 +36,8 @@ resources
     window.setProgressBar("Pobieranie zasobów...", progress * 50);
   })
   .then(async () => {
+    const cursor = await customCursor;
+
     const renderer = new ThreeJsRenderer();
 
     window.setProgressBar("Kompilowanie shaderów...", 50);
@@ -83,8 +91,8 @@ resources
     });
     window.setProgressBar("Kompilowanie shaderów...", 90);
     let playButton = window.showTextInsteadOfProgressBar();
-
-    playButton?.focus();
+    cursor.showCursor("arrow");
+    playButton && cursor.addClickableElement(playButton);
 
     let isGameRunning = false;
     const startPlayBehavior = new ControlBehavior([
@@ -132,6 +140,8 @@ resources
         return;
       }
 
+      playButton && cursor.removeClickableElement(playButton);
+      cursor.showCursor("arrow");
       playButton && playButton.removeEventListener("touchend", runMobile);
       playButton = null;
       isGameRunning = true;
