@@ -11,6 +11,20 @@ class FadeAnimation {
     return this.animate(id, this.fadeInClass);
   }
 
+  prepare(id: string, currentStatus: "visible" | "unVisible"): void {
+    const element = document.getElementById(id);
+    if (!element) {
+      return;
+    }
+    element.classList.remove(this.transitionClass);
+    element.classList.remove(this.fadeInClass);
+    element.classList.remove(this.fadeOutClass);
+    element.classList.add(
+      currentStatus === "visible" ? this.fadeInClass : this.fadeOutClass,
+    );
+    element.classList.add(this.transitionClass);
+  }
+
   private animate(id: string, className: string): Promise<void> {
     const element = document.getElementById(id);
     if (!element) {

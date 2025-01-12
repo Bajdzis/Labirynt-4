@@ -13,6 +13,7 @@ import {
   updateGamepads,
 } from "./engine/IO/Devices/Gamepad";
 import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
+import { fadeAnimation } from "./engine/HTMLAnimation/Fade";
 
 declare global {
   interface Window {
@@ -81,8 +82,9 @@ resources
       renderer.render(new THREE.Group());
     });
     window.setProgressBar("Kompilowanie shaderów...", 90);
-
     let playButton = window.showTextInsteadOfProgressBar();
+
+    playButton?.focus();
 
     let isGameRunning = false;
     const startPlayBehavior = new ControlBehavior([
@@ -133,10 +135,15 @@ resources
       playButton && playButton.removeEventListener("touchend", runMobile);
       playButton = null;
       isGameRunning = true;
+
+      fadeAnimation.prepare("main", "unVisible");
+      await fadeAnimation.fadeOut("loader");
       window.disposeProgressBar();
 
       game.run();
+
       resources.data.sounds.theme.play();
+      await fadeAnimation.fadeIn("main");
     };
     playButton &&
       playButton.addEventListener("touchend", runMobile, {
