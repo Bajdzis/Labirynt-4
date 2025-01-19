@@ -4,21 +4,8 @@ import { MyGame } from "./engine/MyGame";
 import { resources } from "./engine/Resources/Resources";
 import { ThreeJsRenderer } from "./engine/ThreeJsRenderer";
 import { wallOutlineGeometry } from "./engine/Resources/Geometries";
-import { ControlBehavior } from "./engine/IO/Behaviors/ControlBehavior";
-import { KeyboardPressButton } from "./engine/IO/Behaviors/KeyboardPressButton";
-import { GamepadPressButton } from "./engine/IO/Behaviors/GamepadPressButton";
-import {
-  gamepad0,
-  gamepad1,
-  updateGamepads,
-} from "./engine/IO/Devices/Gamepad";
-import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
-import { fadeAnimation } from "./engine/HTMLAnimation/Fade";
 import { customCursor } from "./engine/HTMLAnimation/CustomCursor";
-import {
-  gameSavedStatus,
-  MyGameStatus,
-} from "./engine/SavedStatus/GameSavedStatus";
+import { MyMenu } from "./engine/MyMenu";
 
 declare global {
   interface Window {
@@ -97,94 +84,14 @@ resources
       renderer.render(new THREE.Group());
     });
     window.setProgressBar("Kompilowanie shaderów...", 90);
-    let { playButton, playFormSavedStateButton } =
-      window.showTextInsteadOfProgressBar();
-    customCursor.then((cursor) => {
-      cursor.showCursor("arrow");
-      playButton && cursor.addClickableElement(playButton);
-      playFormSavedStateButton &&
-        cursor.addClickableElement(playFormSavedStateButton);
-    });
-    playButton && playButton.focus();
 
-    let isGameRunning = false;
-    const startPlayBehavior = new ControlBehavior([
-      new KeyboardPressButton("Enter"),
-      new MouseClickElement(playButton || document.body),
-      new GamepadPressButton(gamepad0, "PsCrossButton"),
-      new GamepadPressButton(gamepad1, "PsCrossButton"),
-    ]);
-    let lastTime: number = 0;
-    function behaviorLoop(time: DOMHighResTimeStamp) {
-      updateGamepads();
-      const delta = time - lastTime;
-      lastTime = time;
-      startPlayBehavior.update(delta);
-
-      const shouldStart = startPlayBehavior.getState();
-      if (shouldStart) {
-        run(null);
-      } else if (!isGameRunning) {
-        window.requestAnimationFrame(behaviorLoop);
-      }
-    }
-
-    behaviorLoop(lastTime);
-
-    if (playFormSavedStateButton) {
-      const state = gameSavedStatus.get();
-      playFormSavedStateButton.disabled = state === null;
-      if (state) {
-        playFormSavedStateButton.focus();
-        playFormSavedStateButton.addEventListener("click", () => {
-          run(state);
-        });
-      }
-    }
-
-    const runMobile = async () => {
-      try {
-        await document.documentElement.requestFullscreen();
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        if (screen.orientation.lock) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          screen.orientation.lock("landscape");
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-
-      run(null);
-    };
-
-    const run = async (status: MyGameStatus | null) => {
-      if (isGameRunning) {
-        return;
-      }
-      customCursor.then((cursor) => {
-        playButton && cursor.removeClickableElement(playButton);
-        cursor.showCursor("arrow");
-      });
-      playButton && playButton.removeEventListener("touchend", runMobile);
-      playButton = null;
-      playFormSavedStateButton = null;
-      isGameRunning = true;
-
-      fadeAnimation.prepare("main", "unVisible");
-      await fadeAnimation.fadeOut("loader");
+    const menu = new MyMenu((status) => {
+      menu.stop();
       window.disposeProgressBar();
-
       game.runMyGame(status);
+    });
 
-      resources.data.sounds.theme.play();
-      await fadeAnimation.fadeIn("main");
-    };
-    playButton &&
-      playButton.addEventListener("touchend", runMobile, {
-        passive: true,
-      });
+    menu.run();
   });
 
 function waitForEnd(callback: () => void) {

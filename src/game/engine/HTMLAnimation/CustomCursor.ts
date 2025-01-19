@@ -84,7 +84,10 @@ export class CustomCursor {
   private clickableElementDestroy: WeakMap<HTMLElement, () => void> =
     new WeakMap();
 
-  addClickableElement(element: HTMLElement) {
+  addClickableElement(element: HTMLElement | null) {
+    if (!element) {
+      return;
+    }
     const handlerEnter = () => {
       element.focus();
       this.showCursor("pointer");
@@ -102,7 +105,10 @@ export class CustomCursor {
     });
   }
 
-  removeClickableElement(element: HTMLElement) {
+  removeClickableElement(element: HTMLElement | null) {
+    if (!element) {
+      return;
+    }
     const destroy = this.clickableElementDestroy.get(element);
     if (destroy) {
       destroy();

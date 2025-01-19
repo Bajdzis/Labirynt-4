@@ -1,9 +1,10 @@
 import { ThreeJsBoard } from "./ThreeJsBoard/ThreeJsBoard";
-import { BrowserGame } from "./BrowserGame";
+import { BrowserGameLoop } from "./BrowserGameLoop";
 import { ThreeJsRenderer } from "./ThreeJsRenderer";
 import { MyGameStatus } from "./SavedStatus/GameSavedStatus";
+import { resources } from "./Resources/Resources";
 
-export class MyGame extends BrowserGame {
+export class MyGame extends BrowserGameLoop {
   private board: ThreeJsBoard;
 
   constructor(private renderer: ThreeJsRenderer) {
@@ -21,6 +22,7 @@ export class MyGame extends BrowserGame {
   }
 
   runMyGame(status: MyGameStatus | null): void {
+    resources.data.sounds.theme.play();
     this.board.load(status);
     super.run();
   }

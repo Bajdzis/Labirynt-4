@@ -1,14 +1,18 @@
 import { updateGamepads } from "./IO/Devices/Gamepad";
 import { developerPerformanceMeasure } from "./Utils/performanceMeasure";
 
-export abstract class BrowserGame {
+export abstract class BrowserGameLoop {
   private lastTime: number = 0;
+  private isRunning: boolean = false;
 
   constructor() {
     this.gameLoop = this.gameLoop.bind(this);
   }
 
   private gameLoop(time: DOMHighResTimeStamp) {
+    if (!this.isRunning) {
+      return;
+    }
     const delta = time - this.lastTime;
     this.lastTime = time;
     developerPerformanceMeasure.mark("update-started");
@@ -37,7 +41,12 @@ export abstract class BrowserGame {
 
   run() {
     this.lastTime = performance.now();
+    this.isRunning = true;
     window.requestAnimationFrame(this.gameLoop);
+  }
+
+  stop() {
+    this.isRunning = false;
   }
 
   protected abstract update(delta: number): void;
