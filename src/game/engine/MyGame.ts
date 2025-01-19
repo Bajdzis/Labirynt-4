@@ -1,6 +1,7 @@
 import { ThreeJsBoard } from "./ThreeJsBoard/ThreeJsBoard";
 import { BrowserGame } from "./BrowserGame";
 import { ThreeJsRenderer } from "./ThreeJsRenderer";
+import { MyGameStatus } from "./SavedStatus/GameSavedStatus";
 
 export class MyGame extends BrowserGame {
   private board: ThreeJsBoard;
@@ -17,6 +18,11 @@ export class MyGame extends BrowserGame {
 
   protected render() {
     this.renderer.render(this.board.getScene());
+  }
+
+  runMyGame(status: MyGameStatus | null): void {
+    this.board.load(status);
+    super.run();
   }
 
   getScene() {

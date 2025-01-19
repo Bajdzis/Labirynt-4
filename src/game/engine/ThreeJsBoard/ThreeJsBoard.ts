@@ -27,6 +27,7 @@ import { getCenterOfRectangle } from "../Utils/math/getCenterOfRectangle";
 import { random } from "../Utils/math/random";
 import { WayNetwork } from "../WayNetwork/WayNetwork";
 import { fadeAnimation } from "../HTMLAnimation/Fade";
+import { gameSavedStatus, MyGameStatus } from "../SavedStatus/GameSavedStatus";
 
 type GameEvent =
   | {
@@ -117,7 +118,26 @@ export class ThreeJsBoard {
     const player1 = new FirstPlayerPrototype();
     this.addObject(player1);
     this.addObject(new Floor(resources));
-    this.loadLevel(this.currentLevelId);
+  }
+
+  load(savedState: MyGameStatus | null) {
+    if (savedState) {
+      this.loadLevel(savedState.level);
+      if (savedState.player2IsActive) {
+        this.addSecondPlayer();
+      }
+      const player1 = this.objects.find(
+        (object) => object instanceof FirstPlayerPrototype,
+      ) as any as FirstPlayerPrototype | undefined;
+      const player2 = this.objects.find(
+        (object) => object instanceof SecondPlayerPrototype,
+      ) as any as SecondPlayerPrototype | undefined;
+      player1?.setNumberOfTorches(savedState.numberOfTorchPlayer1);
+      player2?.setNumberOfTorches(savedState.numberOfTorchPlayer2);
+    } else {
+      this.currentLevelId = 0;
+      this.loadLevel(this.currentLevelId);
+    }
   }
 
   eachObject(callback: (object: BoardObject) => void) {
@@ -136,14 +156,7 @@ export class ThreeJsBoard {
     if (!this.secondPlayerAlreadyAdded) {
       this.addSecondPlayerBehavior.update(delta);
       if (this.addSecondPlayerBehavior.getState()) {
-        const player = new SecondPlayerPrototype();
-        player.changePosition(
-          resources.data.levels[this.currentLevelId].startPosition[0] * 0.32,
-          resources.data.levels[this.currentLevelId].startPosition[1] * 0.32,
-        );
-
-        this.addObject(player);
-        this.secondPlayerAlreadyAdded = true;
+        this.addSecondPlayer();
       }
     }
     this.objects.forEach((object) => {
@@ -363,7 +376,21 @@ export class ThreeJsBoard {
       }
     } else if (event.name === "useDestination") {
       resources.data.sounds.teleport.play();
-      this.loadLevel(this.currentLevelId + 1);
+      const firstPlayer = this.objects.find(
+        (object) => object instanceof FirstPlayerPrototype,
+      ) as any as FirstPlayerPrototype | undefined;
+      const secondPlayer = this.objects.find(
+        (object) => object instanceof SecondPlayerPrototype,
+      ) as any as SecondPlayerPrototype | undefined;
+      const nextLevel = this.currentLevelId + 1;
+
+      gameSavedStatus.save({
+        level: nextLevel,
+        player2IsActive: secondPlayer !== undefined,
+        numberOfTorchPlayer1: firstPlayer?.getNumberOfTorches() || 2,
+        numberOfTorchPlayer2: secondPlayer?.getNumberOfTorches() || 2,
+      });
+      this.loadLevel(nextLevel);
     }
   }
 
@@ -451,5 +478,19 @@ export class ThreeJsBoard {
     object.remove && object.remove();
     const object3D = object.getObject();
     object3D && this.scene.remove(object3D);
+  }
+
+  private addSecondPlayer() {
+    if (!this.secondPlayerAlreadyAdded) {
+      return;
+    }
+    const player = new SecondPlayerPrototype();
+    player.changePosition(
+      resources.data.levels[this.currentLevelId].startPosition[0] * 0.32,
+      resources.data.levels[this.currentLevelId].startPosition[1] * 0.32,
+    );
+
+    this.addObject(player);
+    this.secondPlayerAlreadyAdded = true;
   }
 }

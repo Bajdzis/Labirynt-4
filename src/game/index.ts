@@ -15,12 +15,21 @@ import {
 import { MouseClickElement } from "./engine/IO/Behaviors/MouseClickElement";
 import { fadeAnimation } from "./engine/HTMLAnimation/Fade";
 import { customCursor } from "./engine/HTMLAnimation/CustomCursor";
+import {
+  gameSavedStatus,
+  MyGameStatus,
+} from "./engine/SavedStatus/GameSavedStatus";
 
 declare global {
   interface Window {
     setProgressBar: (msg: string, value: number) => void;
     disposeProgressBar: () => void;
-    showTextInsteadOfProgressBar: () => HTMLButtonElement | null;
+    showTextInsteadOfProgressBar: () => {
+      playButton?: HTMLButtonElement | null;
+      playFormSavedStateButton?: HTMLButtonElement | null;
+      showControlsButton?: HTMLButtonElement | null;
+      authorsButton?: HTMLButtonElement | null;
+    };
   }
 }
 
@@ -36,8 +45,6 @@ resources
     window.setProgressBar("Pobieranie zasobów...", progress * 50);
   })
   .then(async () => {
-    const cursor = await customCursor;
-
     const renderer = new ThreeJsRenderer();
 
     window.setProgressBar("Kompilowanie shaderów...", 50);
@@ -90,9 +97,15 @@ resources
       renderer.render(new THREE.Group());
     });
     window.setProgressBar("Kompilowanie shaderów...", 90);
-    let playButton = window.showTextInsteadOfProgressBar();
-    cursor.showCursor("arrow");
-    playButton && cursor.addClickableElement(playButton);
+    let { playButton, playFormSavedStateButton } =
+      window.showTextInsteadOfProgressBar();
+    customCursor.then((cursor) => {
+      cursor.showCursor("arrow");
+      playButton && cursor.addClickableElement(playButton);
+      playFormSavedStateButton &&
+        cursor.addClickableElement(playFormSavedStateButton);
+    });
+    playButton && playButton.focus();
 
     let isGameRunning = false;
     const startPlayBehavior = new ControlBehavior([
@@ -110,13 +123,24 @@ resources
 
       const shouldStart = startPlayBehavior.getState();
       if (shouldStart) {
-        run();
+        run(null);
       } else if (!isGameRunning) {
         window.requestAnimationFrame(behaviorLoop);
       }
     }
 
     behaviorLoop(lastTime);
+
+    if (playFormSavedStateButton) {
+      const state = gameSavedStatus.get();
+      playFormSavedStateButton.disabled = state === null;
+      if (state) {
+        playFormSavedStateButton.focus();
+        playFormSavedStateButton.addEventListener("click", () => {
+          run(state);
+        });
+      }
+    }
 
     const runMobile = async () => {
       try {
@@ -132,25 +156,27 @@ resources
         console.warn(error);
       }
 
-      run();
+      run(null);
     };
 
-    const run = async () => {
+    const run = async (status: MyGameStatus | null) => {
       if (isGameRunning) {
         return;
       }
-
-      playButton && cursor.removeClickableElement(playButton);
-      cursor.showCursor("arrow");
+      customCursor.then((cursor) => {
+        playButton && cursor.removeClickableElement(playButton);
+        cursor.showCursor("arrow");
+      });
       playButton && playButton.removeEventListener("touchend", runMobile);
       playButton = null;
+      playFormSavedStateButton = null;
       isGameRunning = true;
 
       fadeAnimation.prepare("main", "unVisible");
       await fadeAnimation.fadeOut("loader");
       window.disposeProgressBar();
 
-      game.run();
+      game.runMyGame(status);
 
       resources.data.sounds.theme.play();
       await fadeAnimation.fadeIn("main");

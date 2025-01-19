@@ -110,6 +110,11 @@ export class ThreeJsPlayer extends Player {
     this.updatePlayerLight();
   }
 
+  setNumberOfTorches(numberOfTorches: number): void {
+    super.setNumberOfTorches(numberOfTorches);
+    this.updatePlayerLight();
+  }
+
   updatePlayerLight() {
     this.light.changeLightSize(this.numberOfTorches * 2 + 1.5);
     this.light.changeLightColor(

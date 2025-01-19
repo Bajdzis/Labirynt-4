@@ -136,4 +136,12 @@ export class Player extends BoardObject implements Rectangle {
   throwTorch() {
     this.numberOfTorches--;
   }
+
+  getNumberOfTorches() {
+    return this.numberOfTorches;
+  }
+
+  setNumberOfTorches(numberOfTorches: number) {
+    this.numberOfTorches = Math.max(0, Math.min(2, numberOfTorches));
+  }
 }

@@ -271,17 +271,23 @@
                                 </button>
                             </div>
                             <div>
-                                <button class="play-button">
+                                <button class="authors-button">
                                     Autorzy
                                 </button>
                             </div>
                          </div>
                     </div>`;
 
-                    return loader.querySelector('.play-button');
+                    return {
+                        playButton : loader.querySelector('.play-button'),
+                        playFormSavedStateButton : loader.querySelector('.play-form-saved-state-button'),
+                        showControlsButton : loader.querySelector('.show-controls-button'),
+                        authorsButton : loader.querySelector('.authors-button')
+
+                    };
                 }
 
-                return null;
+                return {};
             }
 
             window.disposeProgressBar = () => {
