@@ -1,3 +1,4 @@
+import { electronIntegration } from "../electron/electronIntegration";
 import { BrowserGameLoop } from "./BrowserGameLoop";
 import { customCursor } from "./HTMLAnimation/CustomCursor";
 import { fadeAnimation } from "./HTMLAnimation/Fade";
@@ -16,6 +17,7 @@ export class MyMenu extends BrowserGameLoop {
   private playFormSavedStateButton: HTMLButtonElement | null = null;
   private showControlsButton: HTMLButtonElement | null = null;
   private authorsButton: HTMLButtonElement | null = null;
+  private exitButton: HTMLButtonElement | null = null;
   private elements: HTMLButtonElement[] = [];
 
   constructor(private runGame: (status: MyGameStatus | null) => void) {
@@ -103,6 +105,16 @@ export class MyMenu extends BrowserGameLoop {
     this.playFormSavedStateButton = buttons.playFormSavedStateButton ?? null;
     this.showControlsButton = buttons.showControlsButton ?? null;
     this.authorsButton = buttons.authorsButton ?? null;
+    this.exitButton = buttons.exitButton ?? null;
+
+    if (electronIntegration.isAvailable()) {
+      this.exitButton?.addEventListener("click", () => {
+        electronIntegration.exit();
+      });
+    } else {
+      this.exitButton?.parentElement?.remove();
+      this.exitButton = null;
+    }
 
     customCursor.then((cursor) => {
       cursor.showCursor("arrow");
@@ -110,6 +122,7 @@ export class MyMenu extends BrowserGameLoop {
       cursor.addClickableElement(this.playFormSavedStateButton);
       cursor.addClickableElement(this.showControlsButton);
       cursor.addClickableElement(this.authorsButton);
+      cursor.addClickableElement(this.exitButton);
     });
 
     if (this.playButton) {

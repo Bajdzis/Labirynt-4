@@ -129,7 +129,7 @@ export class CustomCursor {
       cursorImg.style.opacity = "0";
       cursorImg.style.width = "32px";
       cursorImg.style.height = "32px";
-      cursorImg.src = `/resources/ui/cursor/${type}.png`;
+      cursorImg.src = `resources/ui/cursor/${type}.png`;
       cursorImg.onload = () => {
         resolve(cursorImg);
       };

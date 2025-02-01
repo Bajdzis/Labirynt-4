@@ -1,0 +1,20 @@
+{
+  "name": "labirynt-4",
+  "version": "1.0.0",
+  "description": "Gra labirynt 4",
+  "main": "main.js",
+  "scripts": {
+    "start": "npm run get-public && electron .",
+    "build": "npm run get-public && electron-builder build",
+    "get-public": "npx copyfiles ./../public/**/*.* ./public --all",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "copyfiles": "^2.4.1",
+    "electron": "^34.0.2",
+    "electron-builder": "^25.1.8"
+  }
+}

@@ -1,0 +1,9 @@
+appId: "com.example.app"
+icon: "./public/favicon.ico"
+files:
+  - "**/*"
+  - "!**/node_modules/*"
+  - "!**/dist/*"
+  - "!**/.git/*"
+win:
+  target: portable
