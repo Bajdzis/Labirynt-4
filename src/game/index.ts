@@ -21,6 +21,9 @@ declare global {
     };
     electronBridge?: {
       sendEvent: (eventName: string) => void;
+      setItem: (key: string, value: string) => void;
+      getItem: (key: string) => Promise<string | null>;
+      removeItem: (key: string) => void;
     };
   }
 }

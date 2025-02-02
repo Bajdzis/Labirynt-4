@@ -99,7 +99,7 @@ export class MyMenu extends BrowserGameLoop {
     await fadeAnimation.fadeIn("main");
   };
 
-  run(): void {
+  async run() {
     const buttons = window.showTextInsteadOfProgressBar();
     this.playButton = buttons.playButton ?? null;
     this.playFormSavedStateButton = buttons.playFormSavedStateButton ?? null;
@@ -129,7 +129,7 @@ export class MyMenu extends BrowserGameLoop {
       this.elements = [this.playButton];
       this.playButton.addEventListener("click", this.runNewGame);
     }
-    const state = gameSavedStatus.get();
+    const state = await gameSavedStatus.get();
     if (this.playFormSavedStateButton && state) {
       this.elements.push(this.playFormSavedStateButton);
       this.playFormSavedStateButton.focus();
@@ -187,7 +187,7 @@ export class MyMenu extends BrowserGameLoop {
     if (this.isTouchDevice) {
       await this.prepareScreenForMobileGame();
     }
-    const state = gameSavedStatus.get();
+    const state = await gameSavedStatus.get();
     if (state) {
       const confirmDeleteSave = confirm(
         "Czy chcesz usunąć zapisaną grę i rozpoczać nową?",
@@ -205,7 +205,7 @@ export class MyMenu extends BrowserGameLoop {
     if (this.isTouchDevice) {
       await this.prepareScreenForMobileGame();
     }
-    const state = gameSavedStatus.get();
+    const state = await gameSavedStatus.get();
     if (state) {
       this.runGameWithStatus(state);
     }

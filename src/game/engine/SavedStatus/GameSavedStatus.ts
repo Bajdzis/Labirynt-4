@@ -1,12 +1,18 @@
+import { AsyncStorage } from "../../electron/AsyncStorage";
+import { electronIntegration } from "../../electron/electronIntegration";
+
 class GameSavedStatus<T> {
-  constructor(private isCorrectStatus: (status: any) => status is T) {}
+  constructor(
+    private isCorrectStatus: (status: any) => status is T,
+    private storage: Storage | AsyncStorage,
+  ) {}
 
   save(status: T): void {
-    localStorage.setItem("gameStatus", JSON.stringify(status));
+    this.storage.setItem("gameStatus", JSON.stringify(status));
   }
 
-  get(): T | null {
-    const status = localStorage.getItem("gameStatus");
+  async get(): Promise<T | null> {
+    const status = await this.storage.getItem("gameStatus");
     if (status === null) {
       return null;
     }
@@ -38,4 +44,7 @@ const isMyGameStatus = (status: any): status is MyGameStatus => {
   );
 };
 
-export const gameSavedStatus = new GameSavedStatus(isMyGameStatus);
+export const gameSavedStatus = new GameSavedStatus(
+  isMyGameStatus,
+  electronIntegration.getStorage() ?? localStorage,
+);
