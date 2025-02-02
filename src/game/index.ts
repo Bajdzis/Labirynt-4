@@ -12,13 +12,7 @@ declare global {
   interface Window {
     setProgressBar: (msg: string, value: number) => void;
     disposeProgressBar: () => void;
-    showTextInsteadOfProgressBar: () => {
-      playButton?: HTMLButtonElement | null;
-      playFormSavedStateButton?: HTMLButtonElement | null;
-      showControlsButton?: HTMLButtonElement | null;
-      authorsButton?: HTMLButtonElement | null;
-      exitButton?: HTMLButtonElement | null;
-    };
+    showTextInsteadOfProgressBar: (container: HTMLElement) => void;
     electronBridge?: {
       sendEvent: (eventName: string) => void;
       setItem: (key: string, value: string) => void;

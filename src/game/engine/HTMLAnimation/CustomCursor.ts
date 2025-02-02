@@ -16,6 +16,7 @@ export class CustomCursor {
     this.container.style.top = "0";
     this.container.style.left = "0";
     this.container.style.pointerEvents = "none";
+    this.container.style.zIndex = "9999";
 
     Promise.all([
       this.addCursorType("arrow", -4, -4),

@@ -7,21 +7,29 @@ import { GamepadPressButton } from "./IO/Behaviors/GamepadPressButton";
 import { KeyboardPressButton } from "./IO/Behaviors/KeyboardPressButton";
 import { gamepad0, gamepad1, updateGamepads } from "./IO/Devices/Gamepad";
 import { gameSavedStatus, MyGameStatus } from "./SavedStatus/GameSavedStatus";
+import { AlertGroupUI } from "./UI/AlertGroupUI";
+import { MenuGroupUI } from "./UI/MenuGroupUI";
 
 export class MyMenu extends BrowserGameLoop {
+  private cancelBehavior: ControlBehavior<true>;
   private runFocusedBehavior: ControlBehavior<true>;
   private nextElementBehavior: ControlBehavior<true>;
   private prevElementBehavior: ControlBehavior<true>;
   private isTouchDevice = navigator.maxTouchPoints > 0;
-  private playButton: HTMLButtonElement | null = null;
-  private playFormSavedStateButton: HTMLButtonElement | null = null;
-  private showControlsButton: HTMLButtonElement | null = null;
-  private authorsButton: HTMLButtonElement | null = null;
-  private exitButton: HTMLButtonElement | null = null;
-  private elements: HTMLButtonElement[] = [];
+  private menuUI = new MenuGroupUI();
+  private removeSavedGameAlertUI = new AlertGroupUI(
+    "Czy chcesz usunąć zapisaną grę i rozpoczać nową?",
+  );
+  private closeAlertUI = new AlertGroupUI("Czy napewno chcesz wyjść z gry?");
+  private activeGroup: MenuGroupUI | AlertGroupUI = this.menuUI;
 
   constructor(private runGame: (status: MyGameStatus | null) => void) {
     super();
+    this.cancelBehavior = new ControlBehavior([
+      new KeyboardPressButton("Escape"),
+      new GamepadPressButton(gamepad0, "PsCircleButton"),
+      new GamepadPressButton(gamepad1, "PsCircleButton"),
+    ]);
     this.runFocusedBehavior = new ControlBehavior([
       new KeyboardPressButton("Enter"),
       new GamepadPressButton(gamepad0, "PsCrossButton"),
@@ -39,44 +47,43 @@ export class MyMenu extends BrowserGameLoop {
     this.runGameWithSavedState = this.runGameWithSavedState.bind(this);
     this.prepareScreenForMobileGame =
       this.prepareScreenForMobileGame.bind(this);
+
+    this.menuUI.onFocusGroup(() => {
+      this.activeGroup = this.menuUI;
+    });
+    this.closeAlertUI.onFocusGroup(() => {
+      this.activeGroup = this.closeAlertUI;
+    });
+    this.removeSavedGameAlertUI.onFocusGroup(() => {
+      this.activeGroup = this.removeSavedGameAlertUI;
+    });
   }
 
   protected update(delta: number) {
     updateGamepads();
+    this.cancelBehavior.update(delta);
     this.runFocusedBehavior.update(delta);
     this.nextElementBehavior.update(delta);
     this.prevElementBehavior.update(delta);
 
+    if (
+      this.cancelBehavior.getState() &&
+      (this.removeSavedGameAlertUI === this.activeGroup ||
+        this.closeAlertUI === this.activeGroup)
+    ) {
+      this.activeGroup.removeCurrent();
+    }
+
     if (this.runFocusedBehavior.getState()) {
-      this.elements.forEach((button) => {
-        if (document.activeElement === button) {
-          button.click();
-        }
-      });
+      this.activeGroup.runActiveElement();
     }
 
     if (this.nextElementBehavior.getState()) {
-      const activeIndex = this.elements.findIndex(
-        (button) => document.activeElement === button,
-      );
-      const nextIndex = activeIndex + 1;
-      if (nextIndex < this.elements.length) {
-        this.elements[nextIndex].focus();
-      } else {
-        this.elements[0].focus();
-      }
+      this.activeGroup.focusNextElement();
     }
 
     if (this.prevElementBehavior.getState()) {
-      const activeIndex = this.elements.findIndex(
-        (button) => document.activeElement === button,
-      );
-      const prevIndex = activeIndex - 1;
-      if (prevIndex >= 0) {
-        this.elements[prevIndex].focus();
-      } else {
-        this.elements[this.elements.length - 1].focus();
-      }
+      this.activeGroup.focusPrevElement();
     }
   }
 
@@ -84,10 +91,6 @@ export class MyMenu extends BrowserGameLoop {
 
   private runGameWithStatus = async (status: MyGameStatus | null) => {
     customCursor.then((cursor) => {
-      cursor.removeClickableElement(this.playButton);
-      cursor.removeClickableElement(this.playFormSavedStateButton);
-      cursor.removeClickableElement(this.showControlsButton);
-      cursor.removeClickableElement(this.authorsButton);
       cursor.showCursor("arrow");
     });
 
@@ -100,57 +103,52 @@ export class MyMenu extends BrowserGameLoop {
   };
 
   async run() {
-    const buttons = window.showTextInsteadOfProgressBar();
-    this.playButton = buttons.playButton ?? null;
-    this.playFormSavedStateButton = buttons.playFormSavedStateButton ?? null;
-    this.showControlsButton = buttons.showControlsButton ?? null;
-    this.authorsButton = buttons.authorsButton ?? null;
-    this.exitButton = buttons.exitButton ?? null;
+    window.showTextInsteadOfProgressBar(this.menuUI.getContainer());
+    const menuButtons = this.menuUI.create();
 
     if (electronIntegration.isAvailable()) {
-      this.exitButton?.addEventListener("click", () => {
-        electronIntegration.exit();
+      menuButtons.exit.addEventListener("click", () => {
+        const { accept, cancel } = this.closeAlertUI.create();
+        document.body.appendChild(this.closeAlertUI.getContainer());
+
+        cancel.focus();
+
+        accept.addEventListener("click", () => {
+          this.closeAlertUI.removeCurrent();
+          electronIntegration.exit();
+        });
+
+        cancel.addEventListener("click", () => {
+          this.closeAlertUI.removeCurrent();
+        });
       });
     } else {
-      this.exitButton?.parentElement?.remove();
-      this.exitButton = null;
+      this.menuUI.deleteButton(menuButtons.exit);
     }
 
     customCursor.then((cursor) => {
       cursor.showCursor("arrow");
-      cursor.addClickableElement(this.playButton);
-      cursor.addClickableElement(this.playFormSavedStateButton);
-      cursor.addClickableElement(this.showControlsButton);
-      cursor.addClickableElement(this.authorsButton);
-      cursor.addClickableElement(this.exitButton);
     });
 
-    if (this.playButton) {
-      this.elements = [this.playButton];
-      this.playButton.addEventListener("click", this.runNewGame);
+    if (menuButtons.play) {
+      menuButtons.play.addEventListener("click", this.runNewGame);
     }
     const state = await gameSavedStatus.get();
-    if (this.playFormSavedStateButton && state) {
-      this.elements.push(this.playFormSavedStateButton);
-      this.playFormSavedStateButton.focus();
+    if (menuButtons.playFormSavedState && state) {
+      menuButtons.playFormSavedState.focus();
     } else {
-      this.playButton?.focus();
-    }
-    if (this.showControlsButton && this.authorsButton) {
-      this.elements.push(this.showControlsButton, this.authorsButton);
+      menuButtons.play?.focus();
     }
 
-    if (this.playFormSavedStateButton) {
-      this.playFormSavedStateButton.disabled = state === null;
+    menuButtons.playFormSavedState.disabled = state === null;
 
-      this.playFormSavedStateButton.addEventListener(
-        "click",
-        this.runGameWithSavedState,
-      );
-    }
+    menuButtons.playFormSavedState.addEventListener(
+      "click",
+      this.runGameWithSavedState,
+    );
 
-    this.addTouchReactToButton(this.playButton);
-    this.addTouchReactToButton(this.playFormSavedStateButton);
+    this.addTouchReactToButton(menuButtons.play);
+    this.addTouchReactToButton(menuButtons.playFormSavedState);
 
     super.run();
   }
@@ -189,16 +187,22 @@ export class MyMenu extends BrowserGameLoop {
     }
     const state = await gameSavedStatus.get();
     if (state) {
-      const confirmDeleteSave = confirm(
-        "Czy chcesz usunąć zapisaną grę i rozpoczać nową?",
-      );
+      const { accept, cancel } = this.removeSavedGameAlertUI.create();
+      document.body.appendChild(this.removeSavedGameAlertUI.getContainer());
 
-      if (confirmDeleteSave) {
+      cancel.focus();
+
+      accept.addEventListener("click", () => {
+        this.removeSavedGameAlertUI.removeCurrent();
         this.runGameWithStatus(null);
-      }
-      return;
+      });
+
+      cancel.addEventListener("click", () => {
+        this.removeSavedGameAlertUI.removeCurrent();
+      });
+    } else {
+      this.runGameWithStatus(null);
     }
-    this.runGameWithStatus(null);
   };
 
   private runGameWithSavedState = async () => {
